@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Panel Teller & CS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f4f6;
+            padding: 16px;
+            color: #111827;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .service-pill {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        label {
+            font-size: 12px;
+            min-width: 60px;
+            color: #6b7280;
+        }
+
+        select {
+            flex: 1;
+            padding: 6px 8px;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            font-size: 13px;
+            background: #f9fafb;
+        }
+
+        button {
+            border-radius: 999px;
+            border: none;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-call {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-sub {
+            background: #e5e7eb;
+            color: #111827;
+            font-size: 12px;
+        }
+
+        .status {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #374151;
+        }
+
+        .log-card {
+            margin-top: 8px;
+            background: #111827;
+            color: #e5e7eb;
+            border-radius: 14px;
+            padding: 10px;
+            font-size: 11px;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid #1f2937;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.7);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Panel Teller & Customer Service</h1>
+    <div class="page-subtitle">
+        Gunakan panel ini untuk memanggil nomor antrian Teller dan Customer Service.
+    </div>
+
+    <div class="grid">
+        <!-- Teller -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Teller</div>
+                <div class="service-pill">Layanan Teller</div>
+            </div>
+            <div class="field-row">
+                <label>Loket</label>
+                <select id="teller-counter">
+                    <option value="Teller 1">Teller 1</option>
+                    <option value="Teller 2">Teller 2</option>
+                    <option value="Teller 3">Teller 3</option>
+                </select>
+            </div>
+            <button class="btn-call" onclick="callNext('TELLER')">
+                Panggil Nomor Teller Berikutnya
+            </button>
+            <div id="teller-status" class="status">Belum ada nomor yang dipanggil.</div>
+        </div>
+
+        <!-- CS -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Customer Service</div>
+                <div class="service-pill">Layanan CS</div>
+            </div>
+            <div class="field-row">
+                <label>Loket</label>
+                <select id="cs-counter">
+                    <option value="CS 1">CS 1</option>
+                    <option value="CS 2">CS 2</option>
+                    <option value="CS 3">CS 3</option>
+                </select>
+            </div>
+            <button class="btn-call" onclick="callNext('CS')">
+                Panggil Nomor CS Berikutnya
+            </button>
+            <div id="cs-status" class="status">Belum ada nomor yang dipanggil.</div>
+        </div>
+    </div>
+
+    <div class="card log-card">
+        <div style="margin-bottom:6px;font-weight:600;font-size:12px;">Log Panggilan</div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        const tellerStatusEl = document.getElementById("teller-status");
+        const csStatusEl = document.getElementById("cs-status");
+        const logEl = document.getElementById("log");
+
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString("id-ID", { hour12: false });
+            const div = document.createElement("div");
+            div.className = "log-entry";
+            div.textContent = `[${time}] ${message}`;
+            logEl.prepend(div);
+        }
+
+        async function callNext(serviceType) {
+            let counterName;
+            if (serviceType === "TELLER") {
+                counterName = document.getElementById("teller-counter").value;
+            } else {
+                counterName = document.getElementById("cs-counter").value;
+            }
+
+            try {
+                const result = await ipcRenderer.invoke("queue:callNext", {
+                    serviceType,
+                    counterName,
+                });
+
+                if (!result) {
+                    alert("Antrian untuk " + serviceType + " kosong.");
+                    return;
+                }
+
+                if (serviceType === "TELLER") {
+                    tellerStatusEl.textContent =
+                        "Sedang melayani " +
+                        result.ticketCode +
+                        " di " +
+                        result.counterName +
+                        ".";
+                    addLog(
+                        `${result.counterName} memanggil nomor Teller: ${result.ticketCode}`
+                    );
+                } else {
+                    csStatusEl.textContent =
+                        "Sedang melayani " +
+                        result.ticketCode +
+                        " di " +
+                        result.counterName +
+                        ".";
+                    addLog(
+                        `${result.counterName} memanggil nomor CS: ${result.ticketCode}`
+                    );
+                }
+            } catch (e) {
+                alert("Gagal memanggil nomor antrian.");
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Kiosk Pengambilan Nomor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #111827;
+        }
+
+        .card {
+            width: 360px;
+            background: #f9fafb;
+            border-radius: 20px;
+            padding: 20px 22px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.5);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .badge {
+            background: #0f172a;
+            color: #e5e7eb;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        button {
+            border-radius: 999px;
+            border: none;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.05s ease, box-shadow 0.1s ease,
+                background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        .btn-teller {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            box-shadow: 0 10px 25px rgba(248, 113, 22, 0.6);
+        }
+
+        .btn-cs {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.6);
+        }
+
+        .btn-sub {
+            background: #e5e7eb;
+            color: #111827;
+            font-size: 12px;
+            padding: 8px 10px;
+            box-shadow: none;
+        }
+
+        .ticket {
+            background: white;
+            border-radius: 14px;
+            border: 1px dashed #d1d5db;
+            padding: 12px;
+            text-align: center;
+            font-family: "Courier New", monospace;
+        }
+
+        .ticket-title {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .ticket-number {
+            font-size: 34px;
+            font-weight: 800;
+            margin: 6px 0;
+        }
+
+        .ticket-footer {
+            font-size: 11px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="title">Ambil Nomor Antrian</div>
+                <div class="subtitle">Silakan pilih jenis layanan yang Anda butuhkan.</div>
+            </div>
+            <div class="badge">KIOSK</div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-teller" onclick="take('TELLER')">
+                <span>Ambil Antrian Teller</span>
+            </button>
+            <button class="btn-cs" onclick="take('CS')">
+                <span>Ambil Antrian Customer Service</span>
+            </button>
+        </div>
+
+        <div class="ticket">
+            <div class="ticket-title">Nomor Antrian Anda</div>
+            <div id="ticket-number" class="ticket-number">-</div>
+            <div class="ticket-footer">
+                Simpan nomor ini.<br />
+                Nomor akan dipanggil sesuai urutan.
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; text-align: center;">
+            <button class="btn-sub" onclick="window.print()">Cetak Ulang Halaman</button>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        async function take(serviceType) {
+            try {
+                const ticket = await ipcRenderer.invoke("queue:takeTicket", serviceType);
+                document.getElementById("ticket-number").textContent = ticket || "-";
+                // Di tahap lanjutan: integrasi printer thermal di sini
+            } catch (e) {
+                alert("Gagal mengambil nomor antrian. Silakan coba lagi.");
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+
+</html>
