@@ -13,58 +13,115 @@
 
         body {
             margin: 0;
-            background: #f3f4f6;
-            padding: 16px;
-            color: #111827;
+            background: radial-gradient(circle at top, #e0f2fe, #f3f4f6);
+            padding: 18px;
+            color: #0f172a;
         }
 
         h1 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
+            margin: 0;
+            font-size: 22px;
             font-weight: 700;
         }
 
-        .page-subtitle {
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 14px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 12px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-            border: 1px solid #e5e7eb;
-        }
-
-        .card-header {
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
 
+        .page-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        .brand-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.4);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .brand-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background: conic-gradient(from 180deg, #38bdf8, #6366f1, #22c55e, #38bdf8);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            position: relative;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 14px 14px 12px 14px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent);
+            opacity: 0.8;
+        }
+
+        .card-header {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+
         .card-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card-title span:last-child {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
         }
 
         .service-pill {
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            padding: 4px 10px;
+            letter-spacing: 0.14em;
+            padding: 4px 11px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        .service-pill-cs {
+            background: #ecfdf5;
+            color: #166534;
+            border-color: #bbf7d0;
         }
 
         .field-row {
@@ -72,6 +129,8 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
 
         label {
@@ -82,17 +141,67 @@
 
         select {
             flex: 1;
-            padding: 6px 8px;
+            padding: 7px 10px;
             border-radius: 999px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #d4d4d8;
             font-size: 13px;
             background: #f9fafb;
+            outline: none;
+            transition: border 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+        }
+
+        .current-num-box {
+            margin-top: 4px;
+            margin-bottom: 10px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+            padding: 8px 10px;
+            border: 1px solid #dbeafe;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .current-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .current-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1d4ed8;
+            letter-spacing: 0.12em;
+        }
+
+        .current-counter {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .current-num-box.cs {
+            background: linear-gradient(135deg, #ecfdf5, #ffffff);
+            border-color: #bbf7d0;
+        }
+
+        .current-value.cs {
+            color: #16a34a;
         }
 
         button {
             border-radius: 999px;
             border: none;
-            padding: 8px 12px;
+            padding: 9px 14px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -100,36 +209,80 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.05s ease, box-shadow 0.12s ease, background 0.15s ease;
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: none;
         }
 
         .btn-call {
-            background: #2563eb;
-            color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #f9fafb;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.55);
+        }
+
+        .btn-call.cs {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            box-shadow: 0 12px 30px rgba(34, 197, 94, 0.55);
         }
 
         .btn-sub {
             background: #e5e7eb;
             color: #111827;
-            font-size: 12px;
+            font-size: 11px;
+            padding: 6px 10px;
+            box-shadow: none;
         }
 
         .status {
             margin-top: 6px;
             font-size: 12px;
-            color: #374151;
+            color: #334155;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-empty {
+            color: #9ca3af;
         }
 
         .log-card {
-            margin-top: 8px;
-            background: #111827;
+            margin-top: 4px;
+            background: #020617;
             color: #e5e7eb;
-            border-radius: 14px;
-            padding: 10px;
+            border-radius: 16px;
+            padding: 10px 12px;
             font-size: 11px;
             max-height: 220px;
             overflow-y: auto;
             border: 1px solid #1f2937;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .log-title {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .log-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
         }
 
         .log-entry {
@@ -140,22 +293,55 @@
         .log-entry:last-child {
             border-bottom: none;
         }
+
+        .log-empty {
+            font-style: italic;
+            color: #9ca3af;
+        }
+
+        .badge-online {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #16a34a;
+        }
+
+        .dot-online {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+        }
     </style>
 </head>
 
 <body>
-    <h1>Panel Teller & Customer Service</h1>
-    <div class="page-subtitle">
-        Gunakan panel ini untuk memanggil nomor antrian Teller dan Customer Service.
+    <div class="page-header">
+        <div>
+            <h1>Panel Teller & Customer Service</h1>
+            <div class="page-subtitle">
+                Gunakan panel ini untuk memanggil nomor antrian Teller dan Customer Service secara teratur.
+            </div>
+        </div>
+        <div class="brand-pill">
+            <div class="brand-dot"></div>
+            <span>BANK ASTRO • QUEUE CONTROL</span>
+        </div>
     </div>
 
     <div class="grid">
         <!-- Teller -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">Teller</div>
+                <div class="card-title">
+                    <span>Teller</span>
+                    <span>Kontrol panggilan antrian loket Teller.</span>
+                </div>
                 <div class="service-pill">Layanan Teller</div>
             </div>
+
             <div class="field-row">
                 <label>Loket</label>
                 <select id="teller-counter">
@@ -164,18 +350,34 @@
                     <option value="Teller 3">Teller 3</option>
                 </select>
             </div>
+
+            <div class="current-num-box">
+                <div>
+                    <div class="current-label">Nomor terakhir dipanggil</div>
+                    <div id="teller-current" class="current-value">-</div>
+                </div>
+                <div id="teller-current-counter" class="current-counter">Loket: -</div>
+            </div>
+
             <button class="btn-call" onclick="callNext('TELLER')">
                 Panggil Nomor Teller Berikutnya
             </button>
-            <div id="teller-status" class="status">Belum ada nomor yang dipanggil.</div>
+
+            <div id="teller-status" class="status status-empty">
+                Belum ada nomor yang dipanggil.
+            </div>
         </div>
 
         <!-- CS -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">Customer Service</div>
-                <div class="service-pill">Layanan CS</div>
+                <div class="card-title">
+                    <span>Customer Service</span>
+                    <span>Kontrol panggilan antrian loket CS.</span>
+                </div>
+                <div class="service-pill service-pill-cs">Layanan CS</div>
             </div>
+
             <div class="field-row">
                 <label>Loket</label>
                 <select id="cs-counter">
@@ -184,16 +386,34 @@
                     <option value="CS 3">CS 3</option>
                 </select>
             </div>
-            <button class="btn-call" onclick="callNext('CS')">
+
+            <div class="current-num-box cs">
+                <div>
+                    <div class="current-label">Nomor terakhir dipanggil</div>
+                    <div id="cs-current" class="current-value cs">-</div>
+                </div>
+                <div id="cs-current-counter" class="current-counter">Loket: -</div>
+            </div>
+
+            <button class="btn-call cs" onclick="callNext('CS')">
                 Panggil Nomor CS Berikutnya
             </button>
-            <div id="cs-status" class="status">Belum ada nomor yang dipanggil.</div>
+
+            <div id="cs-status" class="status status-empty">
+                Belum ada nomor yang dipanggil.
+            </div>
         </div>
     </div>
 
-    <div class="card log-card">
-        <div style="margin-bottom:6px;font-weight:600;font-size:12px;">Log Panggilan</div>
-        <div id="log"></div>
+    <div class="log-card">
+        <div class="log-header">
+            <div class="log-title">Log Panggilan</div>
+            <div class="badge-online">
+                <span class="dot-online"></span>
+                <span>Sistem Terhubung</span>
+            </div>
+        </div>
+        <div id="log" class="log-empty">Belum ada aktivitas panggilan.</div>
     </div>
 
     <script>
@@ -203,11 +423,22 @@
         const csStatusEl = document.getElementById("cs-status");
         const logEl = document.getElementById("log");
 
+        const tellerCurrentEl = document.getElementById("teller-current");
+        const tellerCurrentCounterEl = document.getElementById("teller-current-counter");
+        const csCurrentEl = document.getElementById("cs-current");
+        const csCurrentCounterEl = document.getElementById("cs-current-counter");
+
         function addLog(message) {
             const time = new Date().toLocaleTimeString("id-ID", { hour12: false });
             const div = document.createElement("div");
             div.className = "log-entry";
             div.textContent = `[${time}] ${message}`;
+
+            if (logEl.classList.contains("log-empty")) {
+                logEl.classList.remove("log-empty");
+                logEl.textContent = "";
+            }
+
             logEl.prepend(div);
         }
 
@@ -237,6 +468,10 @@
                         " di " +
                         result.counterName +
                         ".";
+                    tellerStatusEl.classList.remove("status-empty");
+                    tellerCurrentEl.textContent = result.ticketCode;
+                    tellerCurrentCounterEl.textContent = "Loket: " + result.counterName;
+
                     addLog(
                         `${result.counterName} memanggil nomor Teller: ${result.ticketCode}`
                     );
@@ -247,6 +482,10 @@
                         " di " +
                         result.counterName +
                         ".";
+                    csStatusEl.classList.remove("status-empty");
+                    csCurrentEl.textContent = result.ticketCode;
+                    csCurrentCounterEl.textContent = "Loket: " + result.counterName;
+
                     addLog(
                         `${result.counterName} memanggil nomor CS: ${result.ticketCode}`
                     );
