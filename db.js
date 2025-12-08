@@ -1,102 +1,171 @@
 // FILE: db.js
+// Database lokal berbasis file JSON: queue.json
+
 const fs = require("fs");
 const path = require("path");
 
-let dataFilePath;
-let tickets = [];
+const dbPath = path.join(__dirname, "queue.json");
 
 /**
- * Load data dari file JSON (kalau ada), kalau tidak, mulai dari array kosong.
+ * Pastikan file queue.json ada dan punya struktur dasar
  */
-function loadFromFile() {
+function ensureDbFile() {
+  if (!fs.existsSync(dbPath)) {
+    const initial = {
+      lastId: 0,
+      tickets: [],
+    };
+    fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), "utf-8");
+    return;
+  }
+
+  // kalau sudah ada, pastikan minimal punya field tickets
   try {
-    if (fs.existsSync(dataFilePath)) {
-      const raw = fs.readFileSync(dataFilePath, "utf8");
-      tickets = JSON.parse(raw);
-      if (!Array.isArray(tickets)) tickets = [];
-    } else {
-      tickets = [];
+    const raw = fs.readFileSync(dbPath, "utf-8");
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data.tickets)) {
+      throw new Error("Invalid structure");
     }
-  } catch (err) {
-    console.error("Gagal baca queue.json, mulai dengan data kosong:", err);
-    tickets = [];
+  } catch {
+    const initial = {
+      lastId: 0,
+      tickets: [],
+    };
+    fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), "utf-8");
   }
+}
+
+function loadDb() {
+  ensureDbFile();
+  const raw = fs.readFileSync(dbPath, "utf-8");
+  let data = JSON.parse(raw);
+
+  if (!Array.isArray(data.tickets)) {
+    data = { lastId: 0, tickets: [] };
+  }
+
+  // kalau lastId belum ada, hitung dari id terbesar
+  if (typeof data.lastId !== "number") {
+    data.lastId = data.tickets.reduce((max, t) => Math.max(max, t.id || 0), 0);
+  }
+
+  return data;
+}
+
+function saveDb(data) {
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 /**
- * Simpan data ke file JSON.
+ * Dipanggil dari main.js saat app ready
  */
-function saveToFile() {
-  try {
-    fs.writeFileSync(dataFilePath, JSON.stringify(tickets, null, 2), "utf8");
-  } catch (err) {
-    console.error("Gagal simpan queue.json:", err);
-  }
-}
-
 function initDb() {
-  // Simpan di folder project (boleh juga ganti ke appData nanti)
-  dataFilePath = path.join(process.cwd(), "queue.json");
-  loadFromFile();
+  ensureDbFile();
 }
 
-function getNextNumber(serviceType) {
-  const list = tickets.filter((t) => t.service_type === serviceType);
-  const maxNum = list.reduce((max, t) => Math.max(max, t.number), 0);
-  return maxNum + 1;
+/**
+ * Helper: range awal & akhir hari ini (00:00 – 23:59:59)
+ */
+function getTodayRange() {
+  const now = new Date();
+  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = startDate.getTime();
+  const end = start + 24 * 60 * 60 * 1000; // +1 hari
+  return { start, end };
 }
 
-function formatTicket(serviceType, num) {
-  const n = String(num).padStart(3, "0");
-  if (serviceType === "TELLER") return `T-${n}`;
-  if (serviceType === "CS") return `CS-${n}`;
-  return n;
-}
-
-// Dipakai KIOSK untuk ambil nomor
+/**
+ * Membuat tiket baru (TELLER / CS)
+ * return: string ticket_code -> "T-001", "CS-010"
+ */
 function takeTicket(serviceType) {
-  if (!["TELLER", "CS"].includes(serviceType)) {
-    throw new Error("Invalid service type");
+  const db = loadDb();
+  const tickets = db.tickets || [];
+  const prefix = serviceType === "CS" ? "CS" : "T";
+
+  // cari tiket terakhir untuk serviceType ini
+  const lastTicketSame = [...tickets]
+    .reverse()
+    .find((t) => t.service_type === serviceType);
+
+  let nextNumber = 1;
+  if (lastTicketSame && lastTicketSame.ticket_code) {
+    const numericPart = lastTicketSame.ticket_code
+      .replace("T-", "")
+      .replace("CS-", "");
+    const parsed = parseInt(numericPart, 10);
+    if (!isNaN(parsed)) {
+      nextNumber = parsed + 1;
+    }
   }
 
-  const num = getNextNumber(serviceType);
-  const ticketCode = formatTicket(serviceType, num);
+  const ticketNumberStr = String(nextNumber).padStart(3, "0");
+  const ticketCode =
+    prefix === "T" ? `T-${ticketNumberStr}` : `CS-${ticketNumberStr}`;
 
-  const ticket = {
-    id: Date.now() + Math.random(), // id sederhana
-    service_type: serviceType, // 'TELLER' atau 'CS'
-    number: num,
+  const now = Date.now();
+  const id = (db.lastId || 0) + 1;
+  db.lastId = id;
+
+  tickets.push({
+    id,
+    service_type: serviceType, // 'TELLER' / 'CS'
     ticket_code: ticketCode,
-    status: "WAITING", // WAITING / CALLED / DONE
+    status: "WAITING", // WAITING / CALLED
     counter_name: null,
+    created_at: now,
     called_at: null,
-    created_at: new Date().toISOString(),
-  };
+  });
 
-  tickets.push(ticket);
-  saveToFile();
+  db.tickets = tickets;
+  saveDb(db);
 
   return ticketCode;
 }
 
-// Dipakai TELLER/CS untuk memanggil berikutnya
+/**
+ * Memanggil nomor berikutnya untuk serviceType tertentu
+ * return: { ticketCode, counterName } atau null jika kosong
+ */
 function callNext(serviceType, counterName) {
-  const ticket = tickets.find(
-    (t) => t.service_type === serviceType && t.status === "WAITING"
-  );
+  const db = loadDb();
+  const tickets = db.tickets || [];
 
-  if (!ticket) return null;
+  // tiket dengan status WAITING paling awal (id terkecil)
+  const next = tickets
+    .filter((t) => t.service_type === serviceType && t.status === "WAITING")
+    .sort((a, b) => a.id - b.id)[0];
 
-  ticket.status = "CALLED";
-  ticket.counter_name = counterName;
-  ticket.called_at = new Date().toISOString();
-  saveToFile();
+  if (!next) {
+    return null;
+  }
 
-  return { ticketCode: ticket.ticket_code, counterName };
+  const now = Date.now();
+  next.status = "CALLED";
+  next.counter_name = counterName;
+  next.called_at = now;
+
+  saveDb(db);
+
+  return {
+    ticketCode: next.ticket_code,
+    counterName,
+  };
 }
 
-// Dipakai DISPLAY untuk baca state antrian sekarang
+/**
+ * State untuk DISPLAY & OPERATOR:
+ * {
+ *   tellerNow: { ticket_code, counter_name } | undefined
+ *   csNow: { ticket_code, counter_name } | undefined
+ *   tellerQueue: [ 'T-001', ... ]
+ *   csQueue: [ 'CS-001', ... ]
+ * }
+ */
 function getState() {
+  const db = loadDb();
+  const tickets = db.tickets || [];
+
   const tellerCalled = tickets.filter(
     (t) => t.service_type === "TELLER" && t.status === "CALLED"
   );
@@ -104,43 +173,48 @@ function getState() {
     (t) => t.service_type === "CS" && t.status === "CALLED"
   );
 
-  const lastTeller =
+  // tiket terakhir dipanggil (berdasarkan called_at / id)
+  const tellerNow =
     tellerCalled.length > 0
-      ? tellerCalled.reduce((a, b) =>
-          (a.called_at || a.created_at) > (b.called_at || b.created_at) ? a : b
-        )
+      ? tellerCalled.reduce((latest, t) => {
+          if (!latest) return t;
+          return (t.called_at || t.id) > (latest.called_at || latest.id)
+            ? t
+            : latest;
+        }, null)
       : null;
 
-  const lastCs =
+  const csNow =
     csCalled.length > 0
-      ? csCalled.reduce((a, b) =>
-          (a.called_at || a.created_at) > (b.called_at || b.created_at) ? a : b
-        )
+      ? csCalled.reduce((latest, t) => {
+          if (!latest) return t;
+          return (t.called_at || t.id) > (latest.called_at || latest.id)
+            ? t
+            : latest;
+        }, null)
       : null;
 
   const tellerQueue = tickets
     .filter((t) => t.service_type === "TELLER" && t.status === "WAITING")
     .sort((a, b) => a.id - b.id)
-    .slice(0, 10)
     .map((t) => t.ticket_code);
 
   const csQueue = tickets
     .filter((t) => t.service_type === "CS" && t.status === "WAITING")
     .sort((a, b) => a.id - b.id)
-    .slice(0, 10)
     .map((t) => t.ticket_code);
 
   return {
-    tellerNow: lastTeller
+    tellerNow: tellerNow
       ? {
-          ticket_code: lastTeller.ticket_code,
-          counter_name: lastTeller.counter_name,
+          ticket_code: tellerNow.ticket_code,
+          counter_name: tellerNow.counter_name,
         }
       : null,
-    csNow: lastCs
+    csNow: csNow
       ? {
-          ticket_code: lastCs.ticket_code,
-          counter_name: lastCs.counter_name,
+          ticket_code: csNow.ticket_code,
+          counter_name: csNow.counter_name,
         }
       : null,
     tellerQueue,
@@ -148,9 +222,99 @@ function getState() {
   };
 }
 
+/**
+ * Ringkasan antrian HARI INI (dipakai admin panel)
+ */
+function getTodaySummary() {
+  const db = loadDb();
+  const tickets = db.tickets || [];
+  const { start, end } = getTodayRange();
+
+  const todayTickets = tickets.filter(
+    (t) => t.created_at >= start && t.created_at < end
+  );
+
+  const totalToday = todayTickets.length;
+
+  const tellerWaitingToday = todayTickets.filter(
+    (t) => t.service_type === "TELLER" && t.status === "WAITING"
+  ).length;
+
+  const csWaitingToday = todayTickets.filter(
+    (t) => t.service_type === "CS" && t.status === "WAITING"
+  ).length;
+
+  const tellerCalledToday = todayTickets.filter(
+    (t) =>
+      t.service_type === "TELLER" &&
+      t.status === "CALLED" &&
+      t.called_at != null &&
+      t.called_at >= start &&
+      t.called_at < end
+  ).length;
+
+  const csCalledToday = todayTickets.filter(
+    (t) =>
+      t.service_type === "CS" &&
+      t.status === "CALLED" &&
+      t.called_at != null &&
+      t.called_at >= start &&
+      t.called_at < end
+  ).length;
+
+  return {
+    totalToday,
+    tellerWaitingToday,
+    csWaitingToday,
+    tellerCalledToday,
+    csCalledToday,
+  };
+}
+
+/**
+ * Riwayat panggilan HARI INI (status CALLED)
+ */
+function getTodayCalls() {
+  const db = loadDb();
+  const tickets = db.tickets || [];
+  const { start, end } = getTodayRange();
+
+  const calls = tickets
+    .filter(
+      (t) =>
+        t.status === "CALLED" &&
+        t.called_at != null &&
+        t.called_at >= start &&
+        t.called_at < end
+    )
+    .sort((a, b) => (a.called_at || a.id) - (b.called_at || b.id));
+
+  // kembalikan apa adanya (dipakai admin.html)
+  return calls;
+}
+
+/**
+ * Reset tiket HARI INI (hapus yang created_at hari ini)
+ */
+function clearTodayTickets() {
+  const db = loadDb();
+  const tickets = db.tickets || [];
+  const { start, end } = getTodayRange();
+
+  db.tickets = tickets.filter(
+    (t) => t.created_at < start || t.created_at >= end
+  );
+
+  // lastId bisa dibiarkan, tidak masalah walaupun id lanjut terus
+  saveDb(db);
+}
+
 module.exports = {
   initDb,
   takeTicket,
   callNext,
   getState,
+  getTodaySummary,
+  getTodayCalls,
+  clearTodayTickets,
 };

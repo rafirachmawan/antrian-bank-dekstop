@@ -2,12 +2,21 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
-const { initDb, takeTicket, callNext, getState } = require("./db");
+const {
+  initDb,
+  takeTicket,
+  callNext,
+  getState,
+  getTodaySummary,
+  getTodayCalls,
+  clearTodayTickets,
+} = require("./db");
 
 let windows = {
   display: null,
   kiosk: null,
   operator: null,
+  admin: null,
 };
 
 // =============================
@@ -33,7 +42,7 @@ function loadDisplayConfig() {
       const defaultConfig = {
         promoText:
           "Buka rekening baru hari ini, nikmati bebas biaya admin 6 bulan pertama.",
-        videoPath: null, // pakai default bank-promo.mp4 di HTML
+        videoPath: null, // default: pakai bank-promo.mp4 di display.html
       };
       fs.writeFileSync(
         configPath,
@@ -66,7 +75,7 @@ function saveDisplayConfig(partial) {
 // =============================
 
 function createWindows() {
-  // MONITOR CUSTOMER
+  // MONITOR CUSTOMER (DISPLAY)
   windows.display = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -101,6 +110,18 @@ function createWindows() {
     },
   });
   windows.operator.loadFile("operator.html");
+
+  // ADMIN PANEL
+  windows.admin = new BrowserWindow({
+    width: 900,
+    height: 650,
+    title: "Admin Panel - Antrian Bank Astro",
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  windows.admin.loadFile("admin.html");
 }
 
 function broadcastState() {
@@ -136,7 +157,7 @@ app.whenReady().then(() => {
     return result; // bisa null kalau antrian kosong
   });
 
-  // Dipanggil oleh DISPLAY/OPERATOR saat pertama kali load
+  // Dipanggil oleh DISPLAY/OPERATOR/ADMIN saat pertama kali load
   ipcMain.handle("queue:getState", () => {
     return getState();
   });
@@ -182,6 +203,26 @@ app.whenReady().then(() => {
       console.error("Gagal copy video promo:", e);
       return loadDisplayConfig();
     }
+  });
+
+  // ========= IPC ADMIN PANEL =========
+
+  // Ringkasan antrian hari ini
+  ipcMain.handle("admin:getTodaySummary", () => {
+    return getTodaySummary();
+  });
+
+  // Riwayat panggilan hari ini
+  ipcMain.handle("admin:getTodayCalls", () => {
+    return getTodayCalls();
+  });
+
+  // Reset tiket hari ini
+  ipcMain.handle("admin:resetTodayTickets", () => {
+    clearTodayTickets();
+    // setelah reset, update state di semua window
+    broadcastState();
+    return { success: true };
   });
 
   app.on("activate", () => {
