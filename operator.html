@@ -428,6 +428,7 @@
         const csCurrentEl = document.getElementById("cs-current");
         const csCurrentCounterEl = document.getElementById("cs-current-counter");
 
+        /* ========== LOG ========== */
         function addLog(message) {
             const time = new Date().toLocaleTimeString("id-ID", { hour12: false });
             const div = document.createElement("div");
@@ -442,6 +443,131 @@
             logEl.prepend(div);
         }
 
+        /* ========== UTIL ANGKA → KATA INDONESIA ========== */
+        function digitsToIndonesianWords(numStr) {
+            const map = {
+                "0": "nol",
+                "1": "satu",
+                "2": "dua",
+                "3": "tiga",
+                "4": "empat",
+                "5": "lima",
+                "6": "enam",
+                "7": "tujuh",
+                "8": "delapan",
+                "9": "sembilan",
+            };
+
+            return Array.from(numStr)
+                .map(ch => map[ch] || ch)
+                .join(" ");
+        }
+
+        /* ========== FORMAT NOMOR UNTUK SUARA ========== */
+        function formatTicketForSpeech(ticketCode, serviceType) {
+            if (!ticketCode) return "";
+
+            const prefixChar = ticketCode.charAt(0);   // T / C
+            const numberPart = ticketCode.slice(1);    // 015
+
+            let layananPrefix;
+            if (serviceType === "TELLER") {
+                layananPrefix = "T";
+            } else if (serviceType === "CS") {
+                layananPrefix = "C";
+            } else {
+                layananPrefix = prefixChar;
+            }
+
+            // kalau bukan semua digit (misal format lain), kirim apa adanya
+            if (!/^\d+$/.test(numberPart)) {
+                return `${layananPrefix} ${numberPart}`;
+            }
+
+            const nomorDalamKata = digitsToIndonesianWords(numberPart);
+            // contoh: "T nol satu lima"
+            return `${layananPrefix} ${nomorDalamKata}`;
+        }
+
+        function formatCounterForSpeech(counterName, serviceType) {
+            if (!counterName) return "";
+            if (serviceType === "TELLER") {
+                return counterName.replace("Teller", "Teller");
+            }
+            if (serviceType === "CS") {
+                return counterName.replace(/^CS/, "Customer Service");
+            }
+            return counterName;
+        }
+
+        /* ========== TTS (SUARA CEWEK INDONESIA) ========== */
+        let cachedVoice = null;
+
+        function getIndonesianFemaleVoice() {
+            if (cachedVoice) return cachedVoice;
+
+            const synth = window.speechSynthesis;
+            if (!synth) return null;
+
+            const voices = synth.getVoices();
+            if (!voices || voices.length === 0) return null;
+
+            const idVoices = voices.filter(v =>
+                (v.lang || "").toLowerCase().startsWith("id")
+            );
+
+            const femaleLike = idVoices.find(v =>
+                /female|wanita|zira|siti|indonesia/i.test(v.name)
+            );
+            if (femaleLike) {
+                cachedVoice = femaleLike;
+                return cachedVoice;
+            }
+
+            if (idVoices.length > 0) {
+                cachedVoice = idVoices[0];
+                return cachedVoice;
+            }
+
+            cachedVoice = voices[0];
+            return cachedVoice;
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            if (!synth || !text) return;
+
+            synth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voice = getIndonesianFemaleVoice();
+            if (voice) {
+                utterance.voice = voice;
+            }
+            utterance.lang = "id-ID";
+            utterance.rate = 1;
+            utterance.pitch = 1.05;
+            utterance.volume = 1;
+
+            synth.speak(utterance);
+        }
+
+        function speakCall(serviceType, result) {
+            const nomor = formatTicketForSpeech(result.ticketCode, serviceType);
+            const loket = formatCounterForSpeech(result.counterName, serviceType);
+
+            const kalimat = `Nomor antrian ${nomor}, silakan menuju ${loket}.`;
+            speak(kalimat);
+        }
+
+        if (window.speechSynthesis) {
+            window.speechSynthesis.addEventListener("voiceschanged", () => {
+                cachedVoice = null;
+                getIndonesianFemaleVoice();
+            });
+        }
+
+        /* ========== PANGGIL NOMOR ========== */
         async function callNext(serviceType) {
             let counterName;
             if (serviceType === "TELLER") {
@@ -490,12 +616,16 @@
                         `${result.counterName} memanggil nomor CS: ${result.ticketCode}`
                     );
                 }
+
+                // === SUARA PANGGILAN ===
+                speakCall(serviceType, result);
             } catch (e) {
                 alert("Gagal memanggil nomor antrian.");
                 console.error(e);
             }
         }
     </script>
+
 </body>
 
 </html>

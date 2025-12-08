@@ -1,6 +1,7 @@
 // FILE: main.js
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
+const fs = require("fs");
 const { initDb, takeTicket, callNext, getState } = require("./db");
 
 let windows = {
@@ -8,6 +9,61 @@ let windows = {
   kiosk: null,
   operator: null,
 };
+
+// =============================
+//  CONFIG PROMO & VIDEO
+// =============================
+let dataDir;
+let videosDir;
+let configPath;
+
+function initConfigPaths() {
+  const userData = app.getPath("userData");
+  dataDir = path.join(userData, "astro-queue-data");
+  videosDir = path.join(dataDir, "videos");
+  configPath = path.join(dataDir, "config.json");
+
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
+}
+
+function loadDisplayConfig() {
+  try {
+    if (!fs.existsSync(configPath)) {
+      const defaultConfig = {
+        promoText:
+          "Buka rekening baru hari ini, nikmati bebas biaya admin 6 bulan pertama.",
+        videoPath: null, // pakai default bank-promo.mp4 di HTML
+      };
+      fs.writeFileSync(
+        configPath,
+        JSON.stringify(defaultConfig, null, 2),
+        "utf-8"
+      );
+      return defaultConfig;
+    }
+    const raw = fs.readFileSync(configPath, "utf-8");
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error("Gagal load config display:", e);
+    return {
+      promoText:
+        "Buka rekening baru hari ini, nikmati bebas biaya admin 6 bulan pertama.",
+      videoPath: null,
+    };
+  }
+}
+
+function saveDisplayConfig(partial) {
+  const current = loadDisplayConfig();
+  const next = { ...current, ...partial };
+  fs.writeFileSync(configPath, JSON.stringify(next, null, 2), "utf-8");
+  return next;
+}
+
+// =============================
+//  WINDOW
+// =============================
 
 function createWindows() {
   // MONITOR CUSTOMER
@@ -56,9 +112,15 @@ function broadcastState() {
   }
 }
 
+// =============================
+//  APP READY
+// =============================
 app.whenReady().then(() => {
   initDb();
+  initConfigPaths();
   createWindows();
+
+  // ========= IPC ANTRIAN =========
 
   // Ambil nomor dari KIOSK
   ipcMain.handle("queue:takeTicket", (event, serviceType) => {
@@ -77,6 +139,49 @@ app.whenReady().then(() => {
   // Dipanggil oleh DISPLAY/OPERATOR saat pertama kali load
   ipcMain.handle("queue:getState", () => {
     return getState();
+  });
+
+  // ========= IPC DISPLAY (PROMO & VIDEO) =========
+
+  // Ambil config promo + video
+  ipcMain.handle("display:getConfig", () => {
+    return loadDisplayConfig();
+  });
+
+  // Update teks promo
+  ipcMain.handle("display:updatePromo", (event, { promoText }) => {
+    const next = saveDisplayConfig({ promoText: promoText || "" });
+    return next;
+  });
+
+  // Pilih / upload video promo
+  ipcMain.handle("display:chooseVideo", async () => {
+    const result = await dialog.showOpenDialog({
+      title: "Pilih Video Promo",
+      filters: [
+        { name: "Video Files", extensions: ["mp4", "webm", "mov", "avi"] },
+      ],
+      properties: ["openFile"],
+    });
+
+    if (result.canceled || !result.filePaths.length) {
+      // tidak ada perubahan
+      return loadDisplayConfig();
+    }
+
+    const srcPath = result.filePaths[0];
+    const ext = path.extname(srcPath);
+    const fileName = `promo_${Date.now()}${ext}`;
+    const destPath = path.join(videosDir, fileName);
+
+    try {
+      fs.copyFileSync(srcPath, destPath);
+      const next = saveDisplayConfig({ videoPath: destPath });
+      return next;
+    } catch (e) {
+      console.error("Gagal copy video promo:", e);
+      return loadDisplayConfig();
+    }
   });
 
   app.on("activate", () => {

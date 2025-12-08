@@ -174,9 +174,15 @@
             margin-bottom: 10px;
         }
 
+        .video-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
         .video-title {
             font-size: 13px;
-            margin-bottom: 4px;
             color: #d1d5db;
         }
 
@@ -233,6 +239,130 @@
             align-items: center;
             gap: 4px;
         }
+
+        .settings-btn {
+            border-radius: 999px;
+            border: 1px solid rgba(156, 163, 175, 0.7);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            font-size: 11px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .settings-btn:hover {
+            background: rgba(15, 23, 42, 1);
+        }
+
+        /* SETTINGS OVERLAY */
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .settings-overlay.hidden {
+            display: none;
+        }
+
+        .settings-panel {
+            width: 430px;
+            background: #020617;
+            border-radius: 16px;
+            padding: 16px 18px;
+            border: 1px solid rgba(148, 163, 184, 0.8);
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.95);
+            color: #e5e7eb;
+            font-size: 13px;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .settings-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .close-settings {
+            border: none;
+            background: transparent;
+            color: #9ca3af;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .settings-label {
+            font-size: 12px;
+            color: #a5b4fc;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .settings-textarea {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: #020617;
+            color: #e5e7eb;
+            padding: 8px;
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .settings-save-btn,
+        .settings-upload-btn {
+            margin-top: 8px;
+            border-radius: 999px;
+            padding: 8px 14px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .settings-save-btn {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #eef2ff;
+        }
+
+        .settings-upload-btn {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .settings-divider {
+            margin: 14px 0;
+            border: 0;
+            border-top: 1px solid rgba(31, 41, 55, 0.9);
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .settings-file-label {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .settings-note {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
     </style>
 </head>
 
@@ -277,10 +407,13 @@
         <!-- Right: Video & Promo -->
         <div class="panel">
             <div class="video-box">
-                <div class="video-title">Video Informasi & Promo</div>
-                <!-- ganti src dengan file video bank kamu -->
-                <video autoplay loop muted>
-                    <source src="bank-promo.mp4" type="video/mp4" />
+                <div class="video-title-row">
+                    <div class="video-title">Video Informasi & Promo</div>
+                    <button class="settings-btn" onclick="toggleSettingsPanel()">
+                        ⚙ Pengaturan
+                    </button>
+                </div>
+                <video id="promoVideo" autoplay loop muted>
                     Browser tidak mendukung video.
                 </video>
             </div>
@@ -302,6 +435,41 @@
         <div>Silakan menunggu nomor antrian Anda dipanggil.</div>
     </div>
 
+    <!-- SETTINGS OVERLAY -->
+    <div id="settings-overlay" class="settings-overlay hidden">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h3>Pengaturan Display Promo</h3>
+                <button class="close-settings" onclick="toggleSettingsPanel()">✕</button>
+            </div>
+
+            <label class="settings-label">Teks Promo Hari Ini</label>
+            <textarea id="promo-input" class="settings-textarea"></textarea>
+
+            <button class="settings-save-btn" onclick="savePromoText()">
+                Simpan Teks Promo
+            </button>
+
+            <hr class="settings-divider" />
+
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Video Promo</div>
+                    <div id="video-file-label" class="settings-file-label">
+                        Tidak ada video terpilih.
+                    </div>
+                </div>
+                <button class="settings-upload-btn" onclick="choosePromoVideo()">
+                    Pilih Video…
+                </button>
+            </div>
+
+            <div class="settings-note">
+                Video akan disalin ke folder aplikasi. Gunakan format MP4 untuk hasil terbaik.
+            </div>
+        </div>
+    </div>
+
     <script>
         const { ipcRenderer } = require("electron");
 
@@ -312,6 +480,7 @@
         const tellerQueueEl = document.getElementById("teller-queue");
         const csQueueEl = document.getElementById("cs-queue");
         const promoTextEl = document.getElementById("promo-text");
+        const promoVideoEl = document.getElementById("promoVideo");
 
         let lastTellerTicket = null;
         let lastCsTicket = null;
@@ -434,18 +603,98 @@
             updateDisplay(state);
         });
 
-        // ====== Rotasi promo text sederhana ======
-        const promos = [
-            "Buka rekening baru, nikmati bebas biaya admin 6 bulan pertama.",
-            "Ajukan KPR di BANK ASTRO, bunga kompetitif dan proses cepat.",
-            "Gunakan kartu debit BANK ASTRO, cashback di merchant pilihan.",
-            "Ayo mulai investasi reksa dana bersama BANK ASTRO hari ini."
-        ];
-        let promoIndex = 0;
-        setInterval(() => {
-            promoIndex = (promoIndex + 1) % promos.length;
-            promoTextEl.textContent = promos[promoIndex];
-        }, 8000);
+        // ==============================
+        //  CONFIG PROMO & VIDEO
+        // ==============================
+        let currentDisplayConfig = null;
+
+        async function loadDisplayConfig() {
+            try {
+                const cfg = await ipcRenderer.invoke("display:getConfig");
+                currentDisplayConfig = cfg;
+
+                // Promo text
+                if (cfg.promoText) {
+                    promoTextEl.textContent = cfg.promoText;
+                }
+
+                // Video
+                if (promoVideoEl) {
+                    if (cfg.videoPath) {
+                        const normalized = cfg.videoPath.replace(/\\/g, "/");
+                        promoVideoEl.src = `file://${normalized}`;
+                    } else {
+                        // fallback ke video default di folder project
+                        promoVideoEl.src = "bank-promo.mp4";
+                    }
+                    promoVideoEl.load();
+                }
+
+                const labelEl = document.getElementById("video-file-label");
+                if (labelEl) {
+                    labelEl.textContent = cfg.videoPath
+                        ? `File: ${cfg.videoPath}`
+                        : "Tidak ada video terpilih.";
+                }
+
+                const inputEl = document.getElementById("promo-input");
+                if (inputEl) {
+                    inputEl.value = cfg.promoText || "";
+                }
+            } catch (e) {
+                console.error("Gagal load config display:", e);
+            }
+        }
+
+        async function savePromoText() {
+            const inputEl = document.getElementById("promo-input");
+            if (!inputEl) return;
+
+            try {
+                const next = await ipcRenderer.invoke("display:updatePromo", {
+                    promoText: inputEl.value.trim(),
+                });
+                currentDisplayConfig = next;
+                promoTextEl.textContent = next.promoText || "";
+                alert("Teks promo berhasil disimpan.");
+            } catch (e) {
+                console.error("Gagal simpan promo:", e);
+                alert("Gagal menyimpan teks promo.");
+            }
+        }
+
+        async function choosePromoVideo() {
+            try {
+                const next = await ipcRenderer.invoke("display:chooseVideo");
+                currentDisplayConfig = next;
+                await loadDisplayConfig();
+                alert("Video promo berhasil diperbarui.");
+            } catch (e) {
+                console.error("Gagal memilih video promo:", e);
+                alert("Gagal memilih video promo.");
+            }
+        }
+
+        function toggleSettingsPanel() {
+            const overlay = document.getElementById("settings-overlay");
+            if (!overlay) return;
+            overlay.classList.toggle("hidden");
+
+            if (!overlay.classList.contains("hidden") && currentDisplayConfig) {
+                const inputEl = document.getElementById("promo-input");
+                if (inputEl) inputEl.value = currentDisplayConfig.promoText || "";
+            }
+        }
+
+        // Shortcut: Ctrl+Shift+P untuk buka/tutup panel settings
+        window.addEventListener("keydown", (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "p") {
+                toggleSettingsPanel();
+            }
+        });
+
+        // load config di awal
+        loadDisplayConfig();
     </script>
 </body>
 
