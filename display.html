@@ -14,164 +14,288 @@
         body {
             margin: 0;
             height: 100vh;
-            background: radial-gradient(circle at top, #1d4ed8 0, #020617 55%);
-            color: #e5e7eb;
-            padding: 16px 20px;
+            background: #f3f4f6;
+            color: #111827;
+            padding: 10px 14px;
             display: flex;
             flex-direction: column;
         }
 
-        .header {
+        /* ================= HEADER (PUTIH) ================= */
+
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px 14px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
         }
 
-        .header-title {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .bank-pill {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 8px 16px;
-            border-radius: 999px;
+        .brand-left {
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.6);
+            gap: 10px;
         }
 
-        .bank-logo {
-            width: 26px;
-            height: 26px;
+        .brand-logo-box {
+            width: 52px;
+            height: 38px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9, #6366f1);
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 20px;
         }
 
-        .bank-name {
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            font-size: 13px;
-            text-transform: uppercase;
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: #0f172a;
+        }
+
+        .brand-tagline {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .top-right {
+            text-align: right;
+            font-size: 13px;
+            color: #111827;
+        }
+
+        .top-date {
+            font-weight: 500;
+        }
+
+        .top-time {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+        }
+
+        /* ================= LAYOUT GRID ================= */
 
         .main-grid {
             flex: 1;
             display: grid;
             grid-template-columns: 3fr 2fr;
-            gap: 14px;
+            gap: 10px;
             min-height: 0;
         }
 
         .panel {
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), #020617);
-            border-radius: 16px;
-            padding: 14px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.8);
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
             display: flex;
             flex-direction: column;
             min-height: 0;
         }
 
-        .panel-title {
+        /* ================= LEFT PANEL ================= */
+
+        .section-title {
             margin: 0 0 6px 0;
-            font-size: 14px;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: #9ca3af;
+            letter-spacing: 0.16em;
+            color: #4b5563;
         }
 
-        .now-serving-grid {
+        .current-wrapper {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
-        .now-card {
-            background: radial-gradient(circle at top left, #1d4ed8, #020617);
-            border-radius: 14px;
-            padding: 12px 14px;
+        .current-card {
+            background: linear-gradient(145deg, #2563eb, #1d4ed8);
+            border-radius: 12px;
+            padding: 9px 10px;
+            color: #f9fafb;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(191, 219, 254, 0.4);
+            border: 1px solid #1d4ed8;
         }
 
-        .now-label {
-            font-size: 13px;
-            color: #bfdbfe;
+        .current-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right,
+                    rgba(255, 255, 255, 0.25),
+                    transparent 60%);
+            pointer-events: none;
+        }
+
+        .current-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .current-label-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .current-label-top {
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.13em;
+            color: #dbeafe;
         }
 
-        .now-number {
-            font-size: 44px;
+        .current-service-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .current-badge {
+            font-size: 11px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(219, 234, 254, 0.9);
+            color: #eff6ff;
+            background: rgba(15, 23, 42, 0.25);
+        }
+
+        .current-number-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-top: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .current-number-label {
+            font-size: 11px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #bfdbfe;
+        }
+
+        .current-number {
+            font-size: 40px;
             font-weight: 800;
-            margin: 4px 0;
-            letter-spacing: 0.09em;
+            letter-spacing: 0.16em;
+            color: #fed7aa;
         }
 
-        .now-counter {
-            font-size: 15px;
+        .current-number.cs {
+            color: #bbf7d0;
+        }
+
+        .current-counter-box {
+            margin-top: 2px;
+            font-size: 12px;
+            font-weight: 500;
             color: #e5e7eb;
         }
 
-        .badge {
-            position: absolute;
-            right: 10px;
-            top: 12px;
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(191, 219, 254, 0.5);
-            color: #bfdbfe;
+        .current-arrow {
+            margin-left: auto;
+            font-size: 26px;
+            color: rgba(15, 23, 42, 0.25);
         }
 
+        /* -------- NEXT QUEUE LIST -------- */
+
         .queue-section {
-            margin-top: 10px;
+            margin-top: 4px;
         }
 
         .queue-title {
-            font-size: 12px;
-            letter-spacing: 0.12em;
+            font-size: 11px;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: #9ca3af;
+            color: #4b5563;
             margin-bottom: 4px;
         }
 
         .queue-list {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 6px;
-            min-height: 26px;
+            min-height: 32px;
         }
 
-        .queue-tag {
+        .queue-item {
+            background: #eff6ff;
+            border-radius: 10px;
+            padding: 4px 8px;
+            border: 1px solid #dbeafe;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .queue-item-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .queue-item-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.13em;
+            color: #6b7280;
+        }
+
+        .queue-item-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .queue-item-arrow {
+            font-size: 18px;
+            color: #2563eb;
         }
 
         .empty {
             font-size: 12px;
-            color: #6b7280;
+            color: #9ca3af;
+            grid-column: 1 / -1;
+            align-self: center;
         }
 
-        /* Right side */
+        /* ================= RIGHT PANEL (PUTIH) ================= */
+
         .video-box {
             flex: 1;
-            background: radial-gradient(circle at top, #1f2937, #020617);
-            border-radius: 12px;
-            padding: 10px;
-            border: 1px solid rgba(75, 85, 99, 0.8);
+            background: #e5e7eb;
+            border-radius: 10px;
+            padding: 8px;
+            border: 1px solid #d1d5db;
             display: flex;
             flex-direction: column;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .video-title-row {
@@ -183,47 +307,49 @@
 
         .video-title {
             font-size: 13px;
-            color: #d1d5db;
+            color: #111827;
+            font-weight: 600;
         }
 
         video {
             width: 100%;
-            border-radius: 9px;
+            border-radius: 8px;
             background: #000;
-            max-height: 240px;
+            max-height: 260px;
             object-fit: cover;
         }
 
         .promo-box {
-            background: rgba(15, 23, 42, 0.95);
-            border-radius: 12px;
-            padding: 10px;
-            border: 1px solid rgba(55, 65, 81, 0.9);
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
         .promo-title {
-            font-size: 13px;
-            letter-spacing: 0.12em;
+            font-size: 12px;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: #9ca3af;
+            color: #4b5563;
         }
 
         .promo-text {
             font-size: 13px;
             line-height: 1.5;
-            color: #e5e7eb;
+            color: #111827;
         }
 
         .footer {
-            margin-top: 8px;
+            margin-top: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            color: #6b7280;
+            color: #4b5563;
+            padding: 2px 2px 0;
         }
 
         .status-dot {
@@ -242,23 +368,24 @@
 
         .settings-btn {
             border-radius: 999px;
-            border: 1px solid rgba(156, 163, 175, 0.7);
-            background: rgba(15, 23, 42, 0.9);
-            color: #e5e7eb;
+            border: 1px solid #9ca3af;
+            background: #ffffff;
+            color: #111827;
             font-size: 11px;
             padding: 4px 10px;
             cursor: pointer;
         }
 
         .settings-btn:hover {
-            background: rgba(15, 23, 42, 1);
+            background: #e5e7eb;
         }
 
-        /* SETTINGS OVERLAY */
+        /* ================= SETTINGS OVERLAY ================= */
+
         .settings-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.55);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -271,12 +398,12 @@
 
         .settings-panel {
             width: 430px;
-            background: #020617;
-            border-radius: 16px;
-            padding: 16px 18px;
-            border: 1px solid rgba(148, 163, 184, 0.8);
-            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.95);
-            color: #e5e7eb;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 22px 70px rgba(15, 23, 42, 0.45);
+            color: #111827;
             font-size: 13px;
         }
 
@@ -284,7 +411,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .settings-header h3 {
@@ -295,14 +422,14 @@
         .close-settings {
             border: none;
             background: transparent;
-            color: #9ca3af;
+            color: #6b7280;
             font-size: 18px;
             cursor: pointer;
         }
 
         .settings-label {
             font-size: 12px;
-            color: #a5b4fc;
+            color: #4f46e5;
             margin-bottom: 4px;
             display: block;
         }
@@ -310,9 +437,9 @@
         .settings-textarea {
             width: 100%;
             border-radius: 8px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            background: #020617;
-            color: #e5e7eb;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #111827;
             padding: 8px;
             resize: vertical;
             min-height: 70px;
@@ -340,9 +467,9 @@
         }
 
         .settings-divider {
-            margin: 14px 0;
+            margin: 12px 0;
             border: 0;
-            border-top: 1px solid rgba(31, 41, 55, 0.9);
+            border-top: 1px solid #e5e7eb;
         }
 
         .settings-row {
@@ -354,46 +481,84 @@
 
         .settings-file-label {
             font-size: 11px;
-            color: #9ca3af;
+            color: #6b7280;
             margin-top: 2px;
         }
 
         .settings-note {
-            margin-top: 8px;
+            margin-top: 6px;
             font-size: 11px;
-            color: #94a3b8;
+            color: #6b7280;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="header-title">Display Antrian Nasabah</div>
-        <div class="bank-pill">
-            <div class="bank-logo"></div>
-            <div class="bank-name">BANK ASTRO</div>
+    <!-- TOP BAR PUTIH -->
+    <div class="top-bar">
+        <div class="brand-left">
+            <div class="brand-logo-box">A</div>
+            <div class="brand-text">
+                <div id="brand-name" class="brand-name">BANK ASTRO</div>
+                <div class="brand-tagline">Melayani dengan sepenuh hati</div>
+            </div>
+        </div>
+        <div class="top-right">
+            <div id="top-date" class="top-date">08 Des 2025</div>
+            <div id="top-time" class="top-time">15:54</div>
         </div>
     </div>
 
     <div class="main-grid">
-        <!-- Left: Now Serving & Queue -->
+        <!-- LEFT: CURRENT & QUEUE -->
         <div class="panel">
-            <h2 class="panel-title">Sedang Dilayani</h2>
-            <div class="now-serving-grid">
-                <div class="now-card">
-                    <div class="badge">TELLER</div>
-                    <div class="now-label">Nomor Antrian</div>
-                    <div id="teller-now" class="now-number">-</div>
-                    <div id="teller-counter" class="now-counter">Loket: -</div>
+            <h2 class="section-title">Sedang Dilayani</h2>
+
+            <div class="current-wrapper">
+                <!-- TELLER -->
+                <div class="current-card">
+                    <div class="current-header">
+                        <div class="current-label-block">
+                            <div class="current-label-top">Layanan</div>
+                            <div class="current-service-name">Teller</div>
+                        </div>
+                        <div class="current-badge">TELLER</div>
+                    </div>
+                    <div class="current-number-row">
+                        <div>
+                            <div class="current-number-label">Nomor Antrian</div>
+                            <div id="teller-now" class="current-number">-</div>
+                            <div id="teller-counter" class="current-counter-box">
+                                Loket: -
+                            </div>
+                        </div>
+                        <div class="current-arrow">➤</div>
+                    </div>
                 </div>
-                <div class="now-card">
-                    <div class="badge">CS</div>
-                    <div class="now-label">Nomor Antrian</div>
-                    <div id="cs-now" class="now-number">-</div>
-                    <div id="cs-counter" class="now-counter">Loket: -</div>
+
+                <!-- CS -->
+                <div class="current-card">
+                    <div class="current-header">
+                        <div class="current-label-block">
+                            <div class="current-label-top">Layanan</div>
+                            <div class="current-service-name">Customer Service</div>
+                        </div>
+                        <div class="current-badge">CS</div>
+                    </div>
+                    <div class="current-number-row">
+                        <div>
+                            <div class="current-number-label">Nomor Antrian</div>
+                            <div id="cs-now" class="current-number cs">-</div>
+                            <div id="cs-counter" class="current-counter-box">
+                                Loket: -
+                            </div>
+                        </div>
+                        <div class="current-arrow">➤</div>
+                    </div>
                 </div>
             </div>
 
+            <!-- QUEUE LISTS -->
             <div class="queue-section">
                 <div class="queue-title">Antrian Teller Berikutnya</div>
                 <div id="teller-queue" class="queue-list"></div>
@@ -404,7 +569,7 @@
             </div>
         </div>
 
-        <!-- Right: Video & Promo -->
+        <!-- RIGHT: VIDEO & PROMO -->
         <div class="panel">
             <div class="video-box">
                 <div class="video-title-row">
@@ -430,7 +595,7 @@
     <div class="footer">
         <div class="status">
             <div class="status-dot"></div>
-            <span>Sistem antrian aktif</span>
+            <span id="statusText">Sistem antrian aktif</span>
         </div>
         <div>Silakan menunggu nomor antrian Anda dipanggil.</div>
     </div>
@@ -473,6 +638,21 @@
     <script>
         const { ipcRenderer } = require("electron");
 
+        // ======= KONFIG SERVER CABANG =======
+        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
+            ? window.queueConfig.apiBase
+            : "http://localhost:3000";
+
+        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
+            ? window.queueConfig.branchName
+            : "BANK ASTRO";
+
+        // brand header
+        const brandNameEl = document.getElementById("brand-name");
+        if (brandNameEl) brandNameEl.textContent = BRANCH_NAME;
+
+        const statusTextEl = document.getElementById("statusText");
+
         const tellerNowEl = document.getElementById("teller-now");
         const tellerCounterEl = document.getElementById("teller-counter");
         const csNowEl = document.getElementById("cs-now");
@@ -486,35 +666,120 @@
         let lastCsTicket = null;
         let initialized = false;
 
-        // ======= SUARA: dingdong + TTS =======
+        // ======= JAM & TANGGAL DI HEADER =======
+        function formatTanggalID(date) {
+            const hari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+            const bulan = [
+                "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+                "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+            ];
+            const h = hari[date.getDay()];
+            const d = String(date.getDate()).padStart(2, "0");
+            const m = bulan[date.getMonth()];
+            const y = date.getFullYear();
+            return `${h}, ${d} ${m} ${y}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const t = now
+                .toLocaleTimeString("id-ID", { hour12: false })
+                .slice(0, 5);
+            document.getElementById("top-time").textContent = t;
+            document.getElementById("top-date").textContent = formatTanggalID(now);
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ======= SUARA: dingdong + TTS (INDONESIA: nol, satu...) =======
         const dingAudio = new Audio(
             "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"
         );
 
+        const digitMap = {
+            "0": "nol",
+            "1": "satu",
+            "2": "dua",
+            "3": "tiga",
+            "4": "empat",
+            "5": "lima",
+            "6": "enam",
+            "7": "tujuh",
+            "8": "delapan",
+            "9": "sembilan",
+        };
+
+        let cachedVoice = null;
+        function getIndonesianVoicePreferFemale() {
+            if (cachedVoice) return cachedVoice;
+
+            const synth = window.speechSynthesis;
+            if (!synth) return null;
+
+            const voices = synth.getVoices() || [];
+            if (!voices.length) return null;
+
+            const idVoices = voices.filter(v => (v.lang || "").toLowerCase().startsWith("id"));
+
+            const femaleLike = idVoices.find(v =>
+                /female|wanita|zira|siti|indonesia/i.test(v.name)
+            );
+            if (femaleLike) return (cachedVoice = femaleLike);
+
+            if (idVoices.length) return (cachedVoice = idVoices[0]);
+
+            return (cachedVoice = voices[0]);
+        }
+
         function speak(text) {
+            const synth = window.speechSynthesis;
+            if (!synth || !text) return;
+
+            synth.cancel();
+
             const utter = new SpeechSynthesisUtterance(text);
+            const voice = getIndonesianVoicePreferFemale();
+            if (voice) utter.voice = voice;
+
             utter.lang = "id-ID";
             utter.rate = 1;
-            utter.pitch = 1;
-            speechSynthesis.speak(utter);
+            utter.pitch = 1.05;
+            utter.volume = 1;
+
+            synth.speak(utter);
+        }
+
+        if (window.speechSynthesis) {
+            window.speechSynthesis.addEventListener("voiceschanged", () => {
+                cachedVoice = null;
+                getIndonesianVoicePreferFemale();
+            });
+        }
+
+        function digitsToWords(numStr) {
+            return Array.from(numStr).map(ch => digitMap[ch] || ch).join(" ");
         }
 
         function makeSentence(ticketCode, counterName, serviceLabel) {
-            // T-001 / CS-015
-            const rawNumber = ticketCode.replace("T-", "").replace("CS-", "");
-            const digits = rawNumber.split("").join(" ");
-            const prefix = ticketCode.startsWith("T") ? "T" : "C S";
+            // dukung format: T001 / C015 / T-001 / CS-015
+            let prefix = "";
+            let num = ticketCode || "";
 
-            return (
-                "Nomor antrian " +
-                prefix +
-                " " +
-                digits +
-                ", menuju " +
-                serviceLabel +
-                " " +
-                counterName
-            );
+            if (num.startsWith("T-")) { prefix = "T"; num = num.replace("T-", ""); }
+            else if (num.startsWith("CS-")) { prefix = "C"; num = num.replace("CS-", ""); }
+            else if (num.startsWith("T")) { prefix = "T"; num = num.slice(1); }
+            else if (num.startsWith("C")) { prefix = "C"; num = num.slice(1); }
+            else { prefix = num.charAt(0); num = num.slice(1); }
+
+            const spokenNumber = /^\d+$/.test(num) ? digitsToWords(num) : num;
+            const spokenPrefix = prefix === "C" ? "C" : "T";
+
+            // CS lebih enak disebut "Customer Service"
+            const loketLabel = (serviceLabel === "Customer Service")
+                ? counterName.replace(/^CS\s*/i, "Customer Service ")
+                : counterName;
+
+            return `Nomor antrian ${spokenPrefix} ${spokenNumber}, silakan menuju ${serviceLabel} ${loketLabel}.`;
         }
 
         function announce(serviceType, ticketCode, counterName) {
@@ -522,11 +787,9 @@
             const label = serviceType === "TELLER" ? "Teller" : "Customer Service";
             const sentence = makeSentence(ticketCode, counterName, label);
 
-            // mainkan dingdong dulu, baru bicara
             try {
                 dingAudio.currentTime = 0;
                 dingAudio.play().catch(() => {
-                    // kalau gagal auto-play (kadang diblok), langsung TTS saja
                     speak(sentence);
                 });
                 setTimeout(() => {
@@ -537,7 +800,7 @@
             }
         }
 
-        // ======= Render UI =======
+        // ======= RENDER ANTRIAN =======
         function renderQueueList(container, items) {
             container.innerHTML = "";
             if (!items || items.length === 0) {
@@ -547,11 +810,33 @@
                 container.appendChild(span);
                 return;
             }
+
             items.forEach((ticket) => {
-                const tag = document.createElement("span");
-                tag.className = "queue-tag";
-                tag.textContent = ticket;
-                container.appendChild(tag);
+                const row = document.createElement("div");
+                row.className = "queue-item";
+
+                const left = document.createElement("div");
+                left.className = "queue-item-left";
+
+                const lbl = document.createElement("div");
+                lbl.className = "queue-item-label";
+                lbl.textContent = "Nomor Antrian";
+
+                const num = document.createElement("div");
+                num.className = "queue-item-number";
+                num.textContent = ticket;
+
+                left.appendChild(lbl);
+                left.appendChild(num);
+
+                const arrow = document.createElement("div");
+                arrow.className = "queue-item-arrow";
+                arrow.textContent = "»";
+
+                row.appendChild(left);
+                row.appendChild(arrow);
+
+                container.appendChild(row);
             });
         }
 
@@ -559,53 +844,54 @@
             const tellerNow = state.tellerNow;
             const csNow = state.csNow;
 
-            tellerNowEl.textContent = tellerNow?.ticket_code || "-";
-            tellerCounterEl.textContent =
-                "Loket: " + (tellerNow?.counter_name || "-");
+            // server bisa ngirim {ticket_code} atau {ticketCode}
+            const tellerTicket = tellerNow?.ticket_code || tellerNow?.ticketCode || null;
+            const tellerCounter = tellerNow?.counter_name || tellerNow?.counterName || null;
+            const csTicket = csNow?.ticket_code || csNow?.ticketCode || null;
+            const csCounter = csNow?.counter_name || csNow?.counterName || null;
 
-            csNowEl.textContent = csNow?.ticket_code || "-";
-            csCounterEl.textContent = "Loket: " + (csNow?.counter_name || "-");
+            tellerNowEl.textContent = tellerTicket || "-";
+            tellerCounterEl.textContent = "Loket: " + (tellerCounter || "-");
+
+            csNowEl.textContent = csTicket || "-";
+            csCounterEl.textContent = "Loket: " + (csCounter || "-");
 
             renderQueueList(tellerQueueEl, state.tellerQueue);
             renderQueueList(csQueueEl, state.csQueue);
 
-            // Deteksi perubahan untuk panggil suara
             if (initialized) {
-                if (
-                    tellerNow &&
-                    tellerNow.ticket_code &&
-                    tellerNow.ticket_code !== lastTellerTicket
-                ) {
-                    announce("TELLER", tellerNow.ticket_code, tellerNow.counter_name);
+                if (tellerTicket && tellerTicket !== lastTellerTicket) {
+                    announce("TELLER", tellerTicket, tellerCounter || "");
                 }
-                if (
-                    csNow &&
-                    csNow.ticket_code &&
-                    csNow.ticket_code !== lastCsTicket
-                ) {
-                    announce("CS", csNow.ticket_code, csNow.counter_name);
+                if (csTicket && csTicket !== lastCsTicket) {
+                    announce("CS", csTicket, csCounter || "");
                 }
             }
 
-            lastTellerTicket = tellerNow?.ticket_code || null;
-            lastCsTicket = csNow?.ticket_code || null;
+            lastTellerTicket = tellerTicket;
+            lastCsTicket = csTicket;
             initialized = true;
         }
 
-        // ======= Ambil state awal =======
-        (async () => {
-            const state = await ipcRenderer.invoke("queue:getState");
-            updateDisplay(state);
-        })();
+        // ======= AMBIL STATE DARI SERVER CABANG (POLLING) =======
+        async function fetchStateFromServer() {
+            try {
+                const res = await fetch(`${API_BASE}/api/state`, { cache: "no-store" });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const state = await res.json();
+                updateDisplay(state);
+                if (statusTextEl) statusTextEl.textContent = "Sistem antrian aktif";
+            } catch (e) {
+                if (statusTextEl) statusTextEl.textContent = "Sistem terputus (server cabang tidak aktif)";
+                // jangan spam alert, cukup status saja
+                console.error("Gagal ambil state:", e);
+            }
+        }
 
-        // ======= Update realtime dari main process =======
-        ipcRenderer.on("queue:state", (event, state) => {
-            updateDisplay(state);
-        });
+        fetchStateFromServer();
+        setInterval(fetchStateFromServer, 1000);
 
-        // ==============================
-        //  CONFIG PROMO & VIDEO
-        // ==============================
+        // ================= CONFIG PROMO & VIDEO (tetap via ipcRenderer) =================
         let currentDisplayConfig = null;
 
         async function loadDisplayConfig() {
@@ -613,18 +899,15 @@
                 const cfg = await ipcRenderer.invoke("display:getConfig");
                 currentDisplayConfig = cfg;
 
-                // Promo text
                 if (cfg.promoText) {
                     promoTextEl.textContent = cfg.promoText;
                 }
 
-                // Video
                 if (promoVideoEl) {
                     if (cfg.videoPath) {
                         const normalized = cfg.videoPath.replace(/\\/g, "/");
                         promoVideoEl.src = `file://${normalized}`;
                     } else {
-                        // fallback ke video default di folder project
                         promoVideoEl.src = "bank-promo.mp4";
                     }
                     promoVideoEl.load();
@@ -686,14 +969,12 @@
             }
         }
 
-        // Shortcut: Ctrl+Shift+P untuk buka/tutup panel settings
         window.addEventListener("keydown", (e) => {
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "p") {
                 toggleSettingsPanel();
             }
         });
 
-        // load config di awal
         loadDisplayConfig();
     </script>
 </body>

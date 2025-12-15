@@ -1,7 +1,6 @@
 // FILE: main.js
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const fs = require("fs");
 const {
   initDb,
   takeTicket,
@@ -11,6 +10,7 @@ const {
   getTodayCalls,
   clearTodayTickets,
 } = require("./db");
+const { createServer } = require("./server");
 
 let windows = {
   display: null,
@@ -19,63 +19,24 @@ let windows = {
   admin: null,
 };
 
-// =============================
-//  CONFIG PROMO & VIDEO
-// =============================
-let dataDir;
-let videosDir;
-let configPath;
+const QUEUE_SERVER_PORT = 3000;
+// kalau mau dipasang nama cabang
+const BRANCH_NAME = "BANK ASTRO CABANG A";
 
-function initConfigPaths() {
-  const userData = app.getPath("userData");
-  dataDir = path.join(userData, "astro-queue-data");
-  videosDir = path.join(dataDir, "videos");
-  configPath = path.join(dataDir, "config.json");
-
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
-}
-
-function loadDisplayConfig() {
-  try {
-    if (!fs.existsSync(configPath)) {
-      const defaultConfig = {
-        promoText:
-          "Buka rekening baru hari ini, nikmati bebas biaya admin 6 bulan pertama.",
-        videoPath: null, // default: pakai bank-promo.mp4 di display.html
-      };
-      fs.writeFileSync(
-        configPath,
-        JSON.stringify(defaultConfig, null, 2),
-        "utf-8"
-      );
-      return defaultConfig;
-    }
-    const raw = fs.readFileSync(configPath, "utf-8");
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error("Gagal load config display:", e);
-    return {
-      promoText:
-        "Buka rekening baru hari ini, nikmati bebas biaya admin 6 bulan pertama.",
-      videoPath: null,
+function injectConfig(win) {
+  if (!win || win.isDestroyed()) return;
+  const apiBase = `http://localhost:${QUEUE_SERVER_PORT}`;
+  const script = `
+    window.queueConfig = {
+      apiBase: ${JSON.stringify(apiBase)},
+      branchName: ${JSON.stringify(BRANCH_NAME)}
     };
-  }
+  `;
+  win.webContents.executeJavaScript(script).catch(() => {});
 }
-
-function saveDisplayConfig(partial) {
-  const current = loadDisplayConfig();
-  const next = { ...current, ...partial };
-  fs.writeFileSync(configPath, JSON.stringify(next, null, 2), "utf-8");
-  return next;
-}
-
-// =============================
-//  WINDOW
-// =============================
 
 function createWindows() {
-  // MONITOR CUSTOMER (DISPLAY)
+  // DISPLAY (monitor ruang tunggu)
   windows.display = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -86,8 +47,11 @@ function createWindows() {
     },
   });
   windows.display.loadFile("display.html");
+  windows.display.webContents.on("did-finish-load", () =>
+    injectConfig(windows.display)
+  );
 
-  // KIOSK (AMBIL NOMOR)
+  // KIOSK (ambil nomor) - PC kiosk
   windows.kiosk = new BrowserWindow({
     width: 500,
     height: 700,
@@ -98,11 +62,14 @@ function createWindows() {
     },
   });
   windows.kiosk.loadFile("kiosk.html");
+  windows.kiosk.webContents.on("did-finish-load", () =>
+    injectConfig(windows.kiosk)
+  );
 
-  // OPERATOR (TELLER & CS)
+  // OPERATOR (teller/cs) - PC teller/cs
   windows.operator = new BrowserWindow({
-    width: 600,
-    height: 750,
+    width: 650,
+    height: 780,
     title: "Panel Teller & CS",
     webPreferences: {
       nodeIntegration: true,
@@ -110,18 +77,24 @@ function createWindows() {
     },
   });
   windows.operator.loadFile("operator.html");
+  windows.operator.webContents.on("did-finish-load", () =>
+    injectConfig(windows.operator)
+  );
 
-  // ADMIN PANEL
+  // ADMIN PANEL (opsional: komputer supervisor)
   windows.admin = new BrowserWindow({
-    width: 900,
-    height: 650,
-    title: "Admin Panel - Antrian Bank Astro",
+    width: 1100,
+    height: 750,
+    title: "Admin Panel",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
   windows.admin.loadFile("admin.html");
+  windows.admin.webContents.on("did-finish-load", () =>
+    injectConfig(windows.admin)
+  );
 }
 
 function broadcastState() {
@@ -133,102 +106,50 @@ function broadcastState() {
   }
 }
 
-// =============================
-//  APP READY
-// =============================
 app.whenReady().then(() => {
   initDb();
-  initConfigPaths();
+
+  // ✅ start server cabang (untuk admin/client pc lain)
+  createServer({ port: QUEUE_SERVER_PORT });
+
   createWindows();
 
-  // ========= IPC ANTRIAN =========
-
-  // Ambil nomor dari KIOSK
+  // Ambil nomor dari KIOSK (IPC mode)
   ipcMain.handle("queue:takeTicket", (event, serviceType) => {
     const ticket = takeTicket(serviceType);
     broadcastState();
     return ticket;
   });
 
-  // Panggil nomor dari OPERATOR
+  // Panggil nomor dari OPERATOR (IPC mode)
   ipcMain.handle("queue:callNext", (event, { serviceType, counterName }) => {
     const result = callNext(serviceType, counterName);
     broadcastState();
     return result; // bisa null kalau antrian kosong
   });
 
-  // Dipanggil oleh DISPLAY/OPERATOR/ADMIN saat pertama kali load
+  // Dipanggil oleh DISPLAY/OPERATOR saat pertama kali load
   ipcMain.handle("queue:getState", () => {
     return getState();
   });
 
-  // ========= IPC DISPLAY (PROMO & VIDEO) =========
-
-  // Ambil config promo + video
-  ipcMain.handle("display:getConfig", () => {
-    return loadDisplayConfig();
-  });
-
-  // Update teks promo
-  ipcMain.handle("display:updatePromo", (event, { promoText }) => {
-    const next = saveDisplayConfig({ promoText: promoText || "" });
-    return next;
-  });
-
-  // Pilih / upload video promo
-  ipcMain.handle("display:chooseVideo", async () => {
-    const result = await dialog.showOpenDialog({
-      title: "Pilih Video Promo",
-      filters: [
-        { name: "Video Files", extensions: ["mp4", "webm", "mov", "avi"] },
-      ],
-      properties: ["openFile"],
-    });
-
-    if (result.canceled || !result.filePaths.length) {
-      // tidak ada perubahan
-      return loadDisplayConfig();
-    }
-
-    const srcPath = result.filePaths[0];
-    const ext = path.extname(srcPath);
-    const fileName = `promo_${Date.now()}${ext}`;
-    const destPath = path.join(videosDir, fileName);
-
-    try {
-      fs.copyFileSync(srcPath, destPath);
-      const next = saveDisplayConfig({ videoPath: destPath });
-      return next;
-    } catch (e) {
-      console.error("Gagal copy video promo:", e);
-      return loadDisplayConfig();
-    }
-  });
-
-  // ========= IPC ADMIN PANEL =========
-
-  // Ringkasan antrian hari ini
+  // ====== ADMIN IPC (fallback) ======
   ipcMain.handle("admin:getTodaySummary", () => {
     return getTodaySummary();
   });
 
-  // Riwayat panggilan hari ini
   ipcMain.handle("admin:getTodayCalls", () => {
     return getTodayCalls();
   });
 
-  // Reset tiket hari ini
-  ipcMain.handle("admin:resetTodayTickets", () => {
+  ipcMain.handle("admin:clearTodayTickets", () => {
     clearTodayTickets();
-    // setelah reset, update state di semua window
     broadcastState();
-    return { success: true };
+    return { ok: true };
   });
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindows();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindows();
   });
 });
 

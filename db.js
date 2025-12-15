@@ -1,319 +1,417 @@
 // FILE: db.js
-// Database lokal berbasis file JSON: queue.json
-
-const fs = require("fs");
 const path = require("path");
+const fs = require("fs");
+const sqlite3 = require("sqlite3").verbose();
 
-const dbPath = path.join(__dirname, "queue.json");
+let db = null;
 
-/**
- * Pastikan file queue.json ada dan punya struktur dasar
- */
-function ensureDbFile() {
-  if (!fs.existsSync(dbPath)) {
-    const initial = {
-      lastId: 0,
-      tickets: [],
-    };
-    fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), "utf-8");
-    return;
-  }
-
-  // kalau sudah ada, pastikan minimal punya field tickets
-  try {
-    const raw = fs.readFileSync(dbPath, "utf-8");
-    const data = JSON.parse(raw);
-    if (!Array.isArray(data.tickets)) {
-      throw new Error("Invalid structure");
-    }
-  } catch {
-    const initial = {
-      lastId: 0,
-      tickets: [],
-    };
-    fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), "utf-8");
-  }
+function getDbPath() {
+  // simpan db di folder project (kamu boleh ubah ke app.getPath("userData") kalau mau)
+  return path.join(__dirname, "queue.sqlite");
 }
 
-function loadDb() {
-  ensureDbFile();
-  const raw = fs.readFileSync(dbPath, "utf-8");
-  let data = JSON.parse(raw);
-
-  if (!Array.isArray(data.tickets)) {
-    data = { lastId: 0, tickets: [] };
+function openDb() {
+  if (db) return db;
+  const dbPath = getDbPath();
+  const exists = fs.existsSync(dbPath);
+  db = new sqlite3.Database(dbPath);
+  if (!exists) {
+    console.log("📦 SQLite DB dibuat:", dbPath);
+  } else {
+    console.log("📦 SQLite DB dipakai:", dbPath);
   }
-
-  // kalau lastId belum ada, hitung dari id terbesar
-  if (typeof data.lastId !== "number") {
-    data.lastId = data.tickets.reduce((max, t) => Math.max(max, t.id || 0), 0);
-  }
-
-  return data;
+  return db;
 }
 
-function saveDb(data) {
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), "utf-8");
+// helper promise
+function run(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    openDb().run(sql, params, function (err) {
+      if (err) reject(err);
+      else resolve(this);
+    });
+  });
+}
+function get(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    openDb().get(sql, params, (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+}
+function all(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    openDb().all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
 }
 
-/**
- * Dipanggil dari main.js saat app ready
- */
+// ============= INIT =============
 function initDb() {
-  ensureDbFile();
+  openDb();
+
+  const sqlTickets = `
+  CREATE TABLE IF NOT EXISTS tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    service_type TEXT NOT NULL,         -- TELLER / CS
+    ticket_code TEXT NOT NULL,          -- T-001 / CS-015
+    status TEXT NOT NULL DEFAULT 'WAITING', -- WAITING / CALLED
+    counter_name TEXT NULL,             -- Teller 1 / CS 2
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    called_at TEXT NULL
+  );
+  `;
+
+  const sqlConfig = `
+  CREATE TABLE IF NOT EXISTS display_config (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    promo_text TEXT DEFAULT '',
+    video_path TEXT DEFAULT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+  `;
+
+  openDb().serialize(() => {
+    openDb().run(sqlTickets);
+    openDb().run(sqlConfig);
+    // pastikan row config ada
+    openDb().run(
+      `INSERT OR IGNORE INTO display_config (id, promo_text, video_path) VALUES (1,'',NULL);`
+    );
+  });
 }
 
-/**
- * Helper: range awal & akhir hari ini (00:00 – 23:59:59)
- */
-function getTodayRange() {
-  const now = new Date();
-  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const start = startDate.getTime();
-  const end = start + 24 * 60 * 60 * 1000; // +1 hari
-  return { start, end };
+// ============= UTILS =============
+function todayKeySQL() {
+  // yyyy-mm-dd "localtime"
+  return "date('now','localtime')";
 }
 
-/**
- * Membuat tiket baru (TELLER / CS)
- * return: string ticket_code -> "T-001", "CS-010"
- */
+function pad3(n) {
+  return String(n).padStart(3, "0");
+}
+
+function normalizeService(serviceType) {
+  if (serviceType === "TELLER") return "TELLER";
+  if (serviceType === "CS") return "CS";
+  throw new Error("serviceType invalid");
+}
+
+// ============= QUEUE LOGIC =============
+
+// Ambil nomor berikutnya (tambah 1 berdasarkan max hari ini)
 function takeTicket(serviceType) {
-  const db = loadDb();
-  const tickets = db.tickets || [];
-  const prefix = serviceType === "CS" ? "CS" : "T";
+  serviceType = normalizeService(serviceType);
 
-  // cari tiket terakhir untuk serviceType ini
-  const lastTicketSame = [...tickets]
-    .reverse()
-    .find((t) => t.service_type === serviceType);
+  // sync style (kita pakai serialize + get + run)
+  let ticket = null;
 
-  let nextNumber = 1;
-  if (lastTicketSame && lastTicketSame.ticket_code) {
-    const numericPart = lastTicketSame.ticket_code
-      .replace("T-", "")
-      .replace("CS-", "");
-    const parsed = parseInt(numericPart, 10);
-    if (!isNaN(parsed)) {
-      nextNumber = parsed + 1;
-    }
-  }
+  openDb().serialize(() => {
+    openDb().get(
+      `
+      SELECT ticket_code
+      FROM tickets
+      WHERE service_type = ?
+        AND date(created_at) = ${todayKeySQL()}
+      ORDER BY id DESC
+      LIMIT 1
+      `,
+      [serviceType],
+      (err, row) => {
+        if (err) throw err;
 
-  const ticketNumberStr = String(nextNumber).padStart(3, "0");
-  const ticketCode =
-    prefix === "T" ? `T-${ticketNumberStr}` : `CS-${ticketNumberStr}`;
+        let nextNum = 1;
 
-  const now = Date.now();
-  const id = (db.lastId || 0) + 1;
-  db.lastId = id;
+        if (row && row.ticket_code) {
+          // T-001 / CS-015
+          const numPart = row.ticket_code.replace("T-", "").replace("CS-", "");
+          const last = parseInt(numPart, 10);
+          if (!isNaN(last)) nextNum = last + 1;
+        }
 
-  tickets.push({
-    id,
-    service_type: serviceType, // 'TELLER' / 'CS'
-    ticket_code: ticketCode,
-    status: "WAITING", // WAITING / CALLED
-    counter_name: null,
-    created_at: now,
-    called_at: null,
+        const code =
+          serviceType === "TELLER"
+            ? `T-${pad3(nextNum)}`
+            : `CS-${pad3(nextNum)}`;
+
+        openDb().run(
+          `
+          INSERT INTO tickets (service_type, ticket_code, status)
+          VALUES (?, ?, 'WAITING')
+          `,
+          [serviceType, code],
+          (err2) => {
+            if (err2) throw err2;
+            ticket = code;
+          }
+        );
+      }
+    );
   });
 
-  db.tickets = tickets;
-  saveDb(db);
-
-  return ticketCode;
+  return ticket;
 }
 
-/**
- * Memanggil nomor berikutnya untuk serviceType tertentu
- * return: { ticketCode, counterName } atau null jika kosong
- */
+// Panggil nomor berikutnya dari WAITING (FIFO)
 function callNext(serviceType, counterName) {
-  const db = loadDb();
-  const tickets = db.tickets || [];
+  serviceType = normalizeService(serviceType);
+  if (!counterName) throw new Error("counterName required");
 
-  // tiket dengan status WAITING paling awal (id terkecil)
-  const next = tickets
-    .filter((t) => t.service_type === serviceType && t.status === "WAITING")
-    .sort((a, b) => a.id - b.id)[0];
+  let result = null;
 
-  if (!next) {
-    return null;
-  }
+  openDb().serialize(() => {
+    openDb().get(
+      `
+      SELECT id, ticket_code
+      FROM tickets
+      WHERE service_type = ?
+        AND status = 'WAITING'
+        AND date(created_at) = ${todayKeySQL()}
+      ORDER BY id ASC
+      LIMIT 1
+      `,
+      [serviceType],
+      (err, row) => {
+        if (err) throw err;
+        if (!row) {
+          result = null;
+          return;
+        }
 
-  const now = Date.now();
-  next.status = "CALLED";
-  next.counter_name = counterName;
-  next.called_at = now;
+        openDb().run(
+          `
+          UPDATE tickets
+          SET status = 'CALLED',
+              counter_name = ?,
+              called_at = datetime('now','localtime')
+          WHERE id = ?
+          `,
+          [counterName, row.id],
+          (err2) => {
+            if (err2) throw err2;
+            result = {
+              ticketCode: row.ticket_code,
+              counterName,
+              serviceType,
+            };
+          }
+        );
+      }
+    );
+  });
 
-  saveDb(db);
-
-  return {
-    ticketCode: next.ticket_code,
-    counterName,
-  };
+  return result;
 }
 
-/**
- * State untuk DISPLAY & OPERATOR:
- * {
- *   tellerNow: { ticket_code, counter_name } | undefined
- *   csNow: { ticket_code, counter_name } | undefined
- *   tellerQueue: [ 'T-001', ... ]
- *   csQueue: [ 'CS-001', ... ]
- * }
- */
+// Ambil state untuk display (sedang dilayani + daftar waiting)
 function getState() {
-  const db = loadDb();
-  const tickets = db.tickets || [];
-
-  const tellerCalled = tickets.filter(
-    (t) => t.service_type === "TELLER" && t.status === "CALLED"
-  );
-  const csCalled = tickets.filter(
-    (t) => t.service_type === "CS" && t.status === "CALLED"
-  );
-
-  // tiket terakhir dipanggil (berdasarkan called_at / id)
-  const tellerNow =
-    tellerCalled.length > 0
-      ? tellerCalled.reduce((latest, t) => {
-          if (!latest) return t;
-          return (t.called_at || t.id) > (latest.called_at || latest.id)
-            ? t
-            : latest;
-        }, null)
-      : null;
-
-  const csNow =
-    csCalled.length > 0
-      ? csCalled.reduce((latest, t) => {
-          if (!latest) return t;
-          return (t.called_at || t.id) > (latest.called_at || latest.id)
-            ? t
-            : latest;
-        }, null)
-      : null;
-
-  const tellerQueue = tickets
-    .filter((t) => t.service_type === "TELLER" && t.status === "WAITING")
-    .sort((a, b) => a.id - b.id)
-    .map((t) => t.ticket_code);
-
-  const csQueue = tickets
-    .filter((t) => t.service_type === "CS" && t.status === "WAITING")
-    .sort((a, b) => a.id - b.id)
-    .map((t) => t.ticket_code);
-
-  return {
-    tellerNow: tellerNow
-      ? {
-          ticket_code: tellerNow.ticket_code,
-          counter_name: tellerNow.counter_name,
-        }
-      : null,
-    csNow: csNow
-      ? {
-          ticket_code: csNow.ticket_code,
-          counter_name: csNow.counter_name,
-        }
-      : null,
-    tellerQueue,
-    csQueue,
+  // Karena sqlite3 callback, kita buat versi "sync-ish" via serialize + temp
+  let state = {
+    tellerNow: null,
+    csNow: null,
+    tellerQueue: [],
+    csQueue: [],
   };
+
+  openDb().serialize(() => {
+    // now (last called)
+    openDb().get(
+      `
+      SELECT ticket_code, counter_name
+      FROM tickets
+      WHERE service_type='TELLER'
+        AND status='CALLED'
+        AND date(created_at) = ${todayKeySQL()}
+      ORDER BY called_at DESC, id DESC
+      LIMIT 1
+      `,
+      [],
+      (err, row) => {
+        if (err) throw err;
+        state.tellerNow = row
+          ? { ticket_code: row.ticket_code, counter_name: row.counter_name }
+          : null;
+      }
+    );
+
+    openDb().get(
+      `
+      SELECT ticket_code, counter_name
+      FROM tickets
+      WHERE service_type='CS'
+        AND status='CALLED'
+        AND date(created_at) = ${todayKeySQL()}
+      ORDER BY called_at DESC, id DESC
+      LIMIT 1
+      `,
+      [],
+      (err, row) => {
+        if (err) throw err;
+        state.csNow = row
+          ? { ticket_code: row.ticket_code, counter_name: row.counter_name }
+          : null;
+      }
+    );
+
+    // queue waiting (next 10)
+    openDb().all(
+      `
+      SELECT ticket_code
+      FROM tickets
+      WHERE service_type='TELLER'
+        AND status='WAITING'
+        AND date(created_at) = ${todayKeySQL()}
+      ORDER BY id ASC
+      LIMIT 10
+      `,
+      [],
+      (err, rows) => {
+        if (err) throw err;
+        state.tellerQueue = (rows || []).map((r) => r.ticket_code);
+      }
+    );
+
+    openDb().all(
+      `
+      SELECT ticket_code
+      FROM tickets
+      WHERE service_type='CS'
+        AND status='WAITING'
+        AND date(created_at) = ${todayKeySQL()}
+      ORDER BY id ASC
+      LIMIT 10
+      `,
+      [],
+      (err, rows) => {
+        if (err) throw err;
+        state.csQueue = (rows || []).map((r) => r.ticket_code);
+      }
+    );
+  });
+
+  return state;
 }
 
-/**
- * Ringkasan antrian HARI INI (dipakai admin panel)
- */
+// ============= ADMIN FUNCTIONS =============
+
 function getTodaySummary() {
-  const db = loadDb();
-  const tickets = db.tickets || [];
-  const { start, end } = getTodayRange();
-
-  const todayTickets = tickets.filter(
-    (t) => t.created_at >= start && t.created_at < end
-  );
-
-  const totalToday = todayTickets.length;
-
-  const tellerWaitingToday = todayTickets.filter(
-    (t) => t.service_type === "TELLER" && t.status === "WAITING"
-  ).length;
-
-  const csWaitingToday = todayTickets.filter(
-    (t) => t.service_type === "CS" && t.status === "WAITING"
-  ).length;
-
-  const tellerCalledToday = todayTickets.filter(
-    (t) =>
-      t.service_type === "TELLER" &&
-      t.status === "CALLED" &&
-      t.called_at != null &&
-      t.called_at >= start &&
-      t.called_at < end
-  ).length;
-
-  const csCalledToday = todayTickets.filter(
-    (t) =>
-      t.service_type === "CS" &&
-      t.status === "CALLED" &&
-      t.called_at != null &&
-      t.called_at >= start &&
-      t.called_at < end
-  ).length;
-
-  return {
-    totalToday,
-    tellerWaitingToday,
-    csWaitingToday,
-    tellerCalledToday,
-    csCalledToday,
+  let summary = {
+    totalTickets: 0,
+    tellerWaiting: 0,
+    csWaiting: 0,
+    calledToday: 0,
   };
+
+  openDb().serialize(() => {
+    openDb().get(
+      `
+      SELECT COUNT(*) as c
+      FROM tickets
+      WHERE date(created_at) = ${todayKeySQL()}
+      `,
+      [],
+      (err, row) => {
+        if (err) throw err;
+        summary.totalTickets = row?.c || 0;
+      }
+    );
+
+    openDb().get(
+      `
+      SELECT COUNT(*) as c
+      FROM tickets
+      WHERE date(created_at) = ${todayKeySQL()}
+        AND service_type='TELLER'
+        AND status='WAITING'
+      `,
+      [],
+      (err, row) => {
+        if (err) throw err;
+        summary.tellerWaiting = row?.c || 0;
+      }
+    );
+
+    openDb().get(
+      `
+      SELECT COUNT(*) as c
+      FROM tickets
+      WHERE date(created_at) = ${todayKeySQL()}
+        AND service_type='CS'
+        AND status='WAITING'
+      `,
+      [],
+      (err, row) => {
+        if (err) throw err;
+        summary.csWaiting = row?.c || 0;
+      }
+    );
+
+    openDb().get(
+      `
+      SELECT COUNT(*) as c
+      FROM tickets
+      WHERE date(created_at) = ${todayKeySQL()}
+        AND status='CALLED'
+      `,
+      [],
+      (err, row) => {
+        if (err) throw err;
+        summary.calledToday = row?.c || 0;
+      }
+    );
+  });
+
+  return summary;
 }
 
-/**
- * Riwayat panggilan HARI INI (status CALLED)
- */
 function getTodayCalls() {
-  const db = loadDb();
-  const tickets = db.tickets || [];
-  const { start, end } = getTodayRange();
+  let rowsOut = [];
 
-  const calls = tickets
-    .filter(
-      (t) =>
-        t.status === "CALLED" &&
-        t.called_at != null &&
-        t.called_at >= start &&
-        t.called_at < end
-    )
-    .sort((a, b) => (a.called_at || a.id) - (b.called_at || b.id));
+  openDb().serialize(() => {
+    openDb().all(
+      `
+      SELECT service_type, ticket_code, counter_name, called_at
+      FROM tickets
+      WHERE date(created_at) = ${todayKeySQL()}
+        AND status='CALLED'
+      ORDER BY called_at DESC, id DESC
+      LIMIT 200
+      `,
+      [],
+      (err, rows) => {
+        if (err) throw err;
+        rowsOut = rows || [];
+      }
+    );
+  });
 
-  // kembalikan apa adanya (dipakai admin.html)
-  return calls;
+  return rowsOut;
 }
 
-/**
- * Reset tiket HARI INI (hapus yang created_at hari ini)
- */
 function clearTodayTickets() {
-  const db = loadDb();
-  const tickets = db.tickets || [];
-  const { start, end } = getTodayRange();
+  openDb().serialize(() => {
+    openDb().run(
+      `
+      DELETE FROM tickets
+      WHERE date(created_at) = ${todayKeySQL()}
+      `
+    );
+  });
 
-  db.tickets = tickets.filter(
-    (t) => t.created_at < start || t.created_at >= end
-  );
-
-  // lastId bisa dibiarkan, tidak masalah walaupun id lanjut terus
-  saveDb(db);
+  return true;
 }
 
+// ============= EXPORT =============
 module.exports = {
   initDb,
   takeTicket,
   callNext,
   getState,
+
+  // admin
   getTodaySummary,
   getTodayCalls,
   clearTodayTickets,

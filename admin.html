@@ -7,236 +7,334 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-                sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         body {
             margin: 0;
             height: 100vh;
-            background: radial-gradient(circle at top, #1d4ed8 0, #020617 55%);
-            color: #e5e7eb;
-            padding: 16px 20px;
+            background: #f3f4f6;
+            color: #111827;
+            padding: 10px 14px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
         }
 
-        .header {
+        /* =========== TOP BAR PUTIH =========== */
+
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px 14px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
         }
 
-        .title-block {
+        .brand-left {
             display: flex;
             flex-direction: column;
+            gap: 2px;
         }
 
-        .title {
+        .brand-title {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 800;
+            color: #0f172a;
         }
 
-        .subtitle {
+        .brand-subtitle {
             font-size: 12px;
-            color: #9ca3af;
+            color: #6b7280;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .bank-pill {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 8px 16px;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            padding: 6px 14px;
             border-radius: 999px;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.6);
-        }
-
-        .bank-logo {
-            width: 22px;
-            height: 22px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9, #6366f1);
-        }
-
-        .bank-name {
-            font-weight: 600;
-            letter-spacing: 0.06em;
+            color: #eff6ff;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
             font-size: 12px;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
         }
 
-        .grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 12px;
-            min-height: 0;
+        .bank-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: #ffffff;
         }
 
-        .card {
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), #020617);
-            border-radius: 16px;
-            padding: 12px 14px;
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.8);
-            display: flex;
-            flex-direction: column;
+        .top-date-time {
+            text-align: right;
+            font-size: 11px;
+            color: #4b5563;
+        }
+
+        .top-time {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            color: #111827;
+        }
+
+        /* =========== MAIN GRID =========== */
+
+        .main-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 3fr 2fr;
             gap: 10px;
             min-height: 0;
         }
 
-        .card-header {
+        .panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .panel-header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 10px;
         }
 
-        .card-title {
+        .panel-title {
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.16em;
+            color: #4b5563;
+        }
+
+        .panel-subtitle {
+            font-size: 11px;
             color: #9ca3af;
         }
 
-        .badge-soft {
-            font-size: 11px;
-            padding: 4px 10px;
+        .btn-small {
             border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            color: #e5e7eb;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            padding: 5px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .stats-grid {
+        .btn-small:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        /* ===== RINGKASAN ===== */
+
+        .summary-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
+            margin-bottom: 10px;
         }
 
-        .stat-card {
-            background: rgba(15, 23, 42, 0.95);
-            border-radius: 12px;
+        .summary-card {
+            background: #f9fafb;
+            border-radius: 10px;
             padding: 8px 10px;
-            border: 1px solid rgba(55, 65, 81, 0.9);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .stat-label {
+        .summary-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .summary-caption {
             font-size: 11px;
             color: #9ca3af;
         }
 
-        .stat-value {
-            font-size: 18px;
-            font-weight: 700;
-            margin-top: 2px;
-        }
-
-        .stat-label-subtle {
-            font-size: 10px;
-            color: #64748b;
-        }
+        /* ===== TABEL RIWAYAT ===== */
 
         .table-wrapper {
             flex: 1;
             border-radius: 10px;
+            border: 1px solid #e5e7eb;
             overflow: hidden;
-            border: 1px solid rgba(55, 65, 81, 0.9);
-            background: rgba(15, 23, 42, 0.98);
+            background: #f9fafb;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         thead {
-            background: rgba(15, 23, 42, 1);
+            background: #e5e7eb;
         }
 
         th,
         td {
             padding: 6px 8px;
-            border-bottom: 1px solid rgba(31, 41, 55, 0.9);
-            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         th {
+            text-align: left;
             font-weight: 600;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-size: 10px;
+            color: #374151;
+            font-size: 11px;
         }
 
         tbody tr:nth-child(even) {
-            background: rgba(15, 23, 42, 0.95);
+            background: #f3f4f6;
         }
 
-        .empty-row {
+        tbody tr:hover {
+            background: #e0f2fe;
+        }
+
+        .col-id {
+            width: 28px;
             text-align: center;
-            color: #6b7280;
-            font-style: italic;
         }
 
-        .btn {
-            border-radius: 999px;
-            border: none;
-            padding: 7px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .col-service {
+            width: 120px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #eef2ff;
+        .col-number {
+            width: 90px;
         }
 
-        .btn-danger {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: #fee2e2;
+        .col-counter {
+            width: 80px;
         }
 
-        .btn-ghost {
-            background: rgba(31, 41, 55, 0.9);
-            color: #e5e7eb;
-            border-radius: 999px;
+        .col-time {
+            width: 160px;
         }
 
-        .promo-label {
-            font-size: 12px;
-            color: #a5b4fc;
-        }
+        /* ===== PANEL KANAN: PROMO & VIDEO ===== */
 
         .promo-textarea {
             width: 100%;
-            min-height: 70px;
-            border-radius: 8px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            background: #020617;
-            color: #e5e7eb;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
             padding: 8px;
             resize: vertical;
-            font-size: 12px;
+            min-height: 70px;
+            font-size: 13px;
+            background: #f9fafb;
+            color: #111827;
         }
 
-        .promo-file-label {
+        .promo-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            border-radius: 999px;
+            border: none;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #eef2ff;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-secondary {
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #ffffff;
+            color: #111827;
+        }
+
+        .video-path {
             font-size: 11px;
-            color: #9ca3af;
+            color: #6b7280;
             margin-top: 4px;
         }
 
-        .footer {
+        .note-panel {
+            margin-top: 10px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 8px 10px;
             font-size: 11px;
-            color: #9ca3af;
+            line-height: 1.5;
+            color: #4b5563;
+        }
+
+        .note-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #6b7280;
+        }
+
+        /* ===== FOOTER ===== */
+
+        .footer {
+            margin-top: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 11px;
+            color: #4b5563;
+            padding: 0 2px;
         }
 
         .status-dot {
@@ -244,195 +342,277 @@
             height: 8px;
             border-radius: 999px;
             background: #22c55e;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
-            margin-right: 4px;
         }
 
-        .status-left {
+        .status-row {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="title-block">
-            <div class="title">Admin Panel Antrian</div>
-            <div class="subtitle">
-                Kelola antrian, promo, dan video display untuk BANK ASTRO.
-            </div>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="brand-left">
+            <div id="brandTitle" class="brand-title">Admin Panel Antrian</div>
+            <div class="brand-subtitle">Kelola antrian, promo, dan video display.</div>
         </div>
-        <div class="bank-pill">
-            <div class="bank-logo"></div>
-            <div class="bank-name">BANK ASTRO • ADMIN</div>
+        <div class="top-right">
+            <div class="bank-pill">
+                <div class="bank-dot"></div>
+                <span id="pillText">BANK ASTRO • ADMIN</span>
+            </div>
+            <div class="top-date-time">
+                <div id="hdr-date"></div>
+                <div id="hdr-time" class="top-time"></div>
+            </div>
         </div>
     </div>
 
-    <div class="grid">
-        <!-- KIRI: RINGKASAN & RIWAYAT -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Ringkasan Antrian Hari Ini</div>
-                <button class="btn btn-ghost" onclick="refreshAll()">
-                    ⟳ Refresh
-                </button>
-            </div>
-
-            <div class="stats-grid" id="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Total tiket hari ini</div>
-                    <div id="stat-total" class="stat-value">0</div>
-                    <div class="stat-label-subtle">Semua layanan</div>
+    <div class="main-grid">
+        <!-- ================================== LEFT PANEL ================================== -->
+        <div class="panel">
+            <div class="panel-header-row">
+                <div>
+                    <div class="panel-title">Ringkasan Antrian Hari Ini</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Teller - Menunggu</div>
-                    <div id="stat-teller-wait" class="stat-value">0</div>
-                    <div class="stat-label-subtle">Status WAITING</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">CS - Menunggu</div>
-                    <div id="stat-cs-wait" class="stat-value">0</div>
-                    <div class="stat-label-subtle">Status WAITING</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Dipanggil hari ini</div>
-                    <div id="stat-called" class="stat-value">0</div>
-                    <div class="stat-label-subtle">Teller + CS (CALLED)</div>
+                <div>
+                    <button class="btn-small" onclick="loadData()">⟳ Refresh</button>
+                    <button class="btn-small btn-danger" onclick="resetToday()">✕ Reset Antrian Hari Ini</button>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button class="btn btn-danger" onclick="resetTodayTickets()">
-                    ✖ Reset Antrian Hari Ini
-                </button>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-label">Total tiket hari ini</div>
+                    <div id="summary-total" class="summary-value">0</div>
+                    <div class="summary-caption">Semua layanan</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Teller - Menunggu</div>
+                    <div id="summary-teller-wait" class="summary-value">0</div>
+                    <div class="summary-caption">Status WAITING</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">CS - Menunggu</div>
+                    <div id="summary-cs-wait" class="summary-value">0</div>
+                    <div class="summary-caption">Status WAITING</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Dipanggil hari ini</div>
+                    <div id="summary-called" class="summary-value">0</div>
+                    <div class="summary-caption">Teller + CS (CALLED)</div>
+                </div>
             </div>
 
-            <div class="card-header" style="margin-top: 4px;">
-                <div class="card-title">Riwayat Panggilan Hari Ini</div>
+            <div class="panel-header-row" style="margin-bottom:6px;">
+                <div>
+                    <div class="panel-title">Riwayat Panggilan Hari Ini</div>
+                    <div class="panel-subtitle">Tiket yang sudah dipanggil pada tanggal hari ini.</div>
+                </div>
             </div>
 
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Layanan</th>
-                            <th>Nomor</th>
-                            <th>Loket</th>
-                            <th>Waktu Panggil</th>
+                            <th class="col-id">#</th>
+                            <th class="col-service">LAYANAN</th>
+                            <th class="col-number">NOMOR</th>
+                            <th class="col-counter">LOKET</th>
+                            <th class="col-time">WAKTU PANGGIL</th>
                         </tr>
                     </thead>
                     <tbody id="calls-body">
-                        <tr class="empty-row">
-                            <td colspan="5">Belum ada panggilan hari ini.</td>
-                        </tr>
+                        <!-- row diisi via JS -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- KANAN: PROMO & VIDEO -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Pengaturan Promo & Video</div>
-            </div>
-
-            <div>
-                <div class="promo-label">Teks Promo Hari Ini</div>
-                <textarea id="promo-input" class="promo-textarea"></textarea>
-                <div style="margin-top: 6px; display: flex; gap: 8px;">
-                    <button class="btn btn-primary" onclick="savePromoText()">
-                        💾 Simpan Teks Promo
-                    </button>
+        <!-- ================================== RIGHT PANEL ================================== -->
+        <div class="panel">
+            <div class="panel-header-row">
+                <div>
+                    <div class="panel-title">Pengaturan Promo &amp; Video</div>
                 </div>
             </div>
 
             <div>
-                <div class="promo-label" style="margin-top: 10px;">Video Promo</div>
-                <div id="video-file-label" class="promo-file-label">
+                <div style="font-size:12px; color:#4b5563; margin-bottom:4px;">Teks Promo Hari Ini</div>
+                <textarea id="promo-input" class="promo-textarea"
+                    placeholder="Tulis teks promo yang akan tampil di layar Display Antrian..."></textarea>
+
+                <div class="promo-actions">
+                    <button class="btn-primary" onclick="savePromoText()">💾 Simpan Teks Promo</button>
+                </div>
+
+                <div style="font-size:12px; color:#4b5563; margin-bottom:4px;">Video Promo</div>
+                <button class="btn-secondary" onclick="choosePromoVideo()">📂 Pilih Video Promo...</button>
+                <div id="video-file-label" class="video-path">
                     Tidak ada video terpilih.
                 </div>
-                <div style="margin-top: 6px; display: flex; gap: 8px;">
-                    <button class="btn btn-ghost" onclick="choosePromoVideo()">
-                        🎬 Pilih Video Promo…
-                    </button>
-                </div>
             </div>
 
-            <div class="card" style="background: rgba(15,23,42,0.9); margin-top: 6px;">
-                <div class="card-header">
-                    <div class="card-title">Catatan</div>
-                </div>
-                <div style="font-size: 11px; color: #9ca3af;">
-                    • Reset antrian hanya akan menghapus tiket <b>hari ini</b>.<br />
-                    • Promo & video yang diubah akan tampil di layar Display Antrian.<br />
-                    • Gunakan format video <b>MP4</b> untuk hasil terbaik.
-                </div>
+            <div class="note-panel">
+                <div class="note-title">Catatan</div>
+                <ul style="margin:0 0 0 16px; padding:0;">
+                    <li>Reset antrian hanya akan menghapus tiket <strong>hari ini</strong>.</li>
+                    <li>Promo &amp; video yang diubah akan tampil di layar <strong>Display Antrian</strong>.</li>
+                    <li>Gunakan format video <strong>MP4</strong> untuk hasil terbaik.</li>
+                </ul>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <div class="status-left">
-            <div class="status-dot"></div>
-            <span>Sistem admin terhubung dengan database lokal (SQLite).</span>
+        <div class="status-row">
+            <div id="dot" class="status-dot"></div>
+            <span id="connection-status">Menghubungkan ke server cabang...</span>
         </div>
-        <div style="opacity: 0.7;">
-            Hari ini: <span id="today-label"></span>
-        </div>
+        <div id="footer-date">Hari ini:</div>
     </div>
 
     <script>
         const { ipcRenderer } = require("electron");
 
-        function formatDateTime(ts) {
-            if (!ts) return "-";
-            const d = new Date(ts);
-            return d.toLocaleString("id-ID", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-            });
+        // ====== KONFIG SERVER CABANG ======
+        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
+            ? window.queueConfig.apiBase
+            : "http://localhost:3000";
+
+        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
+            ? window.queueConfig.branchName
+            : "BANK ASTRO";
+
+        // UI brand/pill
+        const pillText = document.getElementById("pillText");
+        const brandTitle = document.getElementById("brandTitle");
+        if (pillText) pillText.textContent = `${BRANCH_NAME} • ADMIN`;
+        if (brandTitle) brandTitle.textContent = `Admin Panel Antrian - ${BRANCH_NAME}`;
+
+        const statusEl = document.getElementById("connection-status");
+        const dotEl = document.getElementById("dot");
+
+        function setOnline(text) {
+            if (dotEl) dotEl.classList.remove("offline");
+            if (statusEl) statusEl.textContent = text || `Terhubung ke server cabang: ${API_BASE}`;
         }
 
-        // ===========================
-        //  RINGKASAN & RIWAYAT
-        // ===========================
+        function setOffline(text) {
+            if (dotEl) dotEl.classList.add("offline");
+            if (statusEl) statusEl.textContent = text || "Server cabang tidak aktif.";
+        }
+
+        // ====== TANGGAL & JAM DI HEADER/FOOTER ======
+        function formatTanggalPanjang(date) {
+            const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const bulan = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+            const h = hari[date.getDay()];
+            const d = String(date.getDate()).padStart(2, "0");
+            const m = bulan[date.getMonth()];
+            const y = date.getFullYear();
+            return `${h}, ${d} ${m} ${y}`;
+        }
+
+        function formatTanggalPendek(date) {
+            const bulan = [
+                "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+                "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+            ];
+            const d = String(date.getDate()).padStart(2, "0");
+            const m = bulan[date.getMonth()];
+            const y = date.getFullYear();
+            return `${d} ${m} ${y}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
+            document.getElementById("hdr-time").textContent = time;
+            document.getElementById("hdr-date").textContent = formatTanggalPendek(now);
+            document.getElementById("footer-date").textContent = `Hari ini: ${formatTanggalPanjang(now)}`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ====== HELPER: Coba fetch ke server, kalau gagal fallback ke ipc ======
+        async function fetchJson(path, opts = {}) {
+            const res = await fetch(`${API_BASE}${path}`, {
+                cache: "no-store",
+                headers: { "Content-Type": "application/json" },
+                ...opts,
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+        }
+
+        async function tryServerThenIpc({ server, ipc, ipcArgs }) {
+            try {
+                const data = await server();
+                setOnline(`Terhubung ke server cabang: ${API_BASE}`);
+                return { data, source: "server" };
+            } catch (e) {
+                // fallback
+                try {
+                    const data = await ipcRenderer.invoke(ipc, ...(ipcArgs || []));
+                    setOnline("Fallback: terhubung ke database lokal (SQLite).");
+                    return { data, source: "ipc" };
+                } catch (e2) {
+                    setOffline("Gagal terhubung ke server cabang & database lokal.");
+                    throw e2;
+                }
+            }
+        }
+
+        // ====== LOAD RINGKASAN & RIWAYAT ======
         async function loadSummary() {
             try {
-                const summary = await ipcRenderer.invoke("admin:getTodaySummary");
-                document.getElementById("stat-total").textContent =
-                    summary.totalToday ?? 0;
-                document.getElementById("stat-teller-wait").textContent =
-                    summary.tellerWaitingToday ?? 0;
-                document.getElementById("stat-cs-wait").textContent =
-                    summary.csWaitingToday ?? 0;
-                const called =
-                    (summary.tellerCalledToday ?? 0) +
-                    (summary.csCalledToday ?? 0);
-                document.getElementById("stat-called").textContent = called;
+                const { data: summary } = await tryServerThenIpc({
+                    server: () => fetchJson("/api/admin/today-summary"),
+                    ipc: "admin:getTodaySummary",
+                });
+
+                document.getElementById("summary-total").textContent = summary.totalTickets ?? 0;
+                document.getElementById("summary-teller-wait").textContent = summary.tellerWaiting ?? 0;
+                document.getElementById("summary-cs-wait").textContent = summary.csWaiting ?? 0;
+                document.getElementById("summary-called").textContent = summary.calledToday ?? 0;
             } catch (e) {
                 console.error("Gagal load summary:", e);
             }
         }
 
+        function formatDateTime(dt) {
+            if (!dt) return "-";
+            return dt;
+        }
+
         async function loadCalls() {
             try {
-                const rows = await ipcRenderer.invoke("admin:getTodayCalls");
+                const { data: rows } = await tryServerThenIpc({
+                    server: () => fetchJson("/api/admin/today-calls"),
+                    ipc: "admin:getTodayCalls",
+                });
+
                 const tbody = document.getElementById("calls-body");
                 tbody.innerHTML = "";
 
-                if (!rows || !rows.length) {
+                if (!rows || rows.length === 0) {
                     const tr = document.createElement("tr");
-                    tr.className = "empty-row";
                     const td = document.createElement("td");
                     td.colSpan = 5;
-                    td.textContent = "Belum ada panggilan hari ini.";
+                    td.style.textAlign = "center";
+                    td.style.color = "#6b7280";
+                    td.textContent = "Belum ada tiket yang dipanggil hari ini.";
                     tr.appendChild(td);
                     tbody.appendChild(tr);
                     return;
@@ -441,26 +621,29 @@
                 rows.forEach((row, idx) => {
                     const tr = document.createElement("tr");
 
-                    const tdIndex = document.createElement("td");
-                    tdIndex.textContent = idx + 1;
+                    const tdNo = document.createElement("td");
+                    tdNo.className = "col-id";
+                    tdNo.textContent = idx + 1;
+                    tr.appendChild(tdNo);
 
-                    const tdService = document.createElement("td");
-                    tdService.textContent =
-                        row.service_type === "TELLER" ? "Teller" : "Customer Service";
+                    const tdSvc = document.createElement("td");
+                    tdSvc.className = "col-service";
+                    tdSvc.textContent = row.service_type === "TELLER" ? "Teller" : "Customer Service";
+                    tr.appendChild(tdSvc);
 
                     const tdTicket = document.createElement("td");
+                    tdTicket.className = "col-number";
                     tdTicket.textContent = row.ticket_code;
+                    tr.appendChild(tdTicket);
 
                     const tdCounter = document.createElement("td");
-                    tdCounter.textContent = row.counter_name || "-";
+                    tdCounter.className = "col-counter";
+                    tdCounter.textContent = row.counter_name;
+                    tr.appendChild(tdCounter);
 
                     const tdTime = document.createElement("td");
+                    tdTime.className = "col-time";
                     tdTime.textContent = formatDateTime(row.called_at);
-
-                    tr.appendChild(tdIndex);
-                    tr.appendChild(tdService);
-                    tr.appendChild(tdTicket);
-                    tr.appendChild(tdCounter);
                     tr.appendChild(tdTime);
 
                     tbody.appendChild(tr);
@@ -470,55 +653,60 @@
             }
         }
 
-        async function resetTodayTickets() {
-            const ok = confirm(
-                "Yakin ingin reset semua antrian HARI INI?\nTindakan ini tidak bisa dibatalkan."
-            );
-            if (!ok) return;
+        async function resetToday() {
+            if (!confirm("Yakin ingin menghapus semua tiket hari ini?")) return;
 
+            // coba server dulu
             try {
-                await ipcRenderer.invoke("admin:resetTodayTickets");
-                await loadSummary();
-                await loadCalls();
-                alert("Antrian hari ini berhasil di-reset.");
+                await fetchJson("/api/admin/clear-today", { method: "POST", body: JSON.stringify({}) });
+                setOnline(`Terhubung ke server cabang: ${API_BASE}`);
+                await loadData();
+                alert("Antrian hari ini sudah direset (server cabang).");
+                return;
             } catch (e) {
-                console.error("Gagal reset antrian:", e);
-                alert("Gagal reset antrian hari ini.");
+                // fallback ke local ipc
+                try {
+                    await ipcRenderer.invoke("admin:clearTodayTickets");
+                    setOnline("Fallback: reset berhasil di database lokal (SQLite).");
+                    await loadData();
+                    alert("Antrian hari ini sudah direset (lokal).");
+                } catch (e2) {
+                    console.error("Gagal reset:", e2);
+                    setOffline("Reset gagal. Server dan lokal tidak bisa diakses.");
+                    alert("Gagal mereset antrian hari ini.");
+                }
             }
         }
 
-        function refreshAll() {
-            loadSummary();
-            loadCalls();
+        async function loadData() {
+            await Promise.all([loadSummary(), loadCalls(), loadDisplayConfig()]);
         }
 
-        // ===========================
-        //  PROMO & VIDEO
-        // ===========================
+        // ====== CONFIG PROMO & VIDEO (tetap pakai ipc) ======
+        let currentDisplayConfig = null;
+
         async function loadDisplayConfig() {
             try {
                 const cfg = await ipcRenderer.invoke("display:getConfig");
-                const promoInputEl = document.getElementById("promo-input");
-                const fileLabelEl = document.getElementById("video-file-label");
+                currentDisplayConfig = cfg;
 
-                if (promoInputEl) promoInputEl.value = cfg.promoText || "";
-                if (fileLabelEl) {
-                    fileLabelEl.textContent = cfg.videoPath
-                        ? `File: ${cfg.videoPath}`
-                        : "Tidak ada video terpilih.";
-                }
+                const promoTextEl = document.getElementById("promo-input");
+                promoTextEl.value = cfg.promoText || "";
+
+                const labelEl = document.getElementById("video-file-label");
+                labelEl.textContent = cfg.videoPath
+                    ? `File: ${cfg.videoPath}`
+                    : "Tidak ada video terpilih.";
             } catch (e) {
                 console.error("Gagal load config display:", e);
             }
         }
 
         async function savePromoText() {
-            const promoInputEl = document.getElementById("promo-input");
-            if (!promoInputEl) return;
-            const text = promoInputEl.value.trim();
-
+            const promoText = document.getElementById("promo-input").value.trim();
             try {
-                await ipcRenderer.invoke("display:updatePromo", { promoText: text });
+                const next = await ipcRenderer.invoke("display:updatePromo", { promoText });
+                currentDisplayConfig = next;
                 alert("Teks promo berhasil disimpan.");
             } catch (e) {
                 console.error("Gagal simpan promo:", e);
@@ -528,13 +716,9 @@
 
         async function choosePromoVideo() {
             try {
-                const cfg = await ipcRenderer.invoke("display:chooseVideo");
-                const fileLabelEl = document.getElementById("video-file-label");
-                if (fileLabelEl) {
-                    fileLabelEl.textContent = cfg.videoPath
-                        ? `File: ${cfg.videoPath}`
-                        : "Tidak ada video terpilih.";
-                }
+                const next = await ipcRenderer.invoke("display:chooseVideo");
+                currentDisplayConfig = next;
+                await loadDisplayConfig();
                 alert("Video promo berhasil diperbarui.");
             } catch (e) {
                 console.error("Gagal memilih video promo:", e);
@@ -542,25 +726,14 @@
             }
         }
 
-        // ===========================
-        //  INIT
-        // ===========================
-        function setTodayLabel() {
-            const el = document.getElementById("today-label");
-            const now = new Date();
-            el.textContent = now.toLocaleDateString("id-ID", {
-                weekday: "long",
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-            });
-        }
+        // ====== INIT ======
+        loadData();
 
-        (function init() {
-            setTodayLabel();
-            refreshAll();
-            loadDisplayConfig();
-        })();
+        // optional: auto refresh ringkasan + tabel tiap 2 detik
+        setInterval(() => {
+            loadSummary();
+            loadCalls();
+        }, 2000);
     </script>
 </body>
 

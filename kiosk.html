@@ -14,158 +14,76 @@
         body {
             margin: 0;
             height: 100vh;
-            position: relative;
-            overflow: hidden;
+            background: #f3f4f6;
+            color: #111827;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 14px;
+        }
 
-            /* Background sama dengan panel teller */
-            background: radial-gradient(circle at top left, #111827 0%, #020617 40%, #020617 100%);
+        /* TOP BAR SEDERHANA (SUPAYA MIRIP DISPLAY) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px 14px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .top-title {
+            font-size: 18px;
+            font-weight: 700;
             color: #0f172a;
+        }
 
+        .top-subtitle {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .top-right-pill {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            padding: 6px 14px;
+            border-radius: 999px;
+            color: #eff6ff;
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-right-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #ffffff;
+        }
+
+        /* CARD UTAMA */
+        .page-body {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* watermark BANK ASTRO di belakang */
-        body::before {
-            content: "BANK ASTRO";
-            position: absolute;
-            right: -80px;
-            top: 8%;
-            font-size: 120px;
-            font-weight: 800;
-            letter-spacing: 0.18em;
-            color: rgba(148, 163, 184, 0.12);
-            text-transform: uppercase;
-            pointer-events: none;
-        }
-
-        body::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image:
-                radial-gradient(circle at 20% 20%, rgba(148, 163, 184, 0.25) 0, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(148, 163, 184, 0.18) 0, transparent 45%);
-            opacity: 0.35;
-            pointer-events: none;
-            mix-blend-mode: screen;
-        }
-
-        /* ====== LAYOUT SHELL ====== */
-        .layout {
-            position: relative;
-            z-index: 1;
-            width: 900px;
-            max-width: calc(100% - 64px);
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        /* ====== HEADER APLIKASI ====== */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            border-radius: 18px;
-
-            background: rgba(15, 23, 42, 0.88);
-            border: 1px solid rgba(30, 64, 175, 0.7);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
-        }
-
-        .header-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .header-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #e5e7eb;
-        }
-
-        .header-subtitle {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .badge-version {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            color: #e5e7eb;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-        }
-
-        .brand-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            background: #0ea5e9;
-            color: #0f172a;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            box-shadow: 0 10px 26px rgba(14, 165, 233, 0.6);
-        }
-
-        .brand-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 999px;
-            background: conic-gradient(from 200deg, #38bdf8, #6366f1, #22c55e, #38bdf8);
-        }
-
-        /* ====== CARD AMBIL NOMOR ====== */
         .card-wrapper {
             width: 420px;
-            max-width: 100%;
-            padding: 18px;
-            border-radius: 26px;
-
-            margin-inline: auto;
-
-            background: rgba(248, 250, 252, 0.22);
-            border: 1px solid rgba(148, 163, 184, 0.45);
-            backdrop-filter: blur(26px);
-            -webkit-backdrop-filter: blur(26px);
-
-            box-shadow: 0 28px 70px rgba(15, 23, 42, 0.85);
-            position: relative;
-            overflow: hidden;
+            padding: 18px 18px 16px;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+            border: 1px solid #e5e7eb;
         }
 
-        .card-wrapper::before {
-            content: "";
-            position: absolute;
-            inset: -30%;
-            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 55%);
-            pointer-events: none;
-        }
-
-        .card-inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .card-header {
+        .card-header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -181,49 +99,47 @@
         .title {
             font-size: 20px;
             font-weight: 700;
-            color: #020617;
+            color: #0f172a;
         }
 
         .subtitle {
             font-size: 12px;
             color: #6b7280;
-            max-width: 260px;
         }
 
-        .badge-kiosk {
+        .brand-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 5px 12px;
+            padding: 6px 12px;
             border-radius: 999px;
-            background: rgba(15, 23, 42, 0.98);
+            background: #0f172a;
             color: #e5e7eb;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.14em;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.7);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.55);
         }
 
-        .badge-kiosk span:first-child {
-            width: 8px;
-            height: 8px;
+        .brand-dot {
+            width: 16px;
+            height: 16px;
             border-radius: 999px;
-            background: #22c55e;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+            background: conic-gradient(from 200deg, #38bdf8, #6366f1, #22c55e, #38bdf8);
         }
 
         .buttons {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 16px;
-            margin-top: 6px;
+            gap: 10px;
+            margin-bottom: 10px;
+            margin-top: 4px;
         }
 
         button {
             border-radius: 999px;
             border: none;
-            padding: 13px 18px;
+            padding: 12px 18px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -256,18 +172,17 @@
             font-size: 11px;
             color: #6b7280;
             text-align: center;
-            margin-top: -4px;
             margin-bottom: 8px;
         }
 
         .ticket {
-            background: rgba(249, 250, 251, 0.6);
-            border-radius: 18px;
-            border: 1px dashed rgba(209, 213, 219, 0.9);
+            background: #f9fafb;
+            border-radius: 16px;
+            border: 1px dashed #d4d4d8;
             padding: 14px 12px;
             text-align: center;
-            margin-bottom: 12px;
-            box-shadow: inset 0 0 0 1px rgba(243, 244, 246, 0.7);
+            margin-bottom: 10px;
+            box-shadow: inset 0 0 0 1px rgba(243, 244, 246, 0.9);
         }
 
         .ticket-title {
@@ -280,7 +195,7 @@
 
         .ticket-number {
             font-family: "Courier New", monospace;
-            font-size: 40px;
+            font-size: 42px;
             font-weight: 800;
             letter-spacing: 0.18em;
             color: #111827;
@@ -300,97 +215,151 @@
             font-size: 12px;
             padding: 9px 14px;
             box-shadow: none;
+            margin-bottom: 4px;
         }
 
         .footer-note {
-            margin-top: 8px;
+            margin-top: 4px;
             font-size: 10px;
             color: #9ca3af;
             text-align: center;
+        }
+
+        /* indikator koneksi */
+        .conn {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .conn strong {
+            color: #0f172a;
         }
     </style>
 </head>
 
 <body>
-    <div class="layout">
-        <!-- HEADER APLIKASI -->
-        <header class="app-header">
-            <div class="header-left">
-                <div class="header-title">Kiosk Antrian Bank Astro</div>
-                <div class="header-subtitle">
-                    Sentuh layar untuk mengambil nomor antrian sesuai kebutuhan layanan Anda.
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div>
+            <div class="top-title">Kiosk Pengambilan Nomor</div>
+            <div class="top-subtitle">Silakan ambil nomor antrian sebelum menuju Teller / Customer Service.</div>
+        </div>
+        <div class="top-right-pill">
+            <div class="top-right-dot"></div>
+            <span id="branch-pill">KIOSK • BANK ASTRO</span>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="card-wrapper">
+            <div class="card-header-row">
+                <div class="title-block">
+                    <div class="title">Ambil Nomor Antrian</div>
+                    <div class="subtitle">
+                        Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.
+                    </div>
                 </div>
-            </div>
-            <div class="header-right">
-                <div class="badge-version">KIOSK MODE</div>
                 <div class="brand-pill">
                     <div class="brand-dot"></div>
-                    <span>BANK ASTRO</span>
+                    <span>KIOSK</span>
                 </div>
             </div>
-        </header>
 
-        <!-- CARD AMBIL NOMOR -->
-        <div class="card-wrapper">
-            <div class="card-inner">
-                <div class="card-header">
-                    <div class="title-block">
-                        <div class="title">Ambil Nomor Antrian</div>
-                        <div class="subtitle">
-                            Silakan pilih jenis layanan yang Anda butuhkan sebelum mengambil nomor.
-                        </div>
-                    </div>
-                    <div class="badge-kiosk">
-                        <span></span>
-                        <span>KIOSK • SIAP MELAYANI</span>
-                    </div>
-                </div>
-
-                <div class="buttons">
-                    <button class="btn-teller" onclick="take('TELLER')">
-                        Ambil Antrian Teller
-                    </button>
-                    <button class="btn-cs" onclick="take('CS')">
-                        Ambil Antrian Customer Service
-                    </button>
-                </div>
-
-                <div class="info-pill">
-                    Tekan tombol sesuai kebutuhan layanan Anda.
-                </div>
-
-                <div class="ticket">
-                    <div class="ticket-title">Nomor Antrian Anda</div>
-                    <div id="ticket-number" class="ticket-number">-</div>
-                    <div class="ticket-footer">
-                        Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
-                    </div>
-                </div>
-
-                <button class="btn-print" onclick="window.print()">
-                    Cetak Ulang Halaman
+            <div class="buttons">
+                <button class="btn-teller" onclick="take('TELLER')">
+                    Ambil Antrian Teller
                 </button>
+                <button class="btn-cs" onclick="take('CS')">
+                    Ambil Antrian Customer Service
+                </button>
+            </div>
 
-                <div class="footer-note">
-                    Jika struk tidak tercetak, silakan hubungi petugas kami.
+            <div class="info-pill">
+                Tekan tombol sesuai kebutuhan layanan Anda.
+            </div>
+
+            <div class="ticket">
+                <div class="ticket-title">Nomor Antrian Anda</div>
+                <div id="ticket-number" class="ticket-number">-</div>
+                <div class="ticket-footer">
+                    Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
                 </div>
             </div>
+
+            <button class="btn-print" onclick="window.print()">
+                Cetak Ulang Halaman
+            </button>
+
+            <div class="footer-note">
+                Jika struk tidak tercetak, silakan hubungi petugas kami.
+            </div>
+
+            <div id="conn" class="conn">Menghubungkan ke server…</div>
         </div>
     </div>
 
     <script>
-        const { ipcRenderer } = require("electron");
+        // ======= KONFIG SERVER CABANG =======
+        // - Jika jalan di Electron (pakai preload), gunakan window.queueConfig.apiBase
+        // - Jika testing di browser, fallback localhost
+        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
+            ? window.queueConfig.apiBase
+            : "http://localhost:3000";
 
+        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
+            ? window.queueConfig.branchName
+            : "BANK ASTRO";
+
+        // tampilkan nama cabang di pill
+        const branchPill = document.getElementById("branch-pill");
+        if (branchPill) branchPill.textContent = `KIOSK • ${BRANCH_NAME}`;
+
+        const connEl = document.getElementById("conn");
+
+        async function pingServer() {
+            try {
+                const res = await fetch(`${API_BASE}/api/state`, { cache: "no-store" });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                connEl.innerHTML = `Terhubung ke server: <strong>${API_BASE}</strong>`;
+            } catch (e) {
+                connEl.innerHTML = `Tidak terhubung ke server: <strong>${API_BASE}</strong>`;
+            }
+        }
+        pingServer();
+        setInterval(pingServer, 5000);
+
+        // ======= AMBIL NOMOR ANTRIAN (HTTP) =======
         async function take(serviceType) {
             try {
-                const ticket = await ipcRenderer.invoke("queue:takeTicket", serviceType);
+                const res = await fetch(`${API_BASE}/api/tickets/take`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ serviceType }), // "TELLER" / "CS"
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || ("HTTP " + res.status));
+                }
+
+                const data = await res.json();
+                const ticket = data.ticketCode;
+
                 document.getElementById("ticket-number").textContent = ticket || "-";
-                // Nanti di tahap berikut: integrasi printer thermal di sini
+
+                // NOTE: printer thermal nanti bisa ditambah:
+                // - minta server print
+                // - atau electron main process print silent
             } catch (e) {
-                alert("Gagal mengambil nomor antrian. Silakan coba lagi.");
+                alert("Gagal mengambil nomor antrian. Pastikan server cabang sudah menyala.");
                 console.error(e);
             }
         }
+
+        // expose agar onclick bisa akses
+        window.take = take;
     </script>
 </body>
 

@@ -1,0 +1,5 @@
+{
+  "mode": "kiosk-display",
+  "branchName": "BANK ASTRO - CABANG A",
+  "branchServerUrl": "http://192.168.10.5:3000"
+}
