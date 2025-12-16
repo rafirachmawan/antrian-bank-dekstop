@@ -2,26 +2,35 @@
   "name": "antrian-bank-desktop",
   "version": "1.0.0",
   "main": "main.js",
+  "build": {
+    "extraResources": [
+      {
+        "from": "config.json",
+        "to": "config.json"
+      }
+    ]
+  },
   "scripts": {
-    "start": "electron .",
-    "start:kiosk": "set APP_MODE=kiosk&& electron .",
-    "start:display": "set APP_MODE=display&& electron .",
-    "start:operator": "set APP_MODE=operator&& electron .",
-    "start:admin": "set APP_MODE=admin&& electron .",
-    "postinstall": "electron-rebuild -f -w sqlite3",
-    "build:kiosk": "set APP_MODE=kiosk&& electron-builder --win --x64 --config.extraMetadata.name=antrian-kiosk --config.productName=\"Antrian Kiosk\"",
-    "build:display": "set APP_MODE=display&& electron-builder --win --x64 --config.extraMetadata.name=antrian-display --config.productName=\"Antrian Display\"",
-    "build:operator": "set APP_MODE=operator&& electron-builder --win --x64 --config.extraMetadata.name=antrian-operator --config.productName=\"Antrian Operator\"",
-    "build:admin": "set APP_MODE=admin&& electron-builder --win --x64 --config.extraMetadata.name=antrian-admin --config.productName=\"Antrian Admin\""
+    "start": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& electron .",
+    "start:kiosk": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=kiosk&& electron .",
+    "start:display": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=display&& electron .",
+    "start:operator": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=operator&& electron .",
+    "start:admin": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=admin&& electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "build:server": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=server-admin&& electron-builder --win --x64 --config.extraMetadata.name=antrian-server --config.productName=\"Antrian Server Admin\"",
+    "build:kiosk": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=kiosk&& electron-builder --win --x64 --config.extraMetadata.name=antrian-kiosk --config.productName=\"Antrian Kiosk\"",
+    "build:display": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=display&& electron-builder --win --x64 --config.extraMetadata.name=antrian-display --config.productName=\"Antrian Display\"",
+    "build:operator": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=operator&& electron-builder --win --x64 --config.extraMetadata.name=antrian-operator --config.productName=\"Antrian Operator\"",
+    "build:admin": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& set APP_MODE=admin&& electron-builder --win --x64 --config.extraMetadata.name=antrian-admin --config.productName=\"Antrian Admin\""
   },
   "dependencies": {
     "body-parser": "^2.2.1",
     "cors": "^2.8.5",
-    "electron": "^29.4.6",
     "express": "^5.2.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "electron": "29.4.6",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9"
   }
