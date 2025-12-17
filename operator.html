@@ -653,69 +653,54 @@
             }
 
             try {
-                const res = await fetch(`${API_BASE}/api/tickets/next`, {
+                const res = await fetch(`${API_BASE}/api/call-next`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ serviceType, counterName }),
                 });
 
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    throw new Error(err.error || ("HTTP " + res.status));
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok || data.ok === false) {
+                    throw new Error(data.error || ("HTTP " + res.status));
                 }
 
-                const result = await res.json(); // bisa null kalau kosong
-
-                if (!result) {
+                const called = data.called; // bisa null kalau kosong
+                if (!called) {
                     alert("Antrian untuk " + serviceType + " kosong.");
                     return;
                 }
 
-                // kompatibel dengan dua kemungkinan field:
-                // - server mengembalikan { ticketCode, counterName }
-                // - atau { ticket_code, counter_name }
                 const normalized = {
-                    ticketCode: result.ticketCode || result.ticket_code,
-                    counterName: result.counterName || result.counter_name,
+                    ticketCode: called.ticketCode || called.ticket_code,
+                    counterName: called.counterName || called.counter_name,
                 };
 
                 if (serviceType === "TELLER") {
                     tellerStatusEl.textContent =
-                        "Sedang melayani " +
-                        normalized.ticketCode +
-                        " di " +
-                        normalized.counterName +
-                        ".";
+                        "Sedang melayani " + normalized.ticketCode + " di " + normalized.counterName + ".";
                     tellerStatusEl.classList.remove("status-empty");
                     tellerCurrentEl.textContent = normalized.ticketCode;
                     tellerCurrentCounterEl.textContent = "Loket: " + normalized.counterName;
 
-                    addLog(
-                        `${normalized.counterName} memanggil nomor Teller: ${normalized.ticketCode}`
-                    );
+                    addLog(`${normalized.counterName} memanggil nomor Teller: ${normalized.ticketCode}`);
                 } else {
                     csStatusEl.textContent =
-                        "Sedang melayani " +
-                        normalized.ticketCode +
-                        " di " +
-                        normalized.counterName +
-                        ".";
+                        "Sedang melayani " + normalized.ticketCode + " di " + normalized.counterName + ".";
                     csStatusEl.classList.remove("status-empty");
                     csCurrentEl.textContent = normalized.ticketCode;
                     csCurrentCounterEl.textContent = "Loket: " + normalized.counterName;
 
-                    addLog(
-                        `${normalized.counterName} memanggil nomor CS: ${normalized.ticketCode}`
-                    );
+                    addLog(`${normalized.counterName} memanggil nomor CS: ${normalized.ticketCode}`);
                 }
 
-                // === SUARA PANGGILAN ===
                 speakCall(serviceType, normalized);
             } catch (e) {
                 alert("Gagal memanggil nomor antrian. Pastikan server cabang aktif.");
                 console.error(e);
             }
         }
+
 
         // supaya onclick HTML tetap jalan
         window.callNext = callNext;

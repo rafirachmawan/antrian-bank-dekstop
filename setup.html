@@ -16,7 +16,7 @@
             background: #fff;
             border-radius: 12px;
             padding: 18px;
-            max-width: 740px;
+            max-width: 760px;
             margin: 0 auto;
             box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
         }
@@ -70,7 +70,6 @@
         .okbtn {
             background: #2e7d32;
             color: #fff;
-            margin-left: 10px;
         }
 
         .ghost {
@@ -108,6 +107,45 @@
             gap: 10px;
             flex-wrap: wrap;
         }
+
+        .list {
+            margin-top: 12px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .server-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .server-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pill {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eef3ff;
+        }
+
+        .pick {
+            background: #111;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 0;
+        }
     </style>
 </head>
 
@@ -137,9 +175,16 @@
         </div>
 
         <div class="actions">
+            <button class="ghost" id="btnScan">Cari Server Otomatis</button>
             <button class="ghost" id="btnTest">Test Connection</button>
             <button class="primary" id="btnSave">Simpan</button>
             <button class="okbtn" id="btnSaveRun">Simpan & Jalankan</button>
+        </div>
+
+        <div id="scanBox" class="list" style="display:none;">
+            <div style="font-weight:700; margin-bottom:8px;">Hasil Scan</div>
+            <div id="scanMeta" style="color:#666; font-size:13px; margin-bottom:10px;"></div>
+            <div id="scanList"></div>
         </div>
 
         <p id="status" style="margin-top:12px;"></p>
@@ -153,6 +198,10 @@
         const serverIpEl = document.getElementById("serverIp");
         const serverPortEl = document.getElementById("serverPort");
         const statusEl = document.getElementById("status");
+
+        const scanBox = document.getElementById("scanBox");
+        const scanList = document.getElementById("scanList");
+        const scanMeta = document.getElementById("scanMeta");
 
         const qs = new URLSearchParams(location.search);
         const mode = qs.get("mode") || "client";
@@ -221,6 +270,50 @@
 
         document.getElementById("btnSave").onclick = () => saveConfig(false);
         document.getElementById("btnSaveRun").onclick = () => saveConfig(true);
+
+        // ✅ AUTO DETECT SERVER
+        document.getElementById("btnScan").onclick = async () => {
+            const port = (serverPortEl.value || "3000").trim();
+            scanBox.style.display = "block";
+            scanList.innerHTML = "";
+            scanMeta.textContent = "Scanning... (ini bisa 5–20 detik tergantung jaringan)";
+            statusEl.textContent = "";
+
+            const res = await ipcRenderer.invoke("network:scanServers", { port: Number(port) });
+
+            if (!res?.ok) {
+                scanMeta.innerHTML = `<span class="err">❌ ${res?.error || "Gagal scan"}</span>`;
+                return;
+            }
+
+            scanMeta.innerHTML = `
+          IP lokal terdeteksi: <b>${(res.localIps || []).join(", ")}</b><br/>
+          Subnet discan: <b>${(res.prefixes || []).join(", ")}</b><br/>
+          Server ditemukan: <b>${(res.found || []).length}</b>
+        `;
+
+            if (!res.found || res.found.length === 0) {
+                scanList.innerHTML = `<div class="err">❌ Tidak ada server ditemukan. Pastikan Server Admin sudah running & satu jaringan.</div>`;
+                return;
+            }
+
+            res.found.forEach((s) => {
+                const div = document.createElement("div");
+                div.className = "server-item";
+                div.innerHTML = `
+            <div>
+              <div style="font-weight:700;">${s.ip}</div>
+              <div class="pill">${s.apiBase}</div>
+            </div>
+            <button class="pick">Pakai</button>
+          `;
+                div.querySelector("button").onclick = () => {
+                    serverIpEl.value = s.ip;
+                    statusEl.innerHTML = `<span class="ok">✅ IP terpilih: ${s.ip}</span>`;
+                };
+                scanList.appendChild(div);
+            });
+        };
     </script>
 </body>
 

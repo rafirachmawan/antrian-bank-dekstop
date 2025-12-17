@@ -333,25 +333,20 @@
         // ======= AMBIL NOMOR ANTRIAN (HTTP) =======
         async function take(serviceType) {
             try {
-                const res = await fetch(`${API_BASE}/api/tickets/take`, {
+                const res = await fetch(`${API_BASE}/api/take-ticket`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ serviceType }), // "TELLER" / "CS"
                 });
 
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    throw new Error(err.error || ("HTTP " + res.status));
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok || data.ok === false) {
+                    throw new Error(data.error || ("HTTP " + res.status));
                 }
 
-                const data = await res.json();
-                const ticket = data.ticketCode;
-
+                const ticket = data.ticketCode; // dari server.js: res.json({ ok:true, ticketCode })
                 document.getElementById("ticket-number").textContent = ticket || "-";
-
-                // NOTE: printer thermal nanti bisa ditambah:
-                // - minta server print
-                // - atau electron main process print silent
             } catch (e) {
                 alert("Gagal mengambil nomor antrian. Pastikan server cabang sudah menyala.");
                 console.error(e);

@@ -1,25 +1,44 @@
 // FILE: main.js
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const os = require("os");
 
-const { initDb } = require("./db");
+// ✅ INI TAMBAHKAN
+const fixedUserData = path.join(app.getPath("appData"), "antrian-bank-desktop");
+app.setPath("userData", fixedUserData);
+
+const {
+  initDb,
+  getDisplayConfig,
+  setDisplayConfig,
+  getTodaySummary,
+  getTodayCalls,
+  clearTodayTickets,
+} = require("./db");
+
 const { createServer } = require("./server");
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_BRANCH = "BANK ASTRO CABANG A";
 
-/** mode dari env APP_MODE atau arg --mode= atau auto dari nama exe */
-function getAppMode() {
-  // 1) prioritas env
-  const envMode = (process.env.APP_MODE || "").toLowerCase().trim();
+/** cari IP lokal (untuk info server) */
+function getLocalIPv4() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] || []) {
+      if (net.family === "IPv4" && !net.internal) return net.address;
+    }
+  }
+  return "127.0.0.1";
+}
 
-  // 2) prioritas arg --mode=
+/** mode dari env APP_MODE atau arg --mode= atau nama exe */
+function getAppMode() {
+  const envMode = (process.env.APP_MODE || "").toLowerCase().trim();
   const argMode = process.argv.find((a) => a.startsWith("--mode="));
   const cliMode = (argMode ? argMode.split("=")[1] : "").toLowerCase().trim();
-
-  // 3) auto dari nama exe (untuk hasil build dist)
-  const exeName = path.basename(process.execPath).toLowerCase(); // contoh: antrian-server.exe
+  const exeName = path.basename(process.execPath).toLowerCase();
 
   let autoMode = "";
   if (exeName.includes("server")) autoMode = "server-admin";
@@ -29,29 +48,20 @@ function getAppMode() {
   else if (exeName.includes("admin")) autoMode = "admin";
 
   const mode = envMode || cliMode || autoMode || "kiosk";
-
   const allowed = ["server-admin", "kiosk", "operator", "display", "admin"];
   return allowed.includes(mode) ? mode : "kiosk";
 }
 
 /**
- * ✅ Config reader (DEV + BUILD) + Backward compatible
- *
- * Prioritas baca:
- * 1) userData/config.json   (untuk .exe install / produksi) ✅
- * 2) resources/config.json  (kalau kamu pakai extraResources) ✅
- * 3) root project config.json (untuk dev) ✅
- *
- * Format baru:
- * { apiBase, branchName, serverPort }
- *
- * Format lama:
- * { branchServerUrl, branchName, mode }
+ * Config reader (DEV + BUILD)
+ * Prioritas:
+ * 1) userData/config.json
+ * 2) resources/config.json (extraResources)
+ * 3) project root config.json
  */
 function readConfig() {
   const userDataPath = app.getPath("userData");
   const pUserData = path.join(userDataPath, "config.json");
-
   const pResources = path.join(process.resourcesPath || "", "config.json");
   const pProject = path.join(__dirname, "config.json");
 
@@ -76,14 +86,12 @@ function readConfig() {
   const branchName = raw.branchName || DEFAULT_BRANCH;
   const serverPort = Number(raw.serverPort || DEFAULT_PORT);
 
-  console.log("====================================================");
   console.log("✅ App Name:", app.getName());
   console.log("✅ Mode:", getAppMode());
   console.log("✅ Config used:", usedPath || "(none)");
   console.log("✅ userData:", userDataPath);
   console.log("✅ resourcesPath:", process.resourcesPath);
   console.log("✅ __dirname:", __dirname);
-  console.log("====================================================");
 
   return {
     apiBase,
@@ -134,8 +142,6 @@ function createWindowByMode(mode, cfg) {
   } else {
     title = "Kiosk Pengambilan Nomor";
     file = "kiosk.html";
-    width = 500;
-    height = 700;
   }
 
   const win = new BrowserWindow({
@@ -150,107 +156,170 @@ function createWindowByMode(mode, cfg) {
   return win;
 }
 
-function openSetupWindow(mode) {
-  const win = new BrowserWindow({
-    width: 880,
-    height: 660,
-    title: "Setup Cabang",
+function openConfigErrorWindow(mode, cfg) {
+  const userDataPath = cfg.__userDataPath || app.getPath("userData");
+  const configPath = path.join(userDataPath, "config.json");
+
+  const errorWin = new BrowserWindow({
+    width: 820,
+    height: 520,
+    title: "Config Error",
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
 
-  // kirim mode & appName via querystring
-  win.loadFile("setup.html", {
-    search: `?mode=${encodeURIComponent(mode)}&appName=${encodeURIComponent(
-      app.getName()
-    )}`,
-  });
+  const html = `
+    <html>
+      <body style="font-family: Arial; padding: 22px; line-height: 1.5;">
+        <h2 style="margin-top:0;">❌ config.json belum lengkap</h2>
+        <p>Mode <b>${mode}</b> butuh alamat server cabang (<code>apiBase</code>).</p>
 
-  return win;
+        <h3>📌 Lokasi config yang dipakai (disarankan)</h3>
+        <div style="background:#f4f4f4;padding:12px;border-radius:8px;">
+          <code>${configPath}</code>
+        </div>
+
+        <h3>Format baru (disarankan)</h3>
+        <pre style="background:#f4f4f4; padding:12px; border-radius:8px; overflow:auto;">
+{
+  "apiBase": "http://192.168.4.106:3000",
+  "branchName": "BANK ASTRO - CABANG A"
+}
+        </pre>
+
+        <h3>Tips</h3>
+        <p style="color:#666;">
+          Coba buka: <code>http://IP-SERVER:3000/health</code>
+        </p>
+      </body>
+    </html>
+  `;
+
+  errorWin.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(html));
+  return errorWin;
 }
 
-/* =========================
-   IPC: save config + relaunch
-   ========================= */
-ipcMain.handle("config:save", async (event, payload) => {
-  try {
-    const userDataPath = app.getPath("userData");
-    const configPath = path.join(userDataPath, "config.json");
+/** ✅ REGISTER IPC (sekali saja) */
+function registerIpcHandlers() {
+  // ===== Display config (promo/video) =====
+  ipcMain.handle("display:getConfig", async () => {
+    // db return: { promo_text, video_path }
+    const cfg = await getDisplayConfig();
+    // biar cocok dengan display.html yang pakai promoText/videoPath
+    return {
+      promoText: cfg?.promo_text || "",
+      videoPath: cfg?.video_path || null,
+    };
+  });
 
-    if (!fs.existsSync(userDataPath))
-      fs.mkdirSync(userDataPath, { recursive: true });
+  ipcMain.handle("display:updatePromo", async (_evt, payload) => {
+    const promoText = (payload?.promoText || "").toString();
+    const next = await setDisplayConfig({ promo_text: promoText });
+    return {
+      promoText: next?.promo_text || "",
+      videoPath: next?.video_path || null,
+    };
+  });
 
-    // validasi minimal
-    if (!payload?.branchName) throw new Error("branchName wajib");
-    if (!payload?.serverPort) payload.serverPort = DEFAULT_PORT;
+  ipcMain.handle("display:chooseVideo", async () => {
+    const res = await dialog.showOpenDialog({
+      title: "Pilih video promo (MP4)",
+      properties: ["openFile"],
+      filters: [
+        { name: "Video", extensions: ["mp4", "mkv", "mov", "avi", "webm"] },
+      ],
+    });
 
-    fs.writeFileSync(configPath, JSON.stringify(payload, null, 2), "utf-8");
+    if (res.canceled || !res.filePaths?.[0]) {
+      throw new Error("cancelled");
+    }
 
-    console.log("✅ Saved config:", configPath);
-    return { ok: true, path: configPath };
-  } catch (e) {
-    console.error("❌ config:save error:", e);
-    return { ok: false, error: String(e?.message || e) };
-  }
-});
+    const picked = res.filePaths[0];
 
-ipcMain.on("app:reload", () => {
-  try {
-    app.relaunch();
-    app.exit(0);
-  } catch (e) {
-    console.error("❌ reload error:", e);
-  }
-});
+    // Copy ke folder userData biar aman (nggak tergantung path random)
+    const videosDir = path.join(app.getPath("userData"), "videos");
+    if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
 
-ipcMain.handle("config:test", async (event, { apiBase } = {}) => {
-  // test koneksi server /health
-  try {
-    if (!apiBase) throw new Error("apiBase kosong");
-    // Node 18+ ada fetch global, tapi untuk aman kita pakai dynamic import jika perlu
-    const url = apiBase.replace(/\/$/, "") + "/health";
+    const target = path.join(
+      videosDir,
+      "promo" + path.extname(picked).toLowerCase()
+    );
+    fs.copyFileSync(picked, target);
 
-    const res = await fetch(url, { method: "GET" });
-    const text = await res.text();
-    if (!res.ok) throw new Error("HTTP " + res.status + " " + text);
+    const next = await setDisplayConfig({ video_path: target });
+    return {
+      promoText: next?.promo_text || "",
+      videoPath: next?.video_path || null,
+    };
+  });
 
-    return { ok: true, status: res.status, body: text };
-  } catch (e) {
-    return { ok: false, error: String(e?.message || e) };
-  }
-});
+  ipcMain.handle("display:clearVideo", async () => {
+    const next = await setDisplayConfig({ video_path: null });
+    return {
+      promoText: next?.promo_text || "",
+      videoPath: next?.video_path || null,
+    };
+  });
 
-/* =========================
-   App lifecycle
-   ========================= */
+  // ===== Admin panel summary/calls/clear =====
+  ipcMain.handle("admin:getTodaySummary", async () => {
+    return await getTodaySummary();
+  });
+
+  ipcMain.handle("admin:getTodayCalls", async () => {
+    return await getTodayCalls();
+  });
+
+  ipcMain.handle("admin:clearTodayTickets", async () => {
+    await clearTodayTickets();
+    return true;
+  });
+}
 
 let mainWin = null;
 let serverRef = null;
 
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-software-rasterizer");
+app.commandLine.appendSwitch(
+  "disk-cache-dir",
+  path.join(app.getPath("userData"), "cache")
+);
+
 app.whenReady().then(() => {
+  // ✅ DB siap untuk semua mode
+  initDb();
+
+  // ✅ IPC handler (sekali)
+  registerIpcHandlers();
+
   const mode = getAppMode();
+
+  // Optional: print ip server biar gampang config device lain
+  if (mode === "server-admin") {
+    console.log("🌐 LAN IP:", getLocalIPv4());
+  }
+
   const cfg = readConfig();
 
   // ===== SERVER + ADMIN =====
   if (mode === "server-admin") {
-    initDb();
-    serverRef = createServer({ port: cfg.serverPort });
+    // server bind 0.0.0.0 biar bisa diakses PC lain
+    serverRef = createServer({ port: cfg.serverPort, host: "0.0.0.0" });
 
-    // server-admin selalu pakai localhost untuk UI admin di PC server
+    const ip = getLocalIPv4();
     const serverApiBase = `http://localhost:${cfg.serverPort}`;
 
-    mainWin = createWindowByMode(mode, {
-      ...cfg,
-      apiBase: serverApiBase,
-    });
-
     console.log("✅ MODE:", mode);
-    console.log("✅ SERVER:", serverApiBase);
+    console.log("✅ SERVER LOCAL:", serverApiBase);
+    console.log("✅ SERVER LAN  :", `http://${ip}:${cfg.serverPort}`);
+
+    mainWin = createWindowByMode(mode, { ...cfg, apiBase: serverApiBase });
     return;
   }
 
-  // ===== CLIENT ONLY (kiosk/operator/display/admin) =====
+  // ===== CLIENT ONLY =====
   if (!cfg.apiBase) {
-    openSetupWindow(mode);
+    openConfigErrorWindow(mode, cfg);
     return;
   }
 
@@ -265,24 +334,4 @@ app.on("window-all-closed", () => {
     if (serverRef?.server) serverRef.server.close();
   } catch {}
   if (process.platform !== "darwin") app.quit();
-});
-
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    const mode = getAppMode();
-    const cfg = readConfig();
-
-    if (mode === "server-admin") {
-      initDb();
-      serverRef = createServer({ port: cfg.serverPort });
-      const serverApiBase = `http://localhost:${cfg.serverPort}`;
-      mainWin = createWindowByMode(mode, { ...cfg, apiBase: serverApiBase });
-    } else {
-      if (!cfg.apiBase) {
-        openSetupWindow(mode);
-        return;
-      }
-      mainWin = createWindowByMode(mode, cfg);
-    }
-  }
 });
