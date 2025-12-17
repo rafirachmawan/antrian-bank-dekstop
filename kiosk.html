@@ -330,6 +330,116 @@
         pingServer();
         setInterval(pingServer, 5000);
 
+        // =======================
+        // PRINT STRUK THERMAL 80mm (tambahan)
+        // =======================
+        function pad2(n) { return String(n).padStart(2, "0"); }
+        function formatNow() {
+            const d = new Date();
+            return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+        }
+
+        /**
+         * PRINT STRUK THERMAL 80mm
+         * - Browser biasa: dialog print (window.print) via popup receipt
+         * - Electron (jika ada bridge preload): bisa silent print via window.kioskPrinter.printTicket()
+         */
+        async function printTicketThermal({ ticket, serviceType }) {
+            const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BANK ASTRO";
+            const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
+            const waktu = formatNow();
+
+            // ===== OPSI A: Electron bridge (kalau kamu expose) =====
+            if (window.kioskPrinter && typeof window.kioskPrinter.printTicket === "function") {
+                try {
+                    await window.kioskPrinter.printTicket({
+                        branch,
+                        layanan,
+                        ticket,
+                        waktu,
+                    });
+                    return;
+                } catch (e) {
+                    console.error("Silent thermal print gagal, fallback ke dialog print:", e);
+                }
+            }
+
+            // ===== OPSI B: Browser/fallback -> buka popup struk lalu print =====
+            const receiptHtml = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Struk Antrian</title>
+  <style>
+    @page { size: 80mm auto; margin: 0; }
+    html, body { margin: 0; padding: 0; }
+    body { width: 80mm; font-family: Arial, sans-serif; color: #000; }
+    .wrap { padding: 10px 10px 12px; }
+    .center { text-align: center; }
+    .title { font-size: 14px; font-weight: 700; }
+    .sub { font-size: 11px; margin-top: 2px; }
+    .line { border-top: 1px dashed #000; margin: 10px 0; }
+    .ticket { font-size: 42px; font-weight: 800; letter-spacing: 2px; margin: 6px 0; }
+    .meta { font-size: 11px; line-height: 1.4; }
+    .small { font-size: 10px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="center">
+      <div class="title">${branch}</div>
+      <div class="sub">KIOSK PENGAMBILAN NOMOR</div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="center meta">
+      <div><b>LAYANAN</b></div>
+      <div>${layanan}</div>
+    </div>
+
+    <div class="center">
+      <div class="sub" style="margin-top:10px;">NOMOR ANTRIAN</div>
+      <div class="ticket">${ticket}</div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="meta">
+      <div><b>Waktu:</b> ${waktu}</div>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="center small">
+      Simpan struk ini. Nomor dipanggil sesuai urutan pada layar.
+      <br/>Terima kasih.
+    </div>
+  </div>
+
+  <script>
+    window.onload = () => {
+      window.focus();
+      window.print();
+      window.onafterprint = () => window.close();
+      setTimeout(() => { try { window.close(); } catch(e){} }, 1500);
+    };
+  <\/script>
+</body>
+</html>`;
+
+            const w = window.open("", "PRINT_TICKET", "width=360,height=650");
+            if (!w) {
+                // kalau popup diblok, fallback: print halaman yang sama
+                window.print();
+                return;
+            }
+            w.document.open();
+            w.document.write(receiptHtml);
+            w.document.close();
+        }
+
         // ======= AMBIL NOMOR ANTRIAN (HTTP) =======
         async function take(serviceType) {
             try {
@@ -347,6 +457,10 @@
 
                 const ticket = data.ticketCode; // dari server.js: res.json({ ok:true, ticketCode })
                 document.getElementById("ticket-number").textContent = ticket || "-";
+
+                // ✅ Tambahan: setelah nomor muncul, langsung print struk thermal
+                if (ticket) printTicketThermal({ ticket, serviceType });
+
             } catch (e) {
                 alert("Gagal mengambil nomor antrian. Pastikan server cabang sudah menyala.");
                 console.error(e);

@@ -102,14 +102,35 @@ function readConfig() {
   };
 }
 
+/**
+ * ✅ Inject config ke renderer (tetap)
+ * ✅ Tambahan: inject window.kioskPrinter.printTicket() (untuk silent thermal print)
+ *
+ * Tidak mengubah logic lama, hanya menambah object baru.
+ */
 function injectConfig(win, { apiBase, branchName }) {
   if (!win || win.isDestroyed()) return;
+
   const script = `
+    // ====== existing inject (tetap) ======
     window.queueConfig = {
       apiBase: ${JSON.stringify(apiBase)},
       branchName: ${JSON.stringify(branchName)}
     };
+
+    // ====== tambahan (tanpa ubah logic lain) ======
+    // Renderer bisa panggil: window.kioskPrinter.printTicket({ branch, layanan, ticket, waktu, deviceName? })
+    try {
+      const { ipcRenderer } = require("electron");
+      window.kioskPrinter = {
+        printTicket: (payload) => ipcRenderer.invoke("PRINT_TICKET", payload)
+      };
+    } catch (e) {
+      // kalau require tidak tersedia (harusnya ada karena nodeIntegration=true)
+      // tidak apa-apa, hanya berarti silent print tidak aktif
+    }
   `;
+
   win.webContents.executeJavaScript(script).catch(() => {});
 }
 
@@ -148,7 +169,7 @@ function createWindowByMode(mode, cfg) {
     width,
     height,
     title,
-    webPreferences: { nodeIntegration: true, contextIsolation: false },
+    webPreferences: { nodeIntegration: true, contextIsolation: false }, // ✅ tetap seperti punya kamu
   });
 
   win.loadFile(file);
@@ -196,6 +217,87 @@ function openConfigErrorWindow(mode, cfg) {
 
   errorWin.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(html));
   return errorWin;
+}
+
+/* =========================================================
+   ✅ Tambahan: thermal print window (hidden) + helper HTML
+   Tidak mengubah logic lain
+   ========================================================= */
+let printWin = null;
+
+function buildThermalReceiptHtml(payload) {
+  const branch = (
+    payload?.branch ||
+    payload?.branchName ||
+    DEFAULT_BRANCH
+  ).toString();
+  const layanan = (payload?.layanan || payload?.serviceType || "").toString();
+  const ticket = (payload?.ticket || payload?.ticketCode || "").toString();
+  const waktu = (payload?.waktu || "").toString();
+
+  const safe = (s) =>
+    String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  return `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Thermal Ticket</title>
+  <style>
+    @page { size: 80mm auto; margin: 0; }
+    html, body { margin: 0; padding: 0; }
+    body { width: 80mm; font-family: Arial, sans-serif; color: #000; }
+    .wrap { padding: 10px 10px 12px; }
+    .center { text-align: center; }
+    .title { font-size: 14px; font-weight: 700; }
+    .sub { font-size: 11px; margin-top: 2px; }
+    .line { border-top: 1px dashed #000; margin: 10px 0; }
+    .ticket { font-size: 42px; font-weight: 800; letter-spacing: 2px; margin: 6px 0; }
+    .meta { font-size: 11px; line-height: 1.4; }
+    .small { font-size: 10px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="center">
+      <div class="title">${safe(branch)}</div>
+      <div class="sub">KIOSK PENGAMBILAN NOMOR</div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="center meta">
+      <div><b>LAYANAN</b></div>
+      <div>${safe(layanan)}</div>
+    </div>
+
+    <div class="center">
+      <div class="sub" style="margin-top:10px;">NOMOR ANTRIAN</div>
+      <div class="ticket">${safe(ticket)}</div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="meta">
+      <div><b>Waktu:</b> ${safe(waktu)}</div>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="center small">
+      Simpan struk ini. Nomor dipanggil sesuai urutan pada layar.
+      <br/>Terima kasih.
+    </div>
+  </div>
+</body>
+</html>
+`;
 }
 
 /** ✅ REGISTER IPC (sekali saja) */
@@ -272,6 +374,69 @@ function registerIpcHandlers() {
   ipcMain.handle("admin:clearTodayTickets", async () => {
     await clearTodayTickets();
     return true;
+  });
+
+  // =========================================================
+  // ✅ Tambahan: PRINT TICKET (Silent Thermal Print)
+  // Channel: "PRINT_TICKET"
+  // Renderer panggil: window.kioskPrinter.printTicket(payload)
+  // =========================================================
+  ipcMain.handle("PRINT_TICKET", async (_evt, payload) => {
+    try {
+      // buat window print hidden sekali, reuse
+      if (!printWin || printWin.isDestroyed()) {
+        printWin = new BrowserWindow({
+          show: false,
+          width: 420,
+          height: 680,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+          },
+        });
+
+        // optional: cegah window dibuka user
+        printWin.on("closed", () => {
+          printWin = null;
+        });
+      }
+
+      const html = buildThermalReceiptHtml(payload);
+      await printWin.loadURL(
+        "data:text/html;charset=utf-8," + encodeURIComponent(html)
+      );
+
+      // tunggu render stabil sedikit
+      await new Promise((r) => setTimeout(r, 250));
+
+      // deviceName optional (kalau mau pilih printer tertentu)
+      const deviceName =
+        payload &&
+        typeof payload.deviceName === "string" &&
+        payload.deviceName.trim()
+          ? payload.deviceName.trim()
+          : "";
+
+      return await new Promise((resolve) => {
+        printWin.webContents.print(
+          {
+            silent: true, // ✅ TANPA dialog
+            printBackground: true,
+            deviceName, // "" = default printer
+          },
+          (success, errorType) => {
+            if (!success) {
+              console.error("❌ Print failed:", errorType);
+              return resolve({ ok: false, error: errorType || "print_failed" });
+            }
+            return resolve({ ok: true });
+          }
+        );
+      });
+    } catch (e) {
+      console.error("❌ PRINT_TICKET error:", e);
+      return { ok: false, error: String(e?.message || e) };
+    }
   });
 }
 
