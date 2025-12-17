@@ -1,0 +1,227 @@
+<!-- FILE: setup.html -->
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Setup Cabang</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f7f7f7;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            max-width: 740px;
+            margin: 0 auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+        }
+
+        h2 {
+            margin: 0 0 6px 0;
+        }
+
+        .muted {
+            color: #666;
+            margin: 0 0 16px 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin: 14px 0 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .row>div {
+            flex: 1;
+        }
+
+        button {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .primary {
+            background: #1e88e5;
+            color: #fff;
+        }
+
+        .okbtn {
+            background: #2e7d32;
+            color: #fff;
+            margin-left: 10px;
+        }
+
+        .ghost {
+            background: #eee;
+        }
+
+        .hint {
+            margin-top: 10px;
+            color: #444;
+            font-size: 13px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .ok {
+            color: #2e7d32;
+            font-weight: 700;
+        }
+
+        .err {
+            color: #c62828;
+            font-weight: 700;
+        }
+
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>⚙️ Setup Cabang</h2>
+        <p class="muted" id="info"></p>
+
+        <label>Nama Cabang</label>
+        <input id="branchName" placeholder="BANK ASTRO - CABANG SURABAYA" />
+
+        <div class="row">
+            <div>
+                <label>IP Server</label>
+                <input id="serverIp" placeholder="192.168.4.106" />
+            </div>
+            <div>
+                <label>Port</label>
+                <input id="serverPort" placeholder="3000" value="3000" />
+            </div>
+        </div>
+
+        <div class="hint">
+            <b>Tips:</b> Jalankan dulu <b>Antrian Server Admin</b> di PC server, lalu cek:
+            <br />
+            <code>http://IP-SERVER:3000/health</code>
+        </div>
+
+        <div class="actions">
+            <button class="ghost" id="btnTest">Test Connection</button>
+            <button class="primary" id="btnSave">Simpan</button>
+            <button class="okbtn" id="btnSaveRun">Simpan & Jalankan</button>
+        </div>
+
+        <p id="status" style="margin-top:12px;"></p>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        const infoEl = document.getElementById("info");
+        const branchNameEl = document.getElementById("branchName");
+        const serverIpEl = document.getElementById("serverIp");
+        const serverPortEl = document.getElementById("serverPort");
+        const statusEl = document.getElementById("status");
+
+        const qs = new URLSearchParams(location.search);
+        const mode = qs.get("mode") || "client";
+        const appName = qs.get("appName") || "";
+
+        infoEl.textContent = `Mode: ${mode}${appName ? " | App: " + appName : ""}`;
+
+        function getApiBase() {
+            const ip = (serverIpEl.value || "").trim();
+            const port = (serverPortEl.value || "3000").trim();
+            if (!ip) return null;
+            return `http://${ip}:${port}`;
+        }
+
+        function validate() {
+            const branchName = (branchNameEl.value || "").trim();
+            const ip = (serverIpEl.value || "").trim();
+            const port = (serverPortEl.value || "3000").trim();
+
+            if (!branchName) return { ok: false, msg: "Nama cabang wajib diisi" };
+            if (!ip) return { ok: false, msg: "IP server wajib diisi" };
+            if (!/^\d+$/.test(port)) return { ok: false, msg: "Port harus angka" };
+            return { ok: true };
+        }
+
+        document.getElementById("btnTest").onclick = async () => {
+            const v = validate();
+            if (!v.ok) {
+                statusEl.innerHTML = `<span class="err">❌ ${v.msg}</span>`;
+                return;
+            }
+            const apiBase = getApiBase();
+            statusEl.textContent = "Testing...";
+            const res = await ipcRenderer.invoke("config:test", { apiBase });
+            if (res?.ok) statusEl.innerHTML = `<span class="ok">✅ OK! Server bisa diakses (${apiBase})</span>`;
+            else statusEl.innerHTML = `<span class="err">❌ Gagal: ${res?.error || "unknown"}</span>`;
+        };
+
+        async function saveConfig(relaunchAfter) {
+            const v = validate();
+            if (!v.ok) {
+                statusEl.innerHTML = `<span class="err">❌ ${v.msg}</span>`;
+                return;
+            }
+            const branchName = (branchNameEl.value || "").trim();
+            const port = (serverPortEl.value || "3000").trim();
+            const apiBase = getApiBase();
+
+            statusEl.textContent = "Menyimpan...";
+            const res = await ipcRenderer.invoke("config:save", {
+                apiBase,
+                branchName,
+                serverPort: Number(port)
+            });
+
+            if (res?.ok) {
+                statusEl.innerHTML = `<span class="ok">✅ Tersimpan: ${res.path}</span>`;
+                if (relaunchAfter) {
+                    statusEl.innerHTML += `<br/><span class="ok">Aplikasi akan restart...</span>`;
+                    setTimeout(() => ipcRenderer.send("app:reload"), 800);
+                }
+            } else {
+                statusEl.innerHTML = `<span class="err">❌ Gagal simpan: ${res?.error || "unknown"}</span>`;
+            }
+        }
+
+        document.getElementById("btnSave").onclick = () => saveConfig(false);
+        document.getElementById("btnSaveRun").onclick = () => saveConfig(true);
+    </script>
+</body>
+
+</html>

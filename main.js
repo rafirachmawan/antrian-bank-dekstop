@@ -1,5 +1,5 @@
 // FILE: main.js
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -9,7 +9,7 @@ const { createServer } = require("./server");
 const DEFAULT_PORT = 3000;
 const DEFAULT_BRANCH = "BANK ASTRO CABANG A";
 
-/** mode dari env APP_MODE atau arg --mode= */
+/** mode dari env APP_MODE atau arg --mode= atau auto dari nama exe */
 function getAppMode() {
   // 1) prioritas env
   const envMode = (process.env.APP_MODE || "").toLowerCase().trim();
@@ -38,7 +38,7 @@ function getAppMode() {
  * ✅ Config reader (DEV + BUILD) + Backward compatible
  *
  * Prioritas baca:
- * 1) userData/config.json   (untuk .exe install / produksi)  ✅
+ * 1) userData/config.json   (untuk .exe install / produksi) ✅
  * 2) resources/config.json  (kalau kamu pakai extraResources) ✅
  * 3) root project config.json (untuk dev) ✅
  *
@@ -55,7 +55,6 @@ function readConfig() {
   const pResources = path.join(process.resourcesPath || "", "config.json");
   const pProject = path.join(__dirname, "config.json");
 
-  // urutan paling aman:
   const candidates = [pUserData, pResources, pProject];
 
   let raw = {};
@@ -69,7 +68,6 @@ function readConfig() {
         break;
       }
     } catch (e) {
-      // kalau file ada tapi JSON invalid
       console.error("❌ Failed to read config.json at:", p, e);
     }
   }
@@ -78,9 +76,14 @@ function readConfig() {
   const branchName = raw.branchName || DEFAULT_BRANCH;
   const serverPort = Number(raw.serverPort || DEFAULT_PORT);
 
+  console.log("====================================================");
+  console.log("✅ App Name:", app.getName());
+  console.log("✅ Mode:", getAppMode());
   console.log("✅ Config used:", usedPath || "(none)");
   console.log("✅ userData:", userDataPath);
+  console.log("✅ resourcesPath:", process.resourcesPath);
   console.log("✅ __dirname:", __dirname);
+  console.log("====================================================");
 
   return {
     apiBase,
@@ -131,6 +134,8 @@ function createWindowByMode(mode, cfg) {
   } else {
     title = "Kiosk Pengambilan Nomor";
     file = "kiosk.html";
+    width = 500;
+    height = 700;
   }
 
   const win = new BrowserWindow({
@@ -145,60 +150,78 @@ function createWindowByMode(mode, cfg) {
   return win;
 }
 
-function openConfigErrorWindow(mode, cfg) {
-  const userDataPath = cfg.__userDataPath || app.getPath("userData");
-  const configPath = path.join(userDataPath, "config.json");
-
-  const errorWin = new BrowserWindow({
-    width: 820,
-    height: 520,
-    title: "Config Error",
+function openSetupWindow(mode) {
+  const win = new BrowserWindow({
+    width: 880,
+    height: 660,
+    title: "Setup Cabang",
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
 
-  const html = `
-    <html>
-      <body style="font-family: Arial; padding: 22px; line-height: 1.5;">
-        <h2 style="margin-top:0;">❌ config.json belum lengkap</h2>
-        <p>Mode <b>${mode}</b> butuh alamat server cabang (<code>apiBase</code>).</p>
+  // kirim mode & appName via querystring
+  win.loadFile("setup.html", {
+    search: `?mode=${encodeURIComponent(mode)}&appName=${encodeURIComponent(
+      app.getName()
+    )}`,
+  });
 
-        <h3>📌 Lokasi config yang dipakai (disarankan)</h3>
-        <div style="background:#f4f4f4;padding:12px;border-radius:8px;">
-          <code>${configPath}</code>
-        </div>
-        <p style="color:#666;margin-top:6px;">
-          Buat file <b>config.json</b> di folder itu (kalau belum ada), lalu isi seperti contoh di bawah.
-        </p>
-
-        <h3>Format baru (disarankan)</h3>
-        <pre style="background:#f4f4f4; padding:12px; border-radius:8px; overflow:auto;">
-{
-  "apiBase": "http://192.168.4.105:3000",
-  "branchName": "BANK ASTRO - CABANG A"
+  return win;
 }
-        </pre>
 
-        <h3>Format lama (masih didukung)</h3>
-        <pre style="background:#f4f4f4; padding:12px; border-radius:8px; overflow:auto;">
-{
-  "branchServerUrl": "http://192.168.4.105:3000",
-  "branchName": "BANK ASTRO - CABANG A"
-}
-        </pre>
+/* =========================
+   IPC: save config + relaunch
+   ========================= */
+ipcMain.handle("config:save", async (event, payload) => {
+  try {
+    const userDataPath = app.getPath("userData");
+    const configPath = path.join(userDataPath, "config.json");
 
-        <hr style="margin:18px 0;" />
-        <p style="color:#666;">
-          Tips: Pastikan server bisa diakses dari PC ini, coba buka:
-          <br/>
-          <code>http://IP-SERVER:3000/health</code>
-        </p>
-      </body>
-    </html>
-  `;
+    if (!fs.existsSync(userDataPath))
+      fs.mkdirSync(userDataPath, { recursive: true });
 
-  errorWin.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(html));
-  return errorWin;
-}
+    // validasi minimal
+    if (!payload?.branchName) throw new Error("branchName wajib");
+    if (!payload?.serverPort) payload.serverPort = DEFAULT_PORT;
+
+    fs.writeFileSync(configPath, JSON.stringify(payload, null, 2), "utf-8");
+
+    console.log("✅ Saved config:", configPath);
+    return { ok: true, path: configPath };
+  } catch (e) {
+    console.error("❌ config:save error:", e);
+    return { ok: false, error: String(e?.message || e) };
+  }
+});
+
+ipcMain.on("app:reload", () => {
+  try {
+    app.relaunch();
+    app.exit(0);
+  } catch (e) {
+    console.error("❌ reload error:", e);
+  }
+});
+
+ipcMain.handle("config:test", async (event, { apiBase } = {}) => {
+  // test koneksi server /health
+  try {
+    if (!apiBase) throw new Error("apiBase kosong");
+    // Node 18+ ada fetch global, tapi untuk aman kita pakai dynamic import jika perlu
+    const url = apiBase.replace(/\/$/, "") + "/health";
+
+    const res = await fetch(url, { method: "GET" });
+    const text = await res.text();
+    if (!res.ok) throw new Error("HTTP " + res.status + " " + text);
+
+    return { ok: true, status: res.status, body: text };
+  } catch (e) {
+    return { ok: false, error: String(e?.message || e) };
+  }
+});
+
+/* =========================
+   App lifecycle
+   ========================= */
 
 let mainWin = null;
 let serverRef = null;
@@ -212,8 +235,9 @@ app.whenReady().then(() => {
     initDb();
     serverRef = createServer({ port: cfg.serverPort });
 
-    // server-admin selalu pakai localhost
+    // server-admin selalu pakai localhost untuk UI admin di PC server
     const serverApiBase = `http://localhost:${cfg.serverPort}`;
+
     mainWin = createWindowByMode(mode, {
       ...cfg,
       apiBase: serverApiBase,
@@ -226,7 +250,7 @@ app.whenReady().then(() => {
 
   // ===== CLIENT ONLY (kiosk/operator/display/admin) =====
   if (!cfg.apiBase) {
-    openConfigErrorWindow(mode, cfg);
+    openSetupWindow(mode);
     return;
   }
 
@@ -255,7 +279,7 @@ app.on("activate", () => {
       mainWin = createWindowByMode(mode, { ...cfg, apiBase: serverApiBase });
     } else {
       if (!cfg.apiBase) {
-        openConfigErrorWindow(mode, cfg);
+        openSetupWindow(mode);
         return;
       }
       mainWin = createWindowByMode(mode, cfg);

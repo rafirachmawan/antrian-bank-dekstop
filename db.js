@@ -3,50 +3,46 @@ const path = require("path");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 
+// ✅ aman untuk app Electron build
+function getUserDataPathSafe() {
+  try {
+    const { app } = require("electron");
+    return app.getPath("userData");
+  } catch (e) {
+    // fallback kalau suatu saat db.js dipakai non-electron (jarang)
+    return process.cwd();
+  }
+}
+
 let db = null;
 
 function getDbPath() {
-  // simpan db di folder project (kamu boleh ubah ke app.getPath("userData") kalau mau)
-  return path.join(__dirname, "queue.sqlite");
+  // ✅ SIMPAN DB DI APPDATA (WAJIB)
+  const baseDir = getUserDataPathSafe();
+  if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+  return path.join(baseDir, "queue.sqlite");
 }
 
 function openDb() {
   if (db) return db;
+
   const dbPath = getDbPath();
   const exists = fs.existsSync(dbPath);
-  db = new sqlite3.Database(dbPath);
-  if (!exists) {
-    console.log("📦 SQLite DB dibuat:", dbPath);
-  } else {
-    console.log("📦 SQLite DB dipakai:", dbPath);
-  }
-  return db;
-}
 
-// helper promise
-function run(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    openDb().run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this);
-    });
+  // ✅ kasih callback biar keliatan errornya kalau ada
+  db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error("❌ SQLite open error:", err);
+      console.error("❌ DB Path:", dbPath);
+      return;
+    }
+    console.log(
+      exists ? "📦 SQLite DB dipakai:" : "📦 SQLite DB dibuat:",
+      dbPath
+    );
   });
-}
-function get(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    openDb().get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
-}
-function all(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    openDb().all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
+
+  return db;
 }
 
 // ============= INIT =============
@@ -56,10 +52,10 @@ function initDb() {
   const sqlTickets = `
   CREATE TABLE IF NOT EXISTS tickets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    service_type TEXT NOT NULL,         -- TELLER / CS
-    ticket_code TEXT NOT NULL,          -- T-001 / CS-015
-    status TEXT NOT NULL DEFAULT 'WAITING', -- WAITING / CALLED
-    counter_name TEXT NULL,             -- Teller 1 / CS 2
+    service_type TEXT NOT NULL,              -- TELLER / CS
+    ticket_code TEXT NOT NULL,               -- T-001 / CS-015
+    status TEXT NOT NULL DEFAULT 'WAITING',  -- WAITING / CALLED
+    counter_name TEXT NULL,                  -- Teller 1 / CS 2
     created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
     called_at TEXT NULL
   );
@@ -77,7 +73,6 @@ function initDb() {
   openDb().serialize(() => {
     openDb().run(sqlTickets);
     openDb().run(sqlConfig);
-    // pastikan row config ada
     openDb().run(
       `INSERT OR IGNORE INTO display_config (id, promo_text, video_path) VALUES (1,'',NULL);`
     );
@@ -86,8 +81,8 @@ function initDb() {
 
 // ============= UTILS =============
 function todayKeySQL() {
-  // yyyy-mm-dd "localtime"
-  return "date('now','localtime')";
+  // ✅ konsisten localtime (jangan pakai date(created_at) doang)
+  return "date(created_at, 'localtime') = date('now','localtime')";
 }
 
 function pad3(n) {
@@ -101,12 +96,8 @@ function normalizeService(serviceType) {
 }
 
 // ============= QUEUE LOGIC =============
-
-// Ambil nomor berikutnya (tambah 1 berdasarkan max hari ini)
 function takeTicket(serviceType) {
   serviceType = normalizeService(serviceType);
-
-  // sync style (kita pakai serialize + get + run)
   let ticket = null;
 
   openDb().serialize(() => {
@@ -115,7 +106,7 @@ function takeTicket(serviceType) {
       SELECT ticket_code
       FROM tickets
       WHERE service_type = ?
-        AND date(created_at) = ${todayKeySQL()}
+        AND ${todayKeySQL()}
       ORDER BY id DESC
       LIMIT 1
       `,
@@ -124,9 +115,7 @@ function takeTicket(serviceType) {
         if (err) throw err;
 
         let nextNum = 1;
-
         if (row && row.ticket_code) {
-          // T-001 / CS-015
           const numPart = row.ticket_code.replace("T-", "").replace("CS-", "");
           const last = parseInt(numPart, 10);
           if (!isNaN(last)) nextNum = last + 1;
@@ -155,7 +144,6 @@ function takeTicket(serviceType) {
   return ticket;
 }
 
-// Panggil nomor berikutnya dari WAITING (FIFO)
 function callNext(serviceType, counterName) {
   serviceType = normalizeService(serviceType);
   if (!counterName) throw new Error("counterName required");
@@ -169,7 +157,7 @@ function callNext(serviceType, counterName) {
       FROM tickets
       WHERE service_type = ?
         AND status = 'WAITING'
-        AND date(created_at) = ${todayKeySQL()}
+        AND ${todayKeySQL()}
       ORDER BY id ASC
       LIMIT 1
       `,
@@ -206,9 +194,7 @@ function callNext(serviceType, counterName) {
   return result;
 }
 
-// Ambil state untuk display (sedang dilayani + daftar waiting)
 function getState() {
-  // Karena sqlite3 callback, kita buat versi "sync-ish" via serialize + temp
   let state = {
     tellerNow: null,
     csNow: null,
@@ -217,14 +203,13 @@ function getState() {
   };
 
   openDb().serialize(() => {
-    // now (last called)
     openDb().get(
       `
       SELECT ticket_code, counter_name
       FROM tickets
       WHERE service_type='TELLER'
         AND status='CALLED'
-        AND date(created_at) = ${todayKeySQL()}
+        AND ${todayKeySQL()}
       ORDER BY called_at DESC, id DESC
       LIMIT 1
       `,
@@ -243,7 +228,7 @@ function getState() {
       FROM tickets
       WHERE service_type='CS'
         AND status='CALLED'
-        AND date(created_at) = ${todayKeySQL()}
+        AND ${todayKeySQL()}
       ORDER BY called_at DESC, id DESC
       LIMIT 1
       `,
@@ -256,14 +241,13 @@ function getState() {
       }
     );
 
-    // queue waiting (next 10)
     openDb().all(
       `
       SELECT ticket_code
       FROM tickets
       WHERE service_type='TELLER'
         AND status='WAITING'
-        AND date(created_at) = ${todayKeySQL()}
+        AND ${todayKeySQL()}
       ORDER BY id ASC
       LIMIT 10
       `,
@@ -280,7 +264,7 @@ function getState() {
       FROM tickets
       WHERE service_type='CS'
         AND status='WAITING'
-        AND date(created_at) = ${todayKeySQL()}
+        AND ${todayKeySQL()}
       ORDER BY id ASC
       LIMIT 10
       `,
@@ -296,7 +280,6 @@ function getState() {
 }
 
 // ============= ADMIN FUNCTIONS =============
-
 function getTodaySummary() {
   let summary = {
     totalTickets: 0,
@@ -310,7 +293,7 @@ function getTodaySummary() {
       `
       SELECT COUNT(*) as c
       FROM tickets
-      WHERE date(created_at) = ${todayKeySQL()}
+      WHERE ${todayKeySQL()}
       `,
       [],
       (err, row) => {
@@ -323,7 +306,7 @@ function getTodaySummary() {
       `
       SELECT COUNT(*) as c
       FROM tickets
-      WHERE date(created_at) = ${todayKeySQL()}
+      WHERE ${todayKeySQL()}
         AND service_type='TELLER'
         AND status='WAITING'
       `,
@@ -338,7 +321,7 @@ function getTodaySummary() {
       `
       SELECT COUNT(*) as c
       FROM tickets
-      WHERE date(created_at) = ${todayKeySQL()}
+      WHERE ${todayKeySQL()}
         AND service_type='CS'
         AND status='WAITING'
       `,
@@ -353,7 +336,7 @@ function getTodaySummary() {
       `
       SELECT COUNT(*) as c
       FROM tickets
-      WHERE date(created_at) = ${todayKeySQL()}
+      WHERE ${todayKeySQL()}
         AND status='CALLED'
       `,
       [],
@@ -375,7 +358,7 @@ function getTodayCalls() {
       `
       SELECT service_type, ticket_code, counter_name, called_at
       FROM tickets
-      WHERE date(created_at) = ${todayKeySQL()}
+      WHERE ${todayKeySQL()}
         AND status='CALLED'
       ORDER BY called_at DESC, id DESC
       LIMIT 200
@@ -396,7 +379,7 @@ function clearTodayTickets() {
     openDb().run(
       `
       DELETE FROM tickets
-      WHERE date(created_at) = ${todayKeySQL()}
+      WHERE ${todayKeySQL()}
       `
     );
   });
