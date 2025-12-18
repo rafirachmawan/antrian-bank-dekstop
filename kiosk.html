@@ -20,7 +20,6 @@
             padding: 12px 14px;
         }
 
-        /* TOP BAR (selaras dengan display) */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -54,7 +53,7 @@
         .top-right-pill {
             background: rgba(255, 255, 255, 0.14);
             border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 8px 14px;
+            padding: 7px 12px;
             border-radius: 999px;
             color: #eff6ff;
             font-size: 11px;
@@ -67,15 +66,27 @@
             backdrop-filter: blur(6px);
         }
 
-        .top-right-dot {
-            width: 10px;
-            height: 10px;
+        /* ✅ BG logo putih agar keliatan */
+        .pill-logo {
+            width: 22px;
+            height: 22px;
             border-radius: 999px;
-            background: #22c55e;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.22);
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
         }
 
-        /* LAYOUT UTAMA: kiri kartu + kanan video */
+        .pill-logo img {
+            width: 86%;
+            height: 86%;
+            object-fit: contain;
+            display: block;
+        }
+
         .page-body {
             flex: 1;
             min-height: 0;
@@ -94,7 +105,6 @@
             min-height: 0;
         }
 
-        /* KIRI: KARTU KIOSK */
         .kiosk-panel {
             display: flex;
             align-items: center;
@@ -149,30 +159,6 @@
             font-size: 12px;
             color: #64748b;
             line-height: 1.45;
-        }
-
-        .brand-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #0f172a, #0b1220);
-            color: #e5e7eb;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            white-space: nowrap;
-        }
-
-        .brand-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 999px;
-            background: conic-gradient(from 200deg, #38bdf8, #6366f1, #22c55e, #38bdf8);
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
         }
 
         .buttons {
@@ -274,7 +260,6 @@
             text-align: center;
         }
 
-        /* indikator koneksi */
         .conn {
             font-size: 11px;
             color: #64748b;
@@ -286,7 +271,6 @@
             color: #0f172a;
         }
 
-        /* KANAN: PANEL VIDEO (biar tidak sepi) */
         .video-panel {
             display: flex;
             flex-direction: column;
@@ -314,13 +298,15 @@
             pointer-events: none;
         }
 
+        /* ✅ biar tidak kepotong */
         .video-frame video {
             width: 100%;
             height: 100%;
             display: block;
-            object-fit: cover;
-            /* biar keliatan "full" */
+            object-fit: contain;
+            /* ⬅️ ganti dari cover */
             background: #000;
+            /* ruang sisa jadi hitam rapi */
         }
 
         .bottom-strip {
@@ -358,8 +344,6 @@
             }
         }
 
-
-        /* RESPONSIVE */
         @media (max-width: 1100px) {
             .page-body {
                 grid-template-columns: 1fr;
@@ -373,20 +357,21 @@
 </head>
 
 <body>
-    <!-- TOP BAR -->
     <div class="top-bar">
         <div class="top-left">
             <div class="top-title">PENGAMBILAN NOMOR</div>
             <div class="top-subtitle">Silakan ambil nomor antrian sebelum menuju Teller / Customer Service.</div>
         </div>
+
         <div class="top-right-pill">
-            <div class="top-right-dot"></div>
-            <span id="branch-pill">• BRI</span>
+            <span class="pill-logo">
+                <img src="assets/logo-astro.png" alt="Logo">
+            </span>
+            <span id="branch-pill">BRI</span>
         </div>
     </div>
 
     <div class="page-body">
-        <!-- KIRI: KIOSK CARD -->
         <div class="panel kiosk-panel">
             <div class="card-wrapper">
                 <div class="card-header-row">
@@ -396,24 +381,15 @@
                             Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.
                         </div>
                     </div>
-                    <div class="brand-pill">
-                        <div class="brand-dot"></div>
-                        <span>BRI</span>
-                    </div>
+                    <!-- (brand pill dihapus sesuai request) -->
                 </div>
 
                 <div class="buttons">
-                    <button class="btn-teller" onclick="take('TELLER')">
-                        Ambil Antrian Teller
-                    </button>
-                    <button class="btn-cs" onclick="take('CS')">
-                        Ambil Antrian Customer Service
-                    </button>
+                    <button class="btn-teller" onclick="take('TELLER')">Ambil Antrian Teller</button>
+                    <button class="btn-cs" onclick="take('CS')">Ambil Antrian Customer Service</button>
                 </div>
 
-                <div class="info-pill">
-                    Tekan tombol sesuai kebutuhan layanan Anda.
-                </div>
+                <div class="info-pill">Tekan tombol sesuai kebutuhan layanan Anda.</div>
 
                 <div class="ticket">
                     <div class="ticket-title">Nomor Antrian Anda</div>
@@ -423,24 +399,18 @@
                     </div>
                 </div>
 
-                <button class="btn-print" onclick="window.print()">
-                    Cetak Ulang Halaman
-                </button>
+                <button class="btn-print" onclick="window.print()">Cetak Ulang Halaman</button>
 
-                <div class="footer-note">
-                    Jika struk tidak tercetak, silakan hubungi petugas kami.
-                </div>
-
+                <div class="footer-note">Jika struk tidak tercetak, silakan hubungi petugas kami.</div>
                 <div id="conn" class="conn">Menghubungkan ke server…</div>
             </div>
         </div>
 
-        <!-- KANAN: VIDEO PANEL -->
         <div class="panel video-panel">
             <div class="video-frame">
-                <!-- Ganti file ini sesuai lokasi videomu -->
-                <video id="kioskVideo" autoplay loop muted playsinline>
-                    <source src="assets/kiosk-promo.mp4" type="video/mp4" />
+                <video id="kioskVideo" autoplay loop muted playsinline preload="auto"
+                    controlslist="nodownload noplaybackrate">
+                    <source id="kioskVideoSource" src="assets/kiosk-promo.mp4" type="video/mp4" />
                     Browser tidak mendukung video.
                 </video>
             </div>
@@ -452,9 +422,6 @@
     </div>
 
     <script>
-        // ======= KONFIG SERVER CABANG =======
-        // - Jika jalan di Electron (pakai preload), gunakan window.queueConfig.apiBase
-        // - Jika testing di browser, fallback localhost
         const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
             ? window.queueConfig.apiBase
             : "http://localhost:3000";
@@ -463,9 +430,8 @@
             ? window.queueConfig.branchName
             : "BRI";
 
-        // tampilkan nama cabang di pill
         const branchPill = document.getElementById("branch-pill");
-        if (branchPill) branchPill.textContent = `  ${BRANCH_NAME}`;
+        if (branchPill) branchPill.textContent = `${BRANCH_NAME}`;
 
         const connEl = document.getElementById("conn");
 
@@ -482,7 +448,84 @@
         setInterval(pingServer, 5000);
 
         // =======================
-        // PRINT STRUK THERMAL 80mm (tambahan)
+        // ✅ Video ikut display (tanpa putus-putus)
+        // =======================
+        function safeNormalizePath(p) {
+            if (!p) return null;
+            if (/^https?:\/\//i.test(p)) return p;
+            return String(p).replace(/\\/g, "/");
+        }
+
+        let lastAppliedSrc = null;
+        let videoRetryTimer = null;
+
+        async function applyVideoFromDisplayConfig() {
+            const videoEl = document.getElementById("kioskVideo");
+            const sourceEl = document.getElementById("kioskVideoSource");
+            if (!videoEl || !sourceEl) return;
+
+            let nextSrc = "assets/kiosk-promo.mp4";
+
+            try {
+                let ipcRenderer = null;
+                try { ipcRenderer = require("electron").ipcRenderer; } catch { }
+
+                if (ipcRenderer) {
+                    const cfg = await ipcRenderer.invoke("display:getConfig");
+                    const vp = safeNormalizePath(cfg?.videoPath);
+                    if (vp) nextSrc = vp;
+                }
+            } catch { }
+
+            // ✅ kalau sama, jangan reload (biar video gak restart)
+            if (lastAppliedSrc === nextSrc) return;
+            lastAppliedSrc = nextSrc;
+
+            sourceEl.src = nextSrc;
+            try {
+                videoEl.load();
+                const p = videoEl.play();
+                if (p && typeof p.catch === "function") p.catch(() => { });
+            } catch { }
+        }
+
+        // jalankan sekali saat start
+        applyVideoFromDisplayConfig();
+
+        // cek config lebih jarang (biar ringan & gak reset)
+        setInterval(applyVideoFromDisplayConfig, 10000);
+
+        // ✅ kalau video error / stuck, retry play pelan tanpa reload src terus
+        (function setupVideoStability() {
+            const videoEl = document.getElementById("kioskVideo");
+            if (!videoEl) return;
+
+            function retryPlay() {
+                if (videoRetryTimer) return;
+                videoRetryTimer = setTimeout(() => {
+                    videoRetryTimer = null;
+                    try {
+                        const p = videoEl.play();
+                        if (p && typeof p.catch === "function") p.catch(() => { });
+                    } catch { }
+                }, 1200);
+            }
+
+            videoEl.addEventListener("error", retryPlay);
+            videoEl.addEventListener("stalled", retryPlay);
+            videoEl.addEventListener("waiting", retryPlay);
+
+            // kalau tab/window fokus kembali, pastikan play
+            window.addEventListener("focus", () => {
+                try {
+                    const p = videoEl.play();
+                    if (p && typeof p.catch === "function") p.catch(() => { });
+                } catch { }
+            });
+        })();
+
+        // =======================
+        // PRINT THERMAL
         // =======================
         function pad2(n) { return String(n).padStart(2, "0"); }
         function formatNow() {
@@ -490,32 +533,20 @@
             return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         }
 
-        /**
-         * PRINT STRUK THERMAL 80mm
-         * - Browser biasa: dialog print (window.print) via popup receipt
-         * - Electron (jika ada bridge preload): bisa silent print via window.kioskPrinter.printTicket()
-         */
         async function printTicketThermal({ ticket, serviceType }) {
             const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 
-            // ===== OPSI A: Electron bridge (kalau kamu expose) =====
             if (window.kioskPrinter && typeof window.kioskPrinter.printTicket === "function") {
                 try {
-                    await window.kioskPrinter.printTicket({
-                        branch,
-                        layanan,
-                        ticket,
-                        waktu,
-                    });
+                    await window.kioskPrinter.printTicket({ branch, layanan, ticket, waktu });
                     return;
                 } catch (e) {
                     console.error("Silent thermal print gagal, fallback ke dialog print:", e);
                 }
             }
 
-            // ===== OPSI B: Browser/fallback -> buka popup struk lalu print =====
             const receiptHtml = `
 <!DOCTYPE html>
 <html lang="id">
@@ -581,35 +612,25 @@
 </html>`;
 
             const w = window.open("", "PRINT_TICKET", "width=360,height=650");
-            if (!w) {
-                // kalau popup diblok, fallback: print halaman yang sama
-                window.print();
-                return;
-            }
+            if (!w) { window.print(); return; }
             w.document.open();
             w.document.write(receiptHtml);
             w.document.close();
         }
 
-        // ======= AMBIL NOMOR ANTRIAN (HTTP) =======
         async function take(serviceType) {
             try {
                 const res = await fetch(`${API_BASE}/api/take-ticket`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ serviceType }), // "TELLER" / "CS"
+                    body: JSON.stringify({ serviceType }),
                 });
 
                 const data = await res.json().catch(() => ({}));
+                if (!res.ok || data.ok === false) throw new Error(data.error || ("HTTP " + res.status));
 
-                if (!res.ok || data.ok === false) {
-                    throw new Error(data.error || ("HTTP " + res.status));
-                }
-
-                const ticket = data.ticketCode; // dari server.js: res.json({ ok:true, ticketCode })
+                const ticket = data.ticketCode;
                 document.getElementById("ticket-number").textContent = ticket || "-";
-
-                // ✅ Tambahan: setelah nomor muncul, langsung print struk thermal
                 if (ticket) printTicketThermal({ ticket, serviceType });
 
             } catch (e) {
@@ -618,7 +639,6 @@
             }
         }
 
-        // expose agar onclick bisa akses
         window.take = take;
     </script>
 </body>

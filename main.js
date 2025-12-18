@@ -15,6 +15,9 @@ const {
   getTodaySummary,
   getTodayCalls,
   clearTodayTickets,
+  // ✅ dari db.js kamu (penting untuk pemanggilan via IPC)
+  callNext,
+  getState,
 } = require("./db");
 
 const { createServer } = require("./server");
@@ -105,30 +108,22 @@ function readConfig() {
 /**
  * ✅ Inject config ke renderer (tetap)
  * ✅ Tambahan: inject window.kioskPrinter.printTicket() (untuk silent thermal print)
- *
- * Tidak mengubah logic lama, hanya menambah object baru.
  */
 function injectConfig(win, { apiBase, branchName }) {
   if (!win || win.isDestroyed()) return;
 
   const script = `
-    // ====== existing inject (tetap) ======
     window.queueConfig = {
       apiBase: ${JSON.stringify(apiBase)},
       branchName: ${JSON.stringify(branchName)}
     };
 
-    // ====== tambahan (tanpa ubah logic lain) ======
-    // Renderer bisa panggil: window.kioskPrinter.printTicket({ branch, layanan, ticket, waktu, deviceName? })
     try {
       const { ipcRenderer } = require("electron");
       window.kioskPrinter = {
         printTicket: (payload) => ipcRenderer.invoke("PRINT_TICKET", payload)
       };
-    } catch (e) {
-      // kalau require tidak tersedia (harusnya ada karena nodeIntegration=true)
-      // tidak apa-apa, hanya berarti silent print tidak aktif
-    }
+    } catch (e) {}
   `;
 
   win.webContents.executeJavaScript(script).catch(() => {});
@@ -169,7 +164,7 @@ function createWindowByMode(mode, cfg) {
     width,
     height,
     title,
-    webPreferences: { nodeIntegration: true, contextIsolation: false }, // ✅ tetap seperti punya kamu
+    webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
 
   win.loadFile(file);
@@ -221,7 +216,6 @@ function openConfigErrorWindow(mode, cfg) {
 
 /* =========================================================
    ✅ Tambahan: thermal print window (hidden) + helper HTML
-   Tidak mengubah logic lain
    ========================================================= */
 let printWin = null;
 
@@ -304,12 +298,10 @@ function buildThermalReceiptHtml(payload) {
 function registerIpcHandlers() {
   // ===== Display config (promo/video) =====
   ipcMain.handle("display:getConfig", async () => {
-    // db return: { promo_text, video_path }
     const cfg = await getDisplayConfig();
-    // biar cocok dengan display.html yang pakai promoText/videoPath
     return {
-      promoText: cfg?.promo_text || "",
-      videoPath: cfg?.video_path || null,
+      promoText: cfg?.promoText || "",
+      videoPath: cfg?.videoPath || null,
     };
   });
 
@@ -317,8 +309,8 @@ function registerIpcHandlers() {
     const promoText = (payload?.promoText || "").toString();
     const next = await setDisplayConfig({ promo_text: promoText });
     return {
-      promoText: next?.promo_text || "",
-      videoPath: next?.video_path || null,
+      promoText: next?.promoText || "",
+      videoPath: next?.videoPath || null,
     };
   });
 
@@ -331,13 +323,10 @@ function registerIpcHandlers() {
       ],
     });
 
-    if (res.canceled || !res.filePaths?.[0]) {
-      throw new Error("cancelled");
-    }
+    if (res.canceled || !res.filePaths?.[0]) throw new Error("cancelled");
 
     const picked = res.filePaths[0];
 
-    // Copy ke folder userData biar aman (nggak tergantung path random)
     const videosDir = path.join(app.getPath("userData"), "videos");
     if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
 
@@ -349,53 +338,55 @@ function registerIpcHandlers() {
 
     const next = await setDisplayConfig({ video_path: target });
     return {
-      promoText: next?.promo_text || "",
-      videoPath: next?.video_path || null,
+      promoText: next?.promoText || "",
+      videoPath: next?.videoPath || null,
     };
   });
 
   ipcMain.handle("display:clearVideo", async () => {
     const next = await setDisplayConfig({ video_path: null });
     return {
-      promoText: next?.promo_text || "",
-      videoPath: next?.video_path || null,
+      promoText: next?.promoText || "",
+      videoPath: next?.videoPath || null,
     };
   });
 
-  // ===== Admin panel summary/calls/clear =====
-  ipcMain.handle("admin:getTodaySummary", async () => {
-    return await getTodaySummary();
-  });
-
-  ipcMain.handle("admin:getTodayCalls", async () => {
-    return await getTodayCalls();
-  });
-
+  // ===== Admin =====
+  ipcMain.handle("admin:getTodaySummary", async () => await getTodaySummary());
+  ipcMain.handle("admin:getTodayCalls", async () => await getTodayCalls());
   ipcMain.handle("admin:clearTodayTickets", async () => {
     await clearTodayTickets();
     return true;
   });
 
+  // ✅✅✅ FIX UTAMA: pemanggilan via IPC (fallback kalau server mati)
+  ipcMain.handle("panel:callNext", async (_evt, payload) => {
+    const serviceType = (payload?.serviceType || "").toString().toUpperCase();
+    const counterName = (payload?.counterName || "").toString();
+
+    const result = await callNext(serviceType, counterName);
+    // result bisa null kalau tidak ada WAITING
+    return result;
+  });
+
+  // ✅ optional: ambil state via IPC
+  ipcMain.handle("state:get", async () => {
+    return await getState();
+  });
+
   // =========================================================
-  // ✅ Tambahan: PRINT TICKET (Silent Thermal Print)
-  // Channel: "PRINT_TICKET"
-  // Renderer panggil: window.kioskPrinter.printTicket(payload)
+  // ✅ PRINT TICKET (Silent Thermal Print)
   // =========================================================
   ipcMain.handle("PRINT_TICKET", async (_evt, payload) => {
     try {
-      // buat window print hidden sekali, reuse
       if (!printWin || printWin.isDestroyed()) {
         printWin = new BrowserWindow({
           show: false,
           width: 420,
           height: 680,
-          webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-          },
+          webPreferences: { nodeIntegration: false, contextIsolation: true },
         });
 
-        // optional: cegah window dibuka user
         printWin.on("closed", () => {
           printWin = null;
         });
@@ -406,10 +397,8 @@ function registerIpcHandlers() {
         "data:text/html;charset=utf-8," + encodeURIComponent(html)
       );
 
-      // tunggu render stabil sedikit
       await new Promise((r) => setTimeout(r, 250));
 
-      // deviceName optional (kalau mau pilih printer tertentu)
       const deviceName =
         payload &&
         typeof payload.deviceName === "string" &&
@@ -419,16 +408,10 @@ function registerIpcHandlers() {
 
       return await new Promise((resolve) => {
         printWin.webContents.print(
-          {
-            silent: true, // ✅ TANPA dialog
-            printBackground: true,
-            deviceName, // "" = default printer
-          },
+          { silent: true, printBackground: true, deviceName },
           (success, errorType) => {
-            if (!success) {
-              console.error("❌ Print failed:", errorType);
+            if (!success)
               return resolve({ ok: false, error: errorType || "print_failed" });
-            }
             return resolve({ ok: true });
           }
         );
@@ -451,15 +434,11 @@ app.commandLine.appendSwitch(
 );
 
 app.whenReady().then(() => {
-  // ✅ DB siap untuk semua mode
   initDb();
-
-  // ✅ IPC handler (sekali)
   registerIpcHandlers();
 
   const mode = getAppMode();
 
-  // Optional: print ip server biar gampang config device lain
   if (mode === "server-admin") {
     console.log("🌐 LAN IP:", getLocalIPv4());
   }
@@ -468,7 +447,6 @@ app.whenReady().then(() => {
 
   // ===== SERVER + ADMIN =====
   if (mode === "server-admin") {
-    // server bind 0.0.0.0 biar bisa diakses PC lain
     serverRef = createServer({ port: cfg.serverPort, host: "0.0.0.0" });
 
     const ip = getLocalIPv4();
