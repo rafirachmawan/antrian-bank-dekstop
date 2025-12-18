@@ -13,86 +13,111 @@
         body {
             margin: 0;
             height: 100vh;
-            background: #f3f4f6;
+            background: linear-gradient(180deg, #dff1ff 0%, #b7ddff 45%, #9fcbff 100%);
             color: #111827;
             padding: 10px 14px;
             display: flex;
             flex-direction: column;
         }
 
-        /* =========== TOP BAR PUTIH =========== */
-
+        /* =========== TOP BAR (BIRU LANGIT) =========== */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 8px 14px;
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            border-radius: 12px;
+            padding: 10px 16px;
+            box-shadow: 0 10px 26px rgba(21, 101, 192, 0.35);
             margin-bottom: 10px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .brand-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .brand-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .brand-subtitle {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .top-right {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        .brand-logo-box {
+            width: 52px;
+            height: 38px;
+            border-radius: 8px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .brand-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: #ffffff;
+        }
+
+        .brand-tagline {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .bank-pill {
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            padding: 6px 14px;
+            background: rgba(15, 23, 42, 0.25);
+            padding: 7px 14px;
             border-radius: 999px;
             display: flex;
             align-items: center;
             gap: 8px;
             color: #eff6ff;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+            border: 1px solid rgba(219, 234, 254, 0.7);
             font-size: 12px;
             letter-spacing: 0.14em;
             text-transform: uppercase;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
         }
 
         .bank-dot {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 999px;
             background: #ffffff;
+            opacity: .95;
         }
 
         .top-date-time {
             text-align: right;
             font-size: 11px;
-            color: #4b5563;
+            color: rgba(255, 255, 255, .9);
         }
 
         .top-time {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: 800;
             letter-spacing: 0.16em;
-            color: #111827;
+            color: #ffffff;
         }
 
         /* =========== MAIN GRID =========== */
-
         .main-grid {
             flex: 1;
             display: grid;
@@ -102,14 +127,15 @@
         }
 
         .panel {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 10px 12px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            background: rgba(255, 255, 255, .92);
+            border-radius: 14px;
+            padding: 12px 12px;
+            border: 1px solid rgba(255, 255, 255, .7);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
             display: flex;
             flex-direction: column;
             min-height: 0;
+            backdrop-filter: blur(6px);
         }
 
         .panel-header-row {
@@ -117,30 +143,33 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .panel-title {
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.16em;
-            color: #4b5563;
+            color: #1f2937;
         }
 
         .panel-subtitle {
             font-size: 11px;
-            color: #9ca3af;
+            color: #6b7280;
+            margin-top: 2px;
         }
 
         .btn-small {
             border-radius: 999px;
             border: 1px solid #d1d5db;
             background: #ffffff;
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 11px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
         }
 
         .btn-small:hover {
@@ -157,114 +186,274 @@
             background: #fecaca;
         }
 
-        /* ===== RINGKASAN ===== */
-
-        .summary-grid {
+        /* ======================= PANEL PEMANGGILAN ======================= */
+        .call-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 10px;
+            min-height: 0;
         }
 
-        .summary-card {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 8px 10px;
+        .call-card {
+            border-radius: 14px;
+            padding: 12px;
             border: 1px solid #e5e7eb;
+            background: #ffffff;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+        }
+
+        .call-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .call-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .call-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .call-badge {
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #dbeafe;
+            background: #eff6ff;
+            color: #1d4ed8;
+            white-space: nowrap;
+        }
+
+        .call-badge.cs {
+            border-color: #bbf7d0;
+            background: #ecfdf5;
+            color: #15803d;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 70px 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-top: 2px;
+        }
+
+        .form-row label {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        select {
+            width: 100%;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            padding: 10px 12px;
+            background: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .last-box {
+            border-radius: 12px;
+            padding: 10px 12px;
+            border: 1px solid #dbeafe;
+            background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .last-box.cs {
+            border-color: #bbf7d0;
+            background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+        }
+
+        .last-left {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
 
-        .summary-label {
+        .last-title {
             font-size: 11px;
-            color: #6b7280;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            color: #334155;
+            opacity: .85;
         }
 
-        .summary-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111827;
+        .last-number {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.10em;
+            color: #0f172a;
         }
 
-        .summary-caption {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        /* ===== TABEL RIWAYAT ===== */
-
-        .table-wrapper {
-            flex: 1;
-            border-radius: 10px;
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-            background: #f9fafb;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .last-meta {
             font-size: 12px;
+            color: #475569;
+            white-space: nowrap;
         }
 
-        thead {
-            background: #e5e7eb;
+        .call-btn {
+            border: none;
+            width: 100%;
+            border-radius: 999px;
+            padding: 11px 14px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 13px;
+            transition: transform .06s ease, filter .12s ease;
         }
 
-        th,
-        td {
-            padding: 6px 8px;
+        .call-btn:active {
+            transform: translateY(1px);
+            filter: brightness(.98);
+        }
+
+        .call-btn.teller {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #eef2ff;
+            box-shadow: 0 14px 32px rgba(37, 99, 235, 0.25);
+        }
+
+        .call-btn.cs {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ecfdf5;
+            box-shadow: 0 14px 32px rgba(22, 163, 74, 0.22);
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: -2px;
+        }
+
+        /* ======================= ✅ LOG RIWAYAT REALTIME ======================= */
+        .mini-log {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            overflow: hidden;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+            margin-bottom: 10px;
+        }
+
+        .mini-log-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: linear-gradient(180deg, #f8fafc, #ffffff);
             border-bottom: 1px solid #e5e7eb;
         }
 
-        th {
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
+        .mini-log-title {
+            font-size: 12px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .mini-log-clear {
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            padding: 6px 10px;
             font-size: 11px;
+            cursor: pointer;
         }
 
-        tbody tr:nth-child(even) {
-            background: #f3f4f6;
+        .mini-log-clear:hover {
+            background: #e5e7eb;
         }
 
-        tbody tr:hover {
-            background: #e0f2fe;
+        .mini-log-list {
+            max-height: 160px;
+            overflow: auto;
         }
 
-        .col-id {
-            width: 28px;
+        .mini-item {
+            display: grid;
+            grid-template-columns: 90px 1fr 140px 90px;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .mini-item:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .mini-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            border: 1px solid #dbeafe;
+            background: #eff6ff;
+            color: #1d4ed8;
+            width: fit-content;
+        }
+
+        .mini-badge.cs {
+            border-color: #bbf7d0;
+            background: #ecfdf5;
+            color: #15803d;
+        }
+
+        .mini-num {
+            font-weight: 900;
+            letter-spacing: .10em;
+            color: #0f172a;
+        }
+
+        .mini-loket {
+            color: #475569;
+        }
+
+        .mini-jam {
+            color: #64748b;
+            text-align: right;
+        }
+
+        .mini-empty {
+            padding: 12px;
             text-align: center;
-        }
-
-        .col-service {
-            width: 120px;
-        }
-
-        .col-number {
-            width: 90px;
-        }
-
-        .col-counter {
-            width: 80px;
-        }
-
-        .col-time {
-            width: 160px;
+            color: #6b7280;
+            font-size: 12px;
         }
 
         /* ===== PANEL KANAN: PROMO & VIDEO ===== */
-
         .promo-textarea {
             width: 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid #d1d5db;
-            padding: 8px;
+            padding: 10px 12px;
             resize: vertical;
-            min-height: 70px;
+            min-height: 80px;
             font-size: 13px;
             background: #f9fafb;
             color: #111827;
@@ -273,28 +462,28 @@
         .promo-actions {
             display: flex;
             gap: 8px;
-            margin-top: 8px;
-            margin-bottom: 10px;
+            margin-top: 10px;
+            margin-bottom: 12px;
         }
 
         .btn-primary {
             border-radius: 999px;
             border: none;
-            padding: 7px 14px;
+            padding: 8px 14px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 800;
             cursor: pointer;
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: #eef2ff;
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.45);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
         }
 
         .btn-secondary {
             border-radius: 999px;
             border: 1px solid #d1d5db;
-            padding: 7px 14px;
+            padding: 8px 14px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             background: #ffffff;
             color: #111827;
@@ -303,37 +492,37 @@
         .video-path {
             font-size: 11px;
             color: #6b7280;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .note-panel {
-            margin-top: 10px;
-            background: #f9fafb;
-            border-radius: 10px;
+            margin-top: 12px;
+            background: #ffffff;
+            border-radius: 12px;
             border: 1px solid #e5e7eb;
-            padding: 8px 10px;
+            padding: 10px 12px;
             font-size: 11px;
-            line-height: 1.5;
+            line-height: 1.6;
             color: #4b5563;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
         }
 
         .note-title {
-            font-weight: 600;
-            margin-bottom: 4px;
+            font-weight: 800;
+            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            color: #6b7280;
+            color: #1f2937;
         }
 
         /* ===== FOOTER ===== */
-
         .footer {
             margin-top: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            color: #4b5563;
+            color: #334155;
             padding: 0 2px;
         }
 
@@ -353,6 +542,20 @@
         .status-dot.offline {
             background: #ef4444;
         }
+
+        @media (max-width: 1100px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .call-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mini-item {
+                grid-template-columns: 90px 1fr 140px 80px;
+            }
+        }
     </style>
 </head>
 
@@ -360,9 +563,15 @@
     <!-- TOP BAR -->
     <div class="top-bar">
         <div class="brand-left">
-            <div id="brandTitle" class="brand-title">Admin Panel Antrian</div>
-            <div class="brand-subtitle">Kelola antrian, promo, dan video display.</div>
+            <div class="brand-logo-box">
+                <img src="assets/logo-astro.png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <div id="brand-name" class="brand-name">BRI</div>
+                <div class="brand-tagline">Melayani dengan sepenuh hati</div>
+            </div>
         </div>
+
         <div class="top-right">
             <div class="bank-pill">
                 <div class="bank-dot"></div>
@@ -376,11 +585,12 @@
     </div>
 
     <div class="main-grid">
-        <!-- ================================== LEFT PANEL ================================== -->
+        <!-- LEFT PANEL -->
         <div class="panel">
             <div class="panel-header-row">
                 <div>
-                    <div class="panel-title">Ringkasan Antrian Hari Ini</div>
+                    <div class="panel-title">Panel Pemanggilan Teller &amp; Customer Service</div>
+                    <div class="panel-subtitle">Panggil nomor berikutnya langsung dari Admin Panel.</div>
                 </div>
                 <div>
                     <button class="btn-small" onclick="loadData()">⟳ Refresh</button>
@@ -388,55 +598,85 @@
                 </div>
             </div>
 
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <div class="summary-label">Total tiket hari ini</div>
-                    <div id="summary-total" class="summary-value">0</div>
-                    <div class="summary-caption">Semua layanan</div>
+            <div class="call-grid">
+                <!-- TELLER -->
+                <div class="call-card">
+                    <div class="call-head">
+                        <div>
+                            <div class="call-name">Teller</div>
+                            <div class="call-desc">Kontrol pemanggilan antrian loket Teller.</div>
+                        </div>
+                        <div class="call-badge">LAYANAN TELLER</div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="tellerCounterSel">Loket</label>
+                        <select id="tellerCounterSel">
+                            <option value="Teller 1">Teller 1</option>
+                            <option value="Teller 2">Teller 2</option>
+                            <option value="Teller 3">Teller 3</option>
+                            <option value="Teller 4">Teller 4</option>
+                        </select>
+                    </div>
+
+                    <div class="last-box">
+                        <div class="last-left">
+                            <div class="last-title">Nomor terakhir dipanggil</div>
+                            <div id="tellerLast" class="last-number">-</div>
+                        </div>
+                        <div id="tellerLastCounter" class="last-meta">Loket: -</div>
+                    </div>
+
+                    <button class="call-btn teller" onclick="callNext('TELLER')">Panggil Nomor Teller
+                        Berikutnya</button>
+                    <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-label">Teller - Menunggu</div>
-                    <div id="summary-teller-wait" class="summary-value">0</div>
-                    <div class="summary-caption">Status WAITING</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">CS - Menunggu</div>
-                    <div id="summary-cs-wait" class="summary-value">0</div>
-                    <div class="summary-caption">Status WAITING</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">Dipanggil hari ini</div>
-                    <div id="summary-called" class="summary-value">0</div>
-                    <div class="summary-caption">Teller + CS (CALLED)</div>
+
+                <!-- CS -->
+                <div class="call-card">
+                    <div class="call-head">
+                        <div>
+                            <div class="call-name">Customer Service</div>
+                            <div class="call-desc">Kontrol pemanggilan antrian loket CS.</div>
+                        </div>
+                        <div class="call-badge cs">LAYANAN CS</div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="csCounterSel">Loket</label>
+                        <select id="csCounterSel">
+                            <option value="CS 1">CS 1</option>
+                            <option value="CS 2">CS 2</option>
+                            <option value="CS 3">CS 3</option>
+                        </select>
+                    </div>
+
+                    <div class="last-box cs">
+                        <div class="last-left">
+                            <div class="last-title">Nomor terakhir dipanggil</div>
+                            <div id="csLast" class="last-number">-</div>
+                        </div>
+                        <div id="csLastCounter" class="last-meta">Loket: -</div>
+                    </div>
+
+                    <button class="call-btn cs" onclick="callNext('CS')">Panggil Nomor CS Berikutnya</button>
+                    <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
                 </div>
             </div>
 
-            <div class="panel-header-row" style="margin-bottom:6px;">
-                <div>
-                    <div class="panel-title">Riwayat Panggilan Hari Ini</div>
-                    <div class="panel-subtitle">Tiket yang sudah dipanggil pada tanggal hari ini.</div>
+            <!-- ✅ RIWAYAT REALTIME (PERSIST + RESET PER HARI) -->
+            <div class="mini-log">
+                <div class="mini-log-head">
+                    <div class="mini-log-title">Riwayat Pemanggilan (Realtime)</div>
+                    <button class="mini-log-clear" onclick="clearRealtimeLog()">Bersihkan</button>
                 </div>
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="col-id">#</th>
-                            <th class="col-service">LAYANAN</th>
-                            <th class="col-number">NOMOR</th>
-                            <th class="col-counter">LOKET</th>
-                            <th class="col-time">WAKTU PANGGIL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="calls-body">
-                        <!-- row diisi via JS -->
-                    </tbody>
-                </table>
+                <div id="miniLogList" class="mini-log-list">
+                    <div class="mini-empty">Belum ada pemanggilan pada sesi ini.</div>
+                </div>
             </div>
         </div>
 
-        <!-- ================================== RIGHT PANEL ================================== -->
+        <!-- RIGHT PANEL -->
         <div class="panel">
             <div class="panel-header-row">
                 <div>
@@ -445,7 +685,7 @@
             </div>
 
             <div>
-                <div style="font-size:12px; color:#4b5563; margin-bottom:4px;">Teks Promo Hari Ini</div>
+                <div style="font-size:12px; color:#334155; margin-bottom:6px;">Teks Promo Hari Ini</div>
                 <textarea id="promo-input" class="promo-textarea"
                     placeholder="Tulis teks promo yang akan tampil di layar Display Antrian..."></textarea>
 
@@ -453,11 +693,9 @@
                     <button class="btn-primary" onclick="savePromoText()">💾 Simpan Teks Promo</button>
                 </div>
 
-                <div style="font-size:12px; color:#4b5563; margin-bottom:4px;">Video Promo</div>
+                <div style="font-size:12px; color:#334155; margin-bottom:6px;">Video Promo</div>
                 <button class="btn-secondary" onclick="choosePromoVideo()">📂 Pilih Video Promo...</button>
-                <div id="video-file-label" class="video-path">
-                    Tidak ada video terpilih.
-                </div>
+                <div id="video-file-label" class="video-path">Tidak ada video terpilih.</div>
             </div>
 
             <div class="note-panel">
@@ -480,22 +718,22 @@
     </div>
 
     <script>
-        const { ipcRenderer } = require("electron");
+        // =====================
+        // Electron optional
+        // =====================
+        let ipcRenderer = null;
+        try { ipcRenderer = require("electron").ipcRenderer; } catch { /* browser mode */ }
 
         // ====== KONFIG SERVER CABANG ======
-        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
-            ? window.queueConfig.apiBase
-            : "http://localhost:3000";
+        const API_BASE = (window.queueConfig && window.queueConfig.apiBase) ? window.queueConfig.apiBase : "http://localhost:3000";
+        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
 
-        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
-            ? window.queueConfig.branchName
-            : "BANK ASTRO";
+        // header brand
+        const brandNameEl = document.getElementById("brand-name");
+        if (brandNameEl) brandNameEl.textContent = BRANCH_NAME || "BRI";
 
-        // UI brand/pill
         const pillText = document.getElementById("pillText");
-        const brandTitle = document.getElementById("brandTitle");
         if (pillText) pillText.textContent = `${BRANCH_NAME} • ADMIN`;
-        if (brandTitle) brandTitle.textContent = `Admin Panel Antrian - ${BRANCH_NAME}`;
 
         const statusEl = document.getElementById("connection-status");
         const dotEl = document.getElementById("dot");
@@ -504,48 +742,35 @@
             if (dotEl) dotEl.classList.remove("offline");
             if (statusEl) statusEl.textContent = text || `Terhubung ke server cabang: ${API_BASE}`;
         }
-
         function setOffline(text) {
             if (dotEl) dotEl.classList.add("offline");
             if (statusEl) statusEl.textContent = text || "Server cabang tidak aktif.";
         }
 
-        // ====== TANGGAL & JAM DI HEADER/FOOTER ======
+        // ====== TANGGAL & JAM ======
         function formatTanggalPanjang(date) {
             const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const bulan = [
-                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-            ];
-            const h = hari[date.getDay()];
-            const d = String(date.getDate()).padStart(2, "0");
-            const m = bulan[date.getMonth()];
-            const y = date.getFullYear();
-            return `${h}, ${d} ${m} ${y}`;
+            const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            return `${hari[date.getDay()]}, ${String(date.getDate()).padStart(2, "0")} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
-
         function formatTanggalPendek(date) {
-            const bulan = [
-                "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-                "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
-            ];
-            const d = String(date.getDate()).padStart(2, "0");
-            const m = bulan[date.getMonth()];
-            const y = date.getFullYear();
-            return `${d} ${m} ${y}`;
+            const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+            return `${String(date.getDate()).padStart(2, "0")} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
+        function pad2(n) { return String(n).padStart(2, "0"); }
+        function formatJam(date) { return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`; }
+        function formatYMD(date) { return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`; }
 
         function updateClock() {
             const now = new Date();
-            const time = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
-            document.getElementById("hdr-time").textContent = time;
+            document.getElementById("hdr-time").textContent = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
             document.getElementById("hdr-date").textContent = formatTanggalPendek(now);
             document.getElementById("footer-date").textContent = `Hari ini: ${formatTanggalPanjang(now)}`;
         }
         updateClock();
         setInterval(updateClock, 1000);
 
-        // ====== HELPER: Coba fetch ke server, kalau gagal fallback ke ipc ======
+        // ====== HELPER FETCH ======
         async function fetchJson(path, opts = {}) {
             const res = await fetch(`${API_BASE}${path}`, {
                 cache: "no-store",
@@ -556,118 +781,245 @@
             return await res.json();
         }
 
-        async function tryServerThenIpc({ server, ipc, ipcArgs }) {
+        // ==========================
+        // BOX "TERAKHIR DIPANGGIL" dari /api/state
+        // ==========================
+        const tellerLastEl = document.getElementById("tellerLast");
+        const tellerLastCounterEl = document.getElementById("tellerLastCounter");
+        const csLastEl = document.getElementById("csLast");
+        const csLastCounterEl = document.getElementById("csLastCounter");
+
+        async function loadNowFromState() {
             try {
-                const data = await server();
+                const data = await fetchJson("/api/state");
+                const state = data?.state ? data.state : data;
+
+                const tellerNow = state?.tellerNow;
+                const csNow = state?.csNow;
+
+                const tTicket = tellerNow?.ticket_code || tellerNow?.ticketCode || "-";
+                const tCounter = tellerNow?.counter_name || tellerNow?.counterName || "-";
+                const cTicket = csNow?.ticket_code || csNow?.ticketCode || "-";
+                const cCounter = csNow?.counter_name || csNow?.counterName || "-";
+
+                tellerLastEl.textContent = tTicket || "-";
+                tellerLastCounterEl.textContent = `Loket: ${tCounter || "-"}`;
+
+                csLastEl.textContent = cTicket || "-";
+                csLastCounterEl.textContent = `Loket: ${cCounter || "-"}`;
+
                 setOnline(`Terhubung ke server cabang: ${API_BASE}`);
-                return { data, source: "server" };
             } catch (e) {
-                // fallback
+                // jangan matikan UI kalau server down
+                setOffline("Server cabang tidak aktif.");
+            }
+        }
+
+        // ==========================
+        // ✅ RIWAYAT REALTIME: Persist + Reset per hari
+        // ==========================
+        const miniLogList = document.getElementById("miniLogList");
+
+        function getLogStorageKey() {
+            const ymd = formatYMD(new Date());
+            const branchSafe = (BRANCH_NAME || "BRI").toString().replace(/\s+/g, "_").toUpperCase();
+            return `admin_realtime_log__${branchSafe}__${ymd}`;
+        }
+
+        function getMetaKey() {
+            const branchSafe = (BRANCH_NAME || "BRI").toString().replace(/\s+/g, "_").toUpperCase();
+            return `admin_realtime_log_meta__${branchSafe}`;
+        }
+
+        let realtimeLogs = []; // { serviceType, ticket, counterName, time }
+
+        function loadRealtimeLogFromStorage() {
+            const today = formatYMD(new Date());
+            const metaKey = getMetaKey();
+            const metaRaw = localStorage.getItem(metaKey);
+            let meta = {};
+            try { meta = metaRaw ? JSON.parse(metaRaw) : {}; } catch { meta = {}; }
+
+            // kalau tanggal berubah -> bersihkan (auto reset per hari)
+            if (meta.date !== today) {
+                // hapus semua key log lama yang mungkin tersisa (opsional aman)
+                // tapi minimal kita reset hari ini
+                localStorage.setItem(metaKey, JSON.stringify({ date: today }));
+                realtimeLogs = [];
+                saveRealtimeLogToStorage();
+                return;
+            }
+
+            const key = getLogStorageKey();
+            const raw = localStorage.getItem(key);
+            try {
+                realtimeLogs = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(realtimeLogs)) realtimeLogs = [];
+            } catch {
+                realtimeLogs = [];
+            }
+        }
+
+        function saveRealtimeLogToStorage() {
+            const key = getLogStorageKey();
+            localStorage.setItem(key, JSON.stringify(realtimeLogs));
+            const metaKey = getMetaKey();
+            const today = formatYMD(new Date());
+            localStorage.setItem(metaKey, JSON.stringify({ date: today }));
+        }
+
+        function renderRealtimeLog() {
+            if (!miniLogList) return;
+
+            if (!realtimeLogs.length) {
+                miniLogList.innerHTML = `<div class="mini-empty">Belum ada pemanggilan pada sesi ini.</div>`;
+                return;
+            }
+
+            miniLogList.innerHTML = realtimeLogs.map((x) => {
+                const badgeCls = x.serviceType === "CS" ? "mini-badge cs" : "mini-badge";
+                const label = x.serviceType === "CS" ? "CS" : "TELLER";
+                return `
+          <div class="mini-item">
+            <div><span class="${badgeCls}">${label}</span></div>
+            <div class="mini-num">${x.ticket || "-"}</div>
+            <div class="mini-loket">${x.counterName || "-"}</div>
+            <div class="mini-jam">${x.time || "-"}</div>
+          </div>
+        `;
+            }).join("");
+        }
+
+        function pushRealtimeLog({ serviceType, ticket, counterName }) {
+            const now = new Date();
+            const item = { serviceType, ticket, counterName, time: formatJam(now) };
+            realtimeLogs.unshift(item);
+            if (realtimeLogs.length > 50) realtimeLogs = realtimeLogs.slice(0, 50);
+            saveRealtimeLogToStorage();
+            renderRealtimeLog();
+        }
+
+        function clearRealtimeLog() {
+            realtimeLogs = [];
+            saveRealtimeLogToStorage();
+            renderRealtimeLog();
+        }
+        window.clearRealtimeLog = clearRealtimeLog;
+
+        // ==========================
+        // PEMANGGILAN (FIX: tidak pakai loadCalls + ticket pasti benar)
+        // ==========================
+        function getCounterName(serviceType) {
+            if (serviceType === "TELLER") return document.getElementById("tellerCounterSel")?.value || "Teller 1";
+            return document.getElementById("csCounterSel")?.value || "CS 1";
+        }
+
+        async function callNext(serviceType) {
+            const counterName = getCounterName(serviceType);
+
+            // Ambil state sebelum panggil (biar bisa deteksi perubahan jika perlu)
+            let beforeTicket = null;
+            try {
+                const s0 = await fetchJson("/api/state");
+                const st0 = s0?.state ? s0.state : s0;
+                if (serviceType === "TELLER") beforeTicket = st0?.tellerNow?.ticket_code || st0?.tellerNow?.ticketCode || null;
+                else beforeTicket = st0?.csNow?.ticket_code || st0?.csNow?.ticketCode || null;
+            } catch { }
+
+            // 1) coba server dulu
+            try {
+                await fetchJson("/api/call-next", {
+                    method: "POST",
+                    body: JSON.stringify({ serviceType, counterName }),
+                });
+
+                // ambil state terbaru supaya ticket yang dicatat itu benar
+                const s1 = await fetchJson("/api/state");
+                const st1 = s1?.state ? s1.state : s1;
+
+                const afterTicket = (serviceType === "TELLER")
+                    ? (st1?.tellerNow?.ticket_code || st1?.tellerNow?.ticketCode || "-")
+                    : (st1?.csNow?.ticket_code || st1?.csNow?.ticketCode || "-");
+
+                const afterCounter = (serviceType === "TELLER")
+                    ? (st1?.tellerNow?.counter_name || st1?.tellerNow?.counterName || counterName)
+                    : (st1?.csNow?.counter_name || st1?.csNow?.counterName || counterName);
+
+                // update box
+                await loadNowFromState();
+
+                // ✅ hanya log kalau memang berubah / ada ticket
+                if (afterTicket && afterTicket !== "-" && afterTicket !== beforeTicket) {
+                    pushRealtimeLog({
+                        serviceType: serviceType === "CS" ? "CS" : "TELLER",
+                        ticket: afterTicket,
+                        counterName: afterCounter || counterName,
+                    });
+                } else if (afterTicket === "-" || !afterTicket) {
+                    alert("Tidak ada antrian untuk dipanggil.");
+                }
+
+                return;
+            } catch (e) {
+                // 2) fallback IPC (kalau server mati)
                 try {
-                    const data = await ipcRenderer.invoke(ipc, ...(ipcArgs || []));
-                    setOnline("Fallback: terhubung ke database lokal (SQLite).");
-                    return { data, source: "ipc" };
-                } catch (e2) {
-                    setOffline("Gagal terhubung ke server cabang & database lokal.");
-                    throw e2;
-                }
-            }
-        }
+                    if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
 
-        // ====== LOAD RINGKASAN & RIWAYAT ======
-        async function loadSummary() {
-            try {
-                const { data: summary } = await tryServerThenIpc({
-                    server: () => fetchJson("/api/admin/today-summary"),
-                    ipc: "admin:getTodaySummary",
-                });
+                    // asumsi handler ini ada di main: "panel:callNext"
+                    const result = await ipcRenderer.invoke("panel:callNext", { serviceType, counterName });
+                    // result boleh mengembalikan ticketCode / ticket_code
+                    const calledTicket = result?.ticketCode || result?.ticket_code || null;
 
-                document.getElementById("summary-total").textContent = summary.totalTickets ?? 0;
-                document.getElementById("summary-teller-wait").textContent = summary.tellerWaiting ?? 0;
-                document.getElementById("summary-cs-wait").textContent = summary.csWaiting ?? 0;
-                document.getElementById("summary-called").textContent = summary.calledToday ?? 0;
-            } catch (e) {
-                console.error("Gagal load summary:", e);
-            }
-        }
+                    // update box kalau memungkinkan
+                    await loadNowFromState();
 
-        function formatDateTime(dt) {
-            if (!dt) return "-";
-            return dt;
-        }
-
-        async function loadCalls() {
-            try {
-                const { data: rows } = await tryServerThenIpc({
-                    server: () => fetchJson("/api/admin/today-calls"),
-                    ipc: "admin:getTodayCalls",
-                });
-
-                const tbody = document.getElementById("calls-body");
-                tbody.innerHTML = "";
-
-                if (!rows || rows.length === 0) {
-                    const tr = document.createElement("tr");
-                    const td = document.createElement("td");
-                    td.colSpan = 5;
-                    td.style.textAlign = "center";
-                    td.style.color = "#6b7280";
-                    td.textContent = "Belum ada tiket yang dipanggil hari ini.";
-                    tr.appendChild(td);
-                    tbody.appendChild(tr);
+                    if (calledTicket) {
+                        pushRealtimeLog({
+                            serviceType: serviceType === "CS" ? "CS" : "TELLER",
+                            ticket: calledTicket,
+                            counterName,
+                        });
+                    } else {
+                        // fallback: pakai isi box (kalau ikut berubah)
+                        const boxTicket = (serviceType === "TELLER") ? (tellerLastEl?.textContent || "-") : (csLastEl?.textContent || "-");
+                        if (boxTicket && boxTicket !== "-" && boxTicket !== beforeTicket) {
+                            pushRealtimeLog({
+                                serviceType: serviceType === "CS" ? "CS" : "TELLER",
+                                ticket: boxTicket,
+                                counterName,
+                            });
+                        } else {
+                            alert("Tidak ada antrian untuk dipanggil.");
+                        }
+                    }
                     return;
+                } catch (e2) {
+                    console.error("Gagal panggil:", e, e2);
+                    alert("Gagal memanggil nomor berikutnya. Pastikan server/IPC pemanggilan tersedia.");
                 }
-
-                rows.forEach((row, idx) => {
-                    const tr = document.createElement("tr");
-
-                    const tdNo = document.createElement("td");
-                    tdNo.className = "col-id";
-                    tdNo.textContent = idx + 1;
-                    tr.appendChild(tdNo);
-
-                    const tdSvc = document.createElement("td");
-                    tdSvc.className = "col-service";
-                    tdSvc.textContent = row.service_type === "TELLER" ? "Teller" : "Customer Service";
-                    tr.appendChild(tdSvc);
-
-                    const tdTicket = document.createElement("td");
-                    tdTicket.className = "col-number";
-                    tdTicket.textContent = row.ticket_code;
-                    tr.appendChild(tdTicket);
-
-                    const tdCounter = document.createElement("td");
-                    tdCounter.className = "col-counter";
-                    tdCounter.textContent = row.counter_name;
-                    tr.appendChild(tdCounter);
-
-                    const tdTime = document.createElement("td");
-                    tdTime.className = "col-time";
-                    tdTime.textContent = formatDateTime(row.called_at);
-                    tr.appendChild(tdTime);
-
-                    tbody.appendChild(tr);
-                });
-            } catch (e) {
-                console.error("Gagal load calls:", e);
             }
         }
+        window.callNext = callNext;
 
+        // ==========================
+        // RESET HARI INI (sekalian bersihkan log realtime hari ini)
+        // ==========================
         async function resetToday() {
             if (!confirm("Yakin ingin menghapus semua tiket hari ini?")) return;
 
-            // coba server dulu
             try {
                 await fetchJson("/api/admin/clear-today", { method: "POST", body: JSON.stringify({}) });
                 setOnline(`Terhubung ke server cabang: ${API_BASE}`);
+                clearRealtimeLog(); // ✅ bersihkan log realtime juga
                 await loadData();
                 alert("Antrian hari ini sudah direset (server cabang).");
                 return;
             } catch (e) {
-                // fallback ke local ipc
                 try {
+                    if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
                     await ipcRenderer.invoke("admin:clearTodayTickets");
                     setOnline("Fallback: reset berhasil di database lokal (SQLite).");
+                    clearRealtimeLog(); // ✅ bersihkan log realtime juga
                     await loadData();
                     alert("Antrian hari ini sudah direset (lokal).");
                 } catch (e2) {
@@ -677,16 +1029,16 @@
                 }
             }
         }
+        window.resetToday = resetToday;
 
-        async function loadData() {
-            await Promise.all([loadSummary(), loadCalls(), loadDisplayConfig()]);
-        }
-
-        // ====== CONFIG PROMO & VIDEO (tetap pakai ipc) ======
+        // ==========================
+        // CONFIG PROMO & VIDEO (tetap)
+        // ==========================
         let currentDisplayConfig = null;
 
         async function loadDisplayConfig() {
             try {
+                if (!ipcRenderer) return; // browser mode skip
                 const cfg = await ipcRenderer.invoke("display:getConfig");
                 currentDisplayConfig = cfg;
 
@@ -694,9 +1046,7 @@
                 promoTextEl.value = cfg.promoText || "";
 
                 const labelEl = document.getElementById("video-file-label");
-                labelEl.textContent = cfg.videoPath
-                    ? `File: ${cfg.videoPath}`
-                    : "Tidak ada video terpilih.";
+                labelEl.textContent = cfg.videoPath ? `File: ${cfg.videoPath}` : "Tidak ada video terpilih.";
             } catch (e) {
                 console.error("Gagal load config display:", e);
             }
@@ -705,6 +1055,7 @@
         async function savePromoText() {
             const promoText = document.getElementById("promo-input").value.trim();
             try {
+                if (!ipcRenderer) { alert("Mode browser: IPC tidak tersedia untuk simpan promo."); return; }
                 const next = await ipcRenderer.invoke("display:updatePromo", { promoText });
                 currentDisplayConfig = next;
                 alert("Teks promo berhasil disimpan.");
@@ -713,9 +1064,11 @@
                 alert("Gagal menyimpan teks promo.");
             }
         }
+        window.savePromoText = savePromoText;
 
         async function choosePromoVideo() {
             try {
+                if (!ipcRenderer) { alert("Mode browser: IPC tidak tersedia untuk pilih video."); return; }
                 const next = await ipcRenderer.invoke("display:chooseVideo");
                 currentDisplayConfig = next;
                 await loadDisplayConfig();
@@ -725,15 +1078,23 @@
                 alert("Gagal memilih video promo.");
             }
         }
+        window.choosePromoVideo = choosePromoVideo;
 
-        // ====== INIT ======
+        // ==========================
+        // INIT
+        // ==========================
+        async function loadData() {
+            await Promise.all([loadNowFromState(), loadDisplayConfig()]);
+        }
+        window.loadData = loadData;
+
+        // ✅ load log dari storage (tahan refresh & reset harian)
+        loadRealtimeLogFromStorage();
+        renderRealtimeLog();
+
+        // start
         loadData();
-
-        // optional: auto refresh ringkasan + tabel tiap 2 detik
-        setInterval(() => {
-            loadSummary();
-            loadCalls();
-        }, 2000);
+        setInterval(() => { loadNowFromState(); }, 2000);
     </script>
 </body>
 
