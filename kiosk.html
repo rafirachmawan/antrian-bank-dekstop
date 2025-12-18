@@ -7,118 +7,164 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-                sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         body {
             margin: 0;
             height: 100vh;
-            background: #f3f4f6;
-            color: #111827;
+            background: linear-gradient(180deg, #dff1ff 0%, #b7ddff 45%, #9fcbff 100%);
+            color: #0f172a;
             display: flex;
             flex-direction: column;
-            padding: 10px 14px;
+            padding: 12px 14px;
         }
 
-        /* TOP BAR SEDERHANA (SUPAYA MIRIP DISPLAY) */
+        /* TOP BAR (selaras dengan display) */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 8px 14px;
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            border-radius: 14px;
+            padding: 12px 16px;
+            box-shadow: 0 14px 34px rgba(21, 101, 192, 0.35);
             margin-bottom: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+
+        .top-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .top-title {
             font-size: 18px;
-            font-weight: 700;
-            color: #0f172a;
+            font-weight: 800;
+            letter-spacing: 0.02em;
         }
 
         .top-subtitle {
-            font-size: 11px;
-            color: #6b7280;
+            font-size: 12px;
+            opacity: 0.9;
         }
 
         .top-right-pill {
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 8px 14px;
             border-radius: 999px;
             color: #eff6ff;
             font-size: 11px;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
         }
 
         .top-right-dot {
             width: 10px;
             height: 10px;
             border-radius: 999px;
-            background: #ffffff;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.22);
         }
 
-        /* CARD UTAMA */
+        /* LAYOUT UTAMA: kiri kartu + kanan video */
         .page-body {
             flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* KIRI: KARTU KIOSK */
+        .kiosk-panel {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 18px;
+            position: relative;
+        }
+
+        .kiosk-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 10%, rgba(37, 99, 235, 0.12), transparent 45%),
+                radial-gradient(circle at 85% 70%, rgba(34, 197, 94, 0.10), transparent 45%);
+            pointer-events: none;
         }
 
         .card-wrapper {
-            width: 420px;
+            width: 520px;
+            max-width: 92%;
             padding: 18px 18px 16px;
             border-radius: 20px;
             background: #ffffff;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.16);
             border: 1px solid #e5e7eb;
+            position: relative;
+            z-index: 1;
         }
 
         .card-header-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
         .title-block {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .title {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             color: #0f172a;
+            letter-spacing: 0.01em;
         }
 
         .subtitle {
             font-size: 12px;
-            color: #6b7280;
+            color: #64748b;
+            line-height: 1.45;
         }
 
         .brand-pill {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
+            gap: 8px;
+            padding: 8px 12px;
             border-radius: 999px;
-            background: #0f172a;
+            background: linear-gradient(135deg, #0f172a, #0b1220);
             color: #e5e7eb;
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.14em;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.55);
+            letter-spacing: 0.16em;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            white-space: nowrap;
         }
 
         .brand-dot {
@@ -126,68 +172,69 @@
             height: 16px;
             border-radius: 999px;
             background: conic-gradient(from 200deg, #38bdf8, #6366f1, #22c55e, #38bdf8);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
         }
 
         .buttons {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 10px;
-            margin-top: 4px;
+            gap: 12px;
+            margin: 10px 0 10px;
         }
 
         button {
-            border-radius: 999px;
+            border-radius: 14px;
             border: none;
-            padding: 12px 18px;
-            font-size: 14px;
-            font-weight: 600;
+            padding: 16px 18px;
+            font-size: 15px;
+            font-weight: 800;
             cursor: pointer;
             transition: transform 0.05s ease, box-shadow 0.12s ease, filter 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            user-select: none;
         }
 
         button:active {
             transform: translateY(1px);
             box-shadow: none;
-            filter: brightness(0.97);
+            filter: brightness(0.98);
         }
 
         .btn-teller {
             background: linear-gradient(135deg, #f97316, #ea580c);
-            color: #fefce8;
-            box-shadow: 0 14px 32px rgba(248, 113, 22, 0.7);
+            color: #fff7ed;
+            box-shadow: 0 16px 34px rgba(248, 113, 22, 0.45);
         }
 
         .btn-cs {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: #ecfdf5;
-            box-shadow: 0 14px 32px rgba(34, 197, 94, 0.7);
+            box-shadow: 0 16px 34px rgba(34, 197, 94, 0.40);
         }
 
         .info-pill {
             font-size: 11px;
-            color: #6b7280;
+            color: #64748b;
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .ticket {
-            background: #f9fafb;
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
             border-radius: 16px;
-            border: 1px dashed #d4d4d8;
+            border: 1px dashed #cbd5e1;
             padding: 14px 12px;
             text-align: center;
-            margin-bottom: 10px;
-            box-shadow: inset 0 0 0 1px rgba(243, 244, 246, 0.9);
+            margin-bottom: 12px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
         }
 
         .ticket-title {
             font-size: 11px;
-            color: #9ca3af;
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.18em;
             margin-bottom: 8px;
@@ -195,46 +242,132 @@
 
         .ticket-number {
             font-family: "Courier New", monospace;
-            font-size: 42px;
-            font-weight: 800;
+            font-size: 46px;
+            font-weight: 900;
             letter-spacing: 0.18em;
-            color: #111827;
-            margin-bottom: 4px;
+            color: #0f172a;
+            margin-bottom: 6px;
         }
 
         .ticket-footer {
             font-size: 11px;
-            color: #6b7280;
+            color: #64748b;
             line-height: 1.5;
         }
 
         .btn-print {
             width: 100%;
-            background: #e5e7eb;
-            color: #111827;
+            background: #e2e8f0;
+            color: #0f172a;
             font-size: 12px;
-            padding: 9px 14px;
+            padding: 12px 14px;
             box-shadow: none;
-            margin-bottom: 4px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            font-weight: 800;
         }
 
         .footer-note {
-            margin-top: 4px;
+            margin-top: 10px;
             font-size: 10px;
-            color: #9ca3af;
+            color: #94a3b8;
             text-align: center;
         }
 
         /* indikator koneksi */
         .conn {
             font-size: 11px;
-            color: #6b7280;
-            margin-top: 8px;
+            color: #64748b;
+            margin-top: 10px;
             text-align: center;
         }
 
         .conn strong {
             color: #0f172a;
+        }
+
+        /* KANAN: PANEL VIDEO (biar tidak sepi) */
+        .video-panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .video-frame {
+            flex: 1;
+            min-height: 0;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #0b1220;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+            position: relative;
+        }
+
+        .video-frame::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.10), transparent 55%);
+            pointer-events: none;
+        }
+
+        .video-frame video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            /* biar keliatan "full" */
+            background: #000;
+        }
+
+        .bottom-strip {
+            height: 44px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #1565c0, #1e88e5);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.10em;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 12px 28px rgba(21, 101, 192, 0.30);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bottom-strip span {
+            display: inline-block;
+            white-space: nowrap;
+            will-change: transform;
+            animation: marquee 16s linear infinite;
+            transform: translateX(100%);
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .page-body {
+                grid-template-columns: 1fr;
+            }
+
+            .video-panel {
+                height: 38vh;
+            }
         }
     </style>
 </head>
@@ -242,61 +375,79 @@
 <body>
     <!-- TOP BAR -->
     <div class="top-bar">
-        <div>
-            <div class="top-title">Kiosk Pengambilan Nomor</div>
+        <div class="top-left">
+            <div class="top-title">PENGAMBILAN NOMOR</div>
             <div class="top-subtitle">Silakan ambil nomor antrian sebelum menuju Teller / Customer Service.</div>
         </div>
         <div class="top-right-pill">
             <div class="top-right-dot"></div>
-            <span id="branch-pill">KIOSK • BANK ASTRO</span>
+            <span id="branch-pill">• BRI</span>
         </div>
     </div>
 
     <div class="page-body">
-        <div class="card-wrapper">
-            <div class="card-header-row">
-                <div class="title-block">
-                    <div class="title">Ambil Nomor Antrian</div>
-                    <div class="subtitle">
-                        Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.
+        <!-- KIRI: KIOSK CARD -->
+        <div class="panel kiosk-panel">
+            <div class="card-wrapper">
+                <div class="card-header-row">
+                    <div class="title-block">
+                        <div class="title">Ambil Nomor Antrian</div>
+                        <div class="subtitle">
+                            Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.
+                        </div>
+                    </div>
+                    <div class="brand-pill">
+                        <div class="brand-dot"></div>
+                        <span>BRI</span>
                     </div>
                 </div>
-                <div class="brand-pill">
-                    <div class="brand-dot"></div>
-                    <span>KIOSK</span>
+
+                <div class="buttons">
+                    <button class="btn-teller" onclick="take('TELLER')">
+                        Ambil Antrian Teller
+                    </button>
+                    <button class="btn-cs" onclick="take('CS')">
+                        Ambil Antrian Customer Service
+                    </button>
                 </div>
-            </div>
 
-            <div class="buttons">
-                <button class="btn-teller" onclick="take('TELLER')">
-                    Ambil Antrian Teller
-                </button>
-                <button class="btn-cs" onclick="take('CS')">
-                    Ambil Antrian Customer Service
-                </button>
-            </div>
-
-            <div class="info-pill">
-                Tekan tombol sesuai kebutuhan layanan Anda.
-            </div>
-
-            <div class="ticket">
-                <div class="ticket-title">Nomor Antrian Anda</div>
-                <div id="ticket-number" class="ticket-number">-</div>
-                <div class="ticket-footer">
-                    Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
+                <div class="info-pill">
+                    Tekan tombol sesuai kebutuhan layanan Anda.
                 </div>
+
+                <div class="ticket">
+                    <div class="ticket-title">Nomor Antrian Anda</div>
+                    <div id="ticket-number" class="ticket-number">-</div>
+                    <div class="ticket-footer">
+                        Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
+                    </div>
+                </div>
+
+                <button class="btn-print" onclick="window.print()">
+                    Cetak Ulang Halaman
+                </button>
+
+                <div class="footer-note">
+                    Jika struk tidak tercetak, silakan hubungi petugas kami.
+                </div>
+
+                <div id="conn" class="conn">Menghubungkan ke server…</div>
+            </div>
+        </div>
+
+        <!-- KANAN: VIDEO PANEL -->
+        <div class="panel video-panel">
+            <div class="video-frame">
+                <!-- Ganti file ini sesuai lokasi videomu -->
+                <video id="kioskVideo" autoplay loop muted playsinline>
+                    <source src="assets/kiosk-promo.mp4" type="video/mp4" />
+                    Browser tidak mendukung video.
+                </video>
             </div>
 
-            <button class="btn-print" onclick="window.print()">
-                Cetak Ulang Halaman
-            </button>
-
-            <div class="footer-note">
-                Jika struk tidak tercetak, silakan hubungi petugas kami.
+            <div class="bottom-strip">
+                <span>SELAMAT DATANG • SILAKAN AMBIL NOMOR ANTRIAN ANDA • TERIMA KASIH</span>
             </div>
-
-            <div id="conn" class="conn">Menghubungkan ke server…</div>
         </div>
     </div>
 
@@ -310,11 +461,11 @@
 
         const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
             ? window.queueConfig.branchName
-            : "BANK ASTRO";
+            : "BRI";
 
         // tampilkan nama cabang di pill
         const branchPill = document.getElementById("branch-pill");
-        if (branchPill) branchPill.textContent = `KIOSK • ${BRANCH_NAME}`;
+        if (branchPill) branchPill.textContent = `  ${BRANCH_NAME}`;
 
         const connEl = document.getElementById("conn");
 
@@ -345,7 +496,7 @@
          * - Electron (jika ada bridge preload): bisa silent print via window.kioskPrinter.printTicket()
          */
         async function printTicketThermal({ ticket, serviceType }) {
-            const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BANK ASTRO";
+            const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 

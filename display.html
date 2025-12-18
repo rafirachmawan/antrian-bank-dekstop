@@ -13,11 +13,14 @@
         body {
             margin: 0;
             height: 100vh;
-            background: linear-gradient(180deg, #dff1ff 0%, #b7ddff 45%, #9fcbff 100%);
+            background:
+                radial-gradient(1200px 600px at 20% 0%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 60%),
+                linear-gradient(180deg, #dff1ff 0%, #b7ddff 45%, #9fcbff 100%);
             color: #111827;
-            padding: 10px 14px;
+            padding: 12px 16px;
             display: flex;
             flex-direction: column;
+            gap: 10px;
         }
 
         /* ================= HEADER (BIRU) ================= */
@@ -26,36 +29,50 @@
             justify-content: space-between;
             align-items: center;
             background: linear-gradient(135deg, #1e88e5, #1565c0);
-            border-radius: 12px;
-            padding: 10px 16px;
-            box-shadow: 0 10px 26px rgba(21, 101, 192, 0.35);
-            margin-bottom: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            padding: 12px 18px;
+            box-shadow: 0 14px 34px rgba(21, 101, 192, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .top-bar::after {
+            content: "";
+            position: absolute;
+            inset: -80px -120px auto auto;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 70%);
+            transform: rotate(15deg);
+            pointer-events: none;
         }
 
         .brand-left {
             display: flex;
             align-items: center;
             gap: 10px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* logo nyatu (tanpa bg putih) */
         .brand-logo-box {
-            width: 52px;
-            height: 38px;
-            border-radius: 8px;
-            background: transparent;
+            width: 56px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            backdrop-filter: blur(6px);
         }
 
         .brand-logo-box img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 0;
             display: block;
         }
 
@@ -67,31 +84,34 @@
 
         .brand-name {
             font-size: 18px;
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: 0.06em;
             color: #ffffff;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
         }
 
         .brand-tagline {
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.88);
         }
 
         .top-right {
             text-align: right;
             font-size: 13px;
             color: #ffffff;
+            position: relative;
+            z-index: 1;
         }
 
         .top-date {
-            font-weight: 500;
+            font-weight: 600;
             opacity: 0.9;
         }
 
         .top-time {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 0.16em;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
             color: #ffffff;
         }
 
@@ -100,19 +120,20 @@
             flex: 1;
             display: grid;
             grid-template-columns: 3fr 2fr;
-            gap: 10px;
+            gap: 12px;
             min-height: 0;
         }
 
         .panel {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 10px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 16px;
+            padding: 14px;
+            border: 1px solid rgba(229, 231, 235, 0.95);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
             display: flex;
             flex-direction: column;
             min-height: 0;
+            overflow: hidden;
         }
 
         /* ================= RIGHT PANEL: SIMETRIS 50/50 ================= */
@@ -120,47 +141,63 @@
             display: flex;
             flex-direction: column;
             min-height: 0;
-            gap: 8px;
+            gap: 12px;
+            padding: 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.10));
+            border: 1px solid rgba(255, 255, 255, 0.40);
         }
 
         .right-panel .video-box,
         .right-panel .promo-box {
             flex: 1;
             min-height: 0;
-            margin-bottom: 0;
         }
 
         /* ================= LEFT PANEL ================= */
         .section-title {
-            margin: 0 0 6px 0;
+            margin: 0 0 10px 0;
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.16em;
-            color: #4b5563;
+            color: #334155;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #2563eb;
+            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.12);
         }
 
         .current-wrapper {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .current-card {
             background: linear-gradient(145deg, #2563eb, #1d4ed8);
-            border-radius: 12px;
-            padding: 9px 10px;
+            border-radius: 14px;
+            padding: 12px 12px;
             color: #f9fafb;
             position: relative;
             overflow: hidden;
-            border: 1px solid #1d4ed8;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
         }
 
         .current-card::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 60%);
+            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 60%);
             pointer-events: none;
         }
 
@@ -168,15 +205,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             position: relative;
             z-index: 1;
-        }
-
-        .current-label-block {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
         }
 
         .current-label-top {
@@ -184,27 +215,29 @@
             text-transform: uppercase;
             letter-spacing: 0.13em;
             color: #dbeafe;
+            opacity: 0.95;
         }
 
         .current-service-name {
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .current-badge {
             font-size: 11px;
-            padding: 3px 9px;
+            padding: 4px 10px;
             border-radius: 999px;
-            border: 1px solid rgba(219, 234, 254, 0.9);
+            border: 1px solid rgba(219, 234, 254, 0.85);
             color: #eff6ff;
-            background: rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.22);
+            backdrop-filter: blur(6px);
         }
 
         .current-number-row {
             display: flex;
             align-items: flex-end;
             gap: 10px;
-            margin-top: 4px;
+            margin-top: 6px;
             position: relative;
             z-index: 1;
         }
@@ -217,10 +250,11 @@
         }
 
         .current-number {
-            font-size: 40px;
-            font-weight: 800;
-            letter-spacing: 0.16em;
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
             color: #fed7aa;
+            line-height: 1;
         }
 
         .current-number.cs {
@@ -228,144 +262,124 @@
         }
 
         .current-counter-box {
-            margin-top: 2px;
+            margin-top: 6px;
             font-size: 12px;
-            font-weight: 500;
-            color: #e5e7eb;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.90);
         }
 
         .current-arrow {
             margin-left: auto;
             font-size: 26px;
-            color: rgba(15, 23, 42, 0.25);
+            color: rgba(15, 23, 42, 0.22);
         }
 
         .queue-section {
-            margin-top: 4px;
+            margin-top: 8px;
         }
 
         .queue-title {
             font-size: 11px;
             letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: #4b5563;
-            margin-bottom: 4px;
+            color: #475569;
+            margin-bottom: 8px;
+            font-weight: 900;
         }
 
         .queue-list {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px;
+            gap: 8px;
             min-height: 32px;
         }
 
         .queue-item {
             background: #eff6ff;
-            border-radius: 10px;
-            padding: 4px 8px;
+            border-radius: 12px;
+            padding: 8px 10px;
             border: 1px solid #dbeafe;
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-size: 12px;
-        }
-
-        .queue-item-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
         }
 
         .queue-item-label {
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.13em;
-            color: #6b7280;
+            color: #64748b;
+            font-weight: 700;
         }
 
         .queue-item-number {
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 900;
             color: #0f172a;
         }
 
         .queue-item-arrow {
             font-size: 18px;
             color: #2563eb;
+            font-weight: 900;
         }
 
         .empty {
             font-size: 12px;
-            color: #9ca3af;
+            color: #94a3b8;
             grid-column: 1 / -1;
             align-self: center;
+            padding: 10px 12px;
+            border: 1px dashed rgba(148, 163, 184, 0.6);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.6);
         }
 
-        /* ================= RIGHT PANEL (VIDEO) ================= */
-        .video-box {
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-
-        .video-title-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            flex: 0 0 auto;
-        }
-
-        .video-title {
-            font-size: 13px;
-            color: #111827;
-            font-weight: 600;
-        }
-
-        /* ✅ VIDEO: isi kotak, tapi tidak kepotong */
-        #promoVideo {
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-            border-radius: 8px;
-            background: #000;
-            object-fit: contain;
-            display: block;
-        }
-
-        /* ================= PROMO BOX (SLIDER) ================= */
-        .promo-box {
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 8px 10px;
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-height: 0;
-        }
-
-        .promo-title {
-            font-size: 12px;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #4b5563;
-            flex: 0 0 auto;
-        }
-
-        .promo-slider {
+        /* ================= RIGHT MEDIA: PROFESIONAL ================= */
+        /* “wadah” yang elegan: border tipis + shadow halus */
+        .media-card {
             position: relative;
-            flex: 1;
-            min-height: 0;
-            width: 100%;
-            border-radius: 10px;
+            border-radius: 16px;
             overflow: hidden;
             background: #0b1220;
-            border: 1px solid #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+        }
+
+        .media-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.00) 40%);
+            pointer-events: none;
+        }
+
+        .video-box,
+        .promo-box {
+            min-height: 0;
+            display: flex;
+        }
+
+        /* ✅ VIDEO full */
+        #promoVideo {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            /* ganti ke contain kalau mau tidak kepotong */
+            background: #0b1220;
+        }
+
+        /* ✅ SLIDER full */
+        .promo-slider {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            min-height: 0;
+            background: #0b1220;
         }
 
         .promo-slide {
@@ -373,25 +387,34 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            background: #0b1220;
+            object-fit: cover;
+            /* ganti ke contain kalau mau tidak kepotong */
             opacity: 0;
             transition: opacity 600ms ease;
             display: block;
+            background: #0b1220;
         }
 
         .promo-slide.active {
             opacity: 1;
         }
 
+        /* ================= FOOTER ================= */
         .footer {
-            margin-top: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            color: #4b5563;
-            padding: 2px 2px 0;
+            color: #334155;
+            padding: 0 6px;
+            gap: 12px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
         }
 
         .status-dot {
@@ -399,30 +422,41 @@
             height: 8px;
             border-radius: 999px;
             background: #22c55e;
-            margin-right: 4px;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
         }
 
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .settings-btn {
+        /* ================= RUNNING TEXT ================= */
+        .running-text {
+            background: linear-gradient(135deg, #0f5fb3, #1565c0);
+            color: #ffffff;
             border-radius: 999px;
-            border: 1px solid #9ca3af;
-            background: #ffffff;
-            color: #111827;
-            font-size: 11px;
-            padding: 4px 10px;
-            cursor: pointer;
+            overflow: hidden;
+            padding: 8px 0;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.10em;
+            box-shadow: 0 12px 28px rgba(21, 101, 192, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
-        .settings-btn:hover {
-            background: #e5e7eb;
+        .running-text span {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: marquee 18s linear infinite;
         }
 
-        /* ================= SETTINGS OVERLAY ================= */
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* ================= SETTINGS OVERLAY (tetap) ================= */
         .settings-overlay {
             position: fixed;
             inset: 0;
@@ -473,6 +507,7 @@
             color: #4f46e5;
             margin-bottom: 4px;
             display: block;
+            font-weight: 700;
         }
 
         .settings-textarea {
@@ -494,7 +529,7 @@
             border: none;
             cursor: pointer;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 800;
         }
 
         .settings-save-btn {
@@ -530,36 +565,6 @@
             margin-top: 6px;
             font-size: 11px;
             color: #6b7280;
-        }
-
-        /* ================= RUNNING TEXT ================= */
-        .running-text {
-            margin-top: 6px;
-            background: #1565c0;
-            color: #ffffff;
-            border-radius: 999px;
-            overflow: hidden;
-            padding: 6px 0;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-        }
-
-        .running-text span {
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%;
-            animation: marquee 18s linear infinite;
-        }
-
-        @keyframes marquee {
-            0% {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
         }
     </style>
 </head>
@@ -640,20 +645,15 @@
 
         <!-- RIGHT -->
         <div class="panel right-panel">
-            <div class="video-box">
-                <div class="video-title-row">
-                    <div class="video-title">Video Informasi & Promo</div>
-                    <button class="settings-btn" onclick="toggleSettingsPanel()">⚙ Pengaturan</button>
-                </div>
+            <!-- VIDEO: tanpa judul & tanpa tombol pengaturan -->
+            <div class="video-box media-card">
                 <video id="promoVideo" autoplay loop muted playsinline>
                     Browser tidak mendukung video.
                 </video>
             </div>
 
-            <div class="promo-box">
-                <div class="promo-title">Promo Hari Ini</div>
-
-                <!-- ✅ gambar langsung di sini, otomatis slide -->
+            <!-- PROMO IMAGE: tanpa judul -->
+            <div class="promo-box media-card">
                 <div class="promo-slider">
                     <img class="promo-slide active" src="assets/promo1.jpg" alt="promo 1">
                     <img class="promo-slide" src="assets/promo2.jpg" alt="promo 2">
@@ -676,7 +676,7 @@
         <span>SELAMAT DATANG DI BRI — SIAP MELAYANI DENGAN SEPENUH HATI</span>
     </div>
 
-    <!-- SETTINGS OVERLAY -->
+    <!-- SETTINGS OVERLAY (tetap ada, dibuka via Ctrl+Shift+P) -->
     <div id="settings-overlay" class="settings-overlay hidden">
         <div class="settings-panel">
             <div class="settings-header">
