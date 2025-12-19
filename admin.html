@@ -3,11 +3,19 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Panel - Antrian Bank Astro</title>
     <style>
         * {
             box-sizing: border-box;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            /* ✅ supaya gak ada scroll body, scroll-nya pindah ke panel */
         }
 
         body {
@@ -18,9 +26,12 @@
             padding: 10px 14px;
             display: flex;
             flex-direction: column;
+            gap: 10px;
         }
 
+        /* ================= TOP BAR ================= */
         .top-bar {
+            flex: 0 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -28,14 +39,15 @@
             border-radius: 12px;
             padding: 10px 16px;
             box-shadow: 0 10px 26px rgba(21, 101, 192, 0.35);
-            margin-bottom: 10px;
             border: 1px solid rgba(255, 255, 255, 0.18);
+            min-height: 58px;
         }
 
         .brand-left {
             display: flex;
             align-items: center;
             gap: 10px;
+            min-width: 260px;
         }
 
         .brand-logo-box {
@@ -47,6 +59,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            flex: 0 0 auto;
         }
 
         .brand-logo-box img {
@@ -60,6 +73,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
         }
 
         .brand-name {
@@ -67,11 +81,13 @@
             font-weight: 800;
             letter-spacing: 0.06em;
             color: #ffffff;
+            line-height: 1.1;
         }
 
         .brand-tagline {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.85);
+            line-height: 1.1;
         }
 
         .top-right {
@@ -80,33 +96,16 @@
             gap: 12px;
         }
 
+        /* ✅ pill kanan atas DIHAPUS TOTAL (tidak dipakai) */
         .bank-pill {
-            background: rgba(15, 23, 42, 0.25);
-            padding: 7px 14px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #eff6ff;
-            border: 1px solid rgba(219, 234, 254, 0.7);
-            font-size: 12px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
-        }
-
-        .bank-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 999px;
-            background: #ffffff;
-            opacity: .95;
+            display: none !important;
         }
 
         .top-date-time {
             text-align: right;
             font-size: 11px;
             color: rgba(255, 255, 255, .9);
+            min-width: 120px;
         }
 
         .top-time {
@@ -114,35 +113,51 @@
             font-weight: 800;
             letter-spacing: 0.16em;
             color: #ffffff;
+            line-height: 1.1;
         }
 
+        /* ================= LAYOUT GRID ================= */
         .main-grid {
-            flex: 1;
+            flex: 1 1 auto;
             display: grid;
             grid-template-columns: 3fr 2fr;
             gap: 10px;
             min-height: 0;
+            /* ✅ penting supaya children bisa scroll */
         }
 
         .panel {
             background: rgba(255, 255, 255, .92);
             border-radius: 14px;
-            padding: 12px 12px;
+            padding: 12px;
             border: 1px solid rgba(255, 255, 255, .7);
             box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
             display: flex;
             flex-direction: column;
             min-height: 0;
+            /* ✅ penting */
+            overflow: hidden;
+            /* ✅ panel tidak membesar kebawah */
             backdrop-filter: blur(6px);
         }
 
         .panel-header-row {
+            flex: 0 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
             gap: 10px;
             flex-wrap: wrap;
+        }
+
+        .panel-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: auto;
+            /* ✅ scroll internal */
+            padding-right: 4px;
+            /* biar gak nabrak scrollbar */
         }
 
         .panel-title {
@@ -168,6 +183,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .btn-small:hover {
@@ -184,6 +200,7 @@
             background: #fecaca;
         }
 
+        /* ================= LEFT PANEL ================= */
         .call-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -233,6 +250,7 @@
             background: #eff6ff;
             color: #1d4ed8;
             white-space: nowrap;
+            flex: 0 0 auto;
         }
 
         .call-badge.cs {
@@ -284,6 +302,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            min-width: 0;
         }
 
         .last-title {
@@ -299,6 +318,7 @@
             font-weight: 900;
             letter-spacing: 0.10em;
             color: #0f172a;
+            line-height: 1.1;
         }
 
         .last-meta {
@@ -347,7 +367,6 @@
             background: #ffffff;
             overflow: hidden;
             box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
-            margin-bottom: 10px;
         }
 
         .mini-log-head {
@@ -357,6 +376,9 @@
             padding: 10px 12px;
             background: linear-gradient(180deg, #f8fafc, #ffffff);
             border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
         .mini-log-title {
@@ -374,6 +396,7 @@
             padding: 6px 10px;
             font-size: 11px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .mini-log-clear:hover {
@@ -381,7 +404,8 @@
         }
 
         .mini-log-list {
-            max-height: 160px;
+            max-height: 220px;
+            /* ✅ biar gak mendorong layout kebawah */
             overflow: auto;
         }
 
@@ -412,6 +436,7 @@
             background: #eff6ff;
             color: #1d4ed8;
             width: fit-content;
+            white-space: nowrap;
         }
 
         .mini-badge.cs {
@@ -442,14 +467,14 @@
             font-size: 12px;
         }
 
-        /* ===== PANEL KANAN: PROMO & VIDEO ===== */
+        /* ================= RIGHT PANEL ================= */
         .promo-textarea {
             width: 100%;
             border-radius: 12px;
             border: 1px solid #d1d5db;
             padding: 10px 12px;
             resize: vertical;
-            min-height: 80px;
+            min-height: 72px;
             font-size: 13px;
             background: #f9fafb;
             color: #111827;
@@ -473,6 +498,7 @@
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: #eef2ff;
             box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+            white-space: nowrap;
         }
 
         .btn-secondary {
@@ -484,15 +510,16 @@
             cursor: pointer;
             background: #ffffff;
             color: #111827;
+            white-space: nowrap;
         }
 
         .video-path {
             font-size: 11px;
             color: #6b7280;
             margin-top: 6px;
+            word-break: break-all;
         }
 
-        /* ✅ list gambar slider */
         .img-list {
             margin-top: 10px;
             border: 1px solid #e5e7eb;
@@ -536,6 +563,7 @@
             padding: 6px 10px;
             font-size: 11px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .img-btn:hover {
@@ -572,14 +600,16 @@
             color: #1f2937;
         }
 
+        /* ================= FOOTER ================= */
         .footer {
-            margin-top: 6px;
+            flex: 0 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
             color: #334155;
             padding: 0 2px;
+            min-height: 18px;
         }
 
         .status-dot {
@@ -593,13 +623,19 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            min-width: 0;
         }
 
         .status-dot.offline {
             background: #ef4444;
         }
 
+        /* ================= RESPONSIVE ================= */
         @media (max-width: 1100px) {
+            body {
+                padding: 10px 10px;
+            }
+
             .main-grid {
                 grid-template-columns: 1fr;
             }
@@ -610,6 +646,25 @@
 
             .mini-item {
                 grid-template-columns: 90px 1fr 140px 80px;
+            }
+
+            .top-date-time {
+                min-width: 110px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .brand-left {
+                min-width: 0;
+            }
+
+            .brand-name {
+                font-size: 16px;
+            }
+
+            .top-time {
+                font-size: 16px;
+                letter-spacing: 0.12em;
             }
         }
     </style>
@@ -629,10 +684,7 @@
         </div>
 
         <div class="top-right">
-            <div class="bank-pill">
-                <div class="bank-dot"></div>
-                <span id="pillText">BANK ASTRO • ADMIN</span>
-            </div>
+            <!-- ✅ pill kanan atas dihapus -->
             <div class="top-date-time">
                 <div id="hdr-date"></div>
                 <div id="hdr-time" class="top-time"></div>
@@ -654,80 +706,82 @@
                 </div>
             </div>
 
-            <div class="call-grid">
-                <!-- TELLER -->
-                <div class="call-card">
-                    <div class="call-head">
-                        <div>
-                            <div class="call-name">Teller</div>
-                            <div class="call-desc">Kontrol pemanggilan antrian loket Teller.</div>
+            <div class="panel-body">
+                <div class="call-grid">
+                    <!-- TELLER -->
+                    <div class="call-card">
+                        <div class="call-head">
+                            <div>
+                                <div class="call-name">Teller</div>
+                                <div class="call-desc">Kontrol pemanggilan antrian loket Teller.</div>
+                            </div>
+                            <div class="call-badge">LAYANAN TELLER</div>
                         </div>
-                        <div class="call-badge">LAYANAN TELLER</div>
-                    </div>
 
-                    <div class="form-row">
-                        <label for="tellerCounterSel">Loket</label>
-                        <select id="tellerCounterSel">
-                            <option value="Teller 1">Teller 1</option>
-                            <option value="Teller 2">Teller 2</option>
-                            <option value="Teller 3">Teller 3</option>
-                            <option value="Teller 4">Teller 4</option>
-                        </select>
-                    </div>
-
-                    <div class="last-box">
-                        <div class="last-left">
-                            <div class="last-title">Nomor terakhir dipanggil</div>
-                            <div id="tellerLast" class="last-number">-</div>
+                        <div class="form-row">
+                            <label for="tellerCounterSel">Loket</label>
+                            <select id="tellerCounterSel">
+                                <option value="Teller 1">Teller 1</option>
+                                <option value="Teller 2">Teller 2</option>
+                                <option value="Teller 3">Teller 3</option>
+                                <option value="Teller 4">Teller 4</option>
+                            </select>
                         </div>
-                        <div id="tellerLastCounter" class="last-meta">Loket: -</div>
+
+                        <div class="last-box">
+                            <div class="last-left">
+                                <div class="last-title">Nomor terakhir dipanggil</div>
+                                <div id="tellerLast" class="last-number">-</div>
+                            </div>
+                            <div id="tellerLastCounter" class="last-meta">Loket: -</div>
+                        </div>
+
+                        <button class="call-btn teller" onclick="callNext('TELLER')">Panggil Nomor Teller
+                            Berikutnya</button>
+                        <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
                     </div>
 
-                    <button class="call-btn teller" onclick="callNext('TELLER')">Panggil Nomor Teller
-                        Berikutnya</button>
-                    <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
+                    <!-- CS -->
+                    <div class="call-card">
+                        <div class="call-head">
+                            <div>
+                                <div class="call-name">Customer Service</div>
+                                <div class="call-desc">Kontrol pemanggilan antrian loket CS.</div>
+                            </div>
+                            <div class="call-badge cs">LAYANAN CS</div>
+                        </div>
+
+                        <div class="form-row">
+                            <label for="csCounterSel">Loket</label>
+                            <select id="csCounterSel">
+                                <option value="CS 1">CS 1</option>
+                                <option value="CS 2">CS 2</option>
+                                <option value="CS 3">CS 3</option>
+                            </select>
+                        </div>
+
+                        <div class="last-box cs">
+                            <div class="last-left">
+                                <div class="last-title">Nomor terakhir dipanggil</div>
+                                <div id="csLast" class="last-number">-</div>
+                            </div>
+                            <div id="csLastCounter" class="last-meta">Loket: -</div>
+                        </div>
+
+                        <button class="call-btn cs" onclick="callNext('CS')">Panggil Nomor CS Berikutnya</button>
+                        <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
+                    </div>
                 </div>
 
-                <!-- CS -->
-                <div class="call-card">
-                    <div class="call-head">
-                        <div>
-                            <div class="call-name">Customer Service</div>
-                            <div class="call-desc">Kontrol pemanggilan antrian loket CS.</div>
-                        </div>
-                        <div class="call-badge cs">LAYANAN CS</div>
+                <!-- RIWAYAT REALTIME -->
+                <div class="mini-log">
+                    <div class="mini-log-head">
+                        <div class="mini-log-title">Riwayat Pemanggilan (Realtime)</div>
+                        <button class="mini-log-clear" onclick="clearRealtimeLog()">Bersihkan</button>
                     </div>
-
-                    <div class="form-row">
-                        <label for="csCounterSel">Loket</label>
-                        <select id="csCounterSel">
-                            <option value="CS 1">CS 1</option>
-                            <option value="CS 2">CS 2</option>
-                            <option value="CS 3">CS 3</option>
-                        </select>
+                    <div id="miniLogList" class="mini-log-list">
+                        <div class="mini-empty">Belum ada pemanggilan pada sesi ini.</div>
                     </div>
-
-                    <div class="last-box cs">
-                        <div class="last-left">
-                            <div class="last-title">Nomor terakhir dipanggil</div>
-                            <div id="csLast" class="last-number">-</div>
-                        </div>
-                        <div id="csLastCounter" class="last-meta">Loket: -</div>
-                    </div>
-
-                    <button class="call-btn cs" onclick="callNext('CS')">Panggil Nomor CS Berikutnya</button>
-                    <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
-                </div>
-            </div>
-
-            <!-- ✅ RIWAYAT REALTIME -->
-            <div class="mini-log">
-                <div class="mini-log-head">
-                    <div class="mini-log-title">Riwayat Pemanggilan (Realtime)</div>
-                    <button class="mini-log-clear" onclick="clearRealtimeLog()">Bersihkan</button>
-                </div>
-                <div id="miniLogList" class="mini-log-list">
-                    <div class="mini-empty">Belum ada pemanggilan pada sesi ini.</div>
                 </div>
             </div>
         </div>
@@ -738,65 +792,66 @@
                 <div>
                     <div class="panel-title">Pengaturan Promo &amp; Video</div>
                     <div class="panel-subtitle" style="margin-top:4px">Teks, video, dan gambar slider akan tampil di
-                        Display.
-                    </div>
+                        Display.</div>
                 </div>
             </div>
 
-            <!-- PROMO TEXT -->
-            <div>
-                <div style="font-size:12px; color:#334155; margin-bottom:6px;">Teks Promo Hari Ini</div>
-                <textarea id="promo-input" class="promo-textarea"
-                    placeholder="Tulis teks promo yang akan tampil di layar Display..."></textarea>
+            <div class="panel-body">
+                <!-- PROMO TEXT -->
+                <div>
+                    <div style="font-size:12px; color:#334155; margin-bottom:6px;">Teks Promo Hari Ini</div>
+                    <textarea id="promo-input" class="promo-textarea"
+                        placeholder="Tulis teks promo yang akan tampil di layar Display..."></textarea>
 
-                <div class="promo-actions">
-                    <button class="btn-primary" onclick="savePromoText()">💾 Simpan Teks Promo</button>
-                </div>
-            </div>
-
-            <!-- VIDEO -->
-            <div style="margin-top:6px;">
-                <div style="font-size:12px; color:#334155; margin-bottom:6px;">Video Promo</div>
-                <div class="promo-actions" style="margin-top:0;">
-                    <button class="btn-secondary" onclick="choosePromoVideo()">📂 Pilih Video Promo...</button>
-                </div>
-                <div id="video-file-label" class="video-path">Tidak ada video terpilih.</div>
-            </div>
-
-            <!-- ✅ SLIDER IMAGES -->
-            <div style="margin-top:14px;">
-                <div style="font-size:12px; color:#334155; margin-bottom:6px;">Gambar Slider Promo (Multiple)</div>
-
-                <div class="promo-actions" style="margin-top:0;">
-                    <button class="btn-secondary" onclick="choosePromoImages()">🖼️ Pilih Gambar Slider...</button>
-                    <button class="btn-secondary" onclick="clearPromoImages()"
-                        style="border-color:#fecaca;color:#b91c1c;background:#fee2e2;">🗑️ Hapus Semua</button>
-                </div>
-
-                <div style="font-size:11px;color:#6b7280;margin-top:-6px;">
-                    Disarankan JPG/PNG. Display akan otomatis slide tiap 5 detik.
-                </div>
-
-                <div id="imgList" class="img-list" style="margin-top:10px;">
-                    <div class="img-row">
-                        <div class="img-name" style="color:#6b7280;font-weight:600;">Belum ada gambar slider.</div>
-                        <div></div>
+                    <div class="promo-actions">
+                        <button class="btn-primary" onclick="savePromoText()">💾 Simpan Teks Promo</button>
                     </div>
                 </div>
 
-                <!-- input file (browser mode) -->
-                <input id="imgPicker" type="file" accept="image/*" multiple style="display:none" />
-                <input id="videoPicker" type="file" accept="video/*" style="display:none" />
-            </div>
+                <!-- VIDEO -->
+                <div style="margin-top:6px;">
+                    <div style="font-size:12px; color:#334155; margin-bottom:6px;">Video Promo</div>
+                    <div class="promo-actions" style="margin-top:0;">
+                        <button class="btn-secondary" onclick="choosePromoVideo()">📂 Pilih Video Promo...</button>
+                    </div>
+                    <div id="video-file-label" class="video-path">Tidak ada video terpilih.</div>
+                </div>
 
-            <div class="note-panel">
-                <div class="note-title">Catatan</div>
-                <ul style="margin:0 0 0 16px; padding:0;">
-                    <li>Reset antrian hanya akan menghapus tiket <strong>hari ini</strong>.</li>
-                    <li>Promo &amp; media yang diubah akan tampil realtime di <strong>Display Antrian</strong>.</li>
-                    <li>Jika Admin dijalankan dari Electron, upload slider disarankan via IPC (lebih stabil).</li>
-                    <li>Jika via browser, server perlu endpoint upload <code>/api/display/upload-images</code>.</li>
-                </ul>
+                <!-- SLIDER IMAGES -->
+                <div style="margin-top:14px;">
+                    <div style="font-size:12px; color:#334155; margin-bottom:6px;">Gambar Slider Promo (Multiple)</div>
+
+                    <div class="promo-actions" style="margin-top:0;">
+                        <button class="btn-secondary" onclick="choosePromoImages()">🖼️ Pilih Gambar Slider...</button>
+                        <button class="btn-secondary" onclick="clearPromoImages()"
+                            style="border-color:#fecaca;color:#b91c1c;background:#fee2e2;">🗑️ Hapus Semua</button>
+                    </div>
+
+                    <div style="font-size:11px;color:#6b7280;margin-top:-6px;">
+                        Disarankan JPG/PNG. Display akan otomatis slide tiap 5 detik.
+                    </div>
+
+                    <div id="imgList" class="img-list" style="margin-top:10px;">
+                        <div class="img-row">
+                            <div class="img-name" style="color:#6b7280;font-weight:600;">Belum ada gambar slider.</div>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <!-- input file (browser mode) -->
+                    <input id="imgPicker" type="file" accept="image/*" multiple style="display:none" />
+                    <input id="videoPicker" type="file" accept="video/*" style="display:none" />
+                </div>
+
+                <div class="note-panel">
+                    <div class="note-title">Catatan</div>
+                    <ul style="margin:0 0 0 16px; padding:0;">
+                        <li>Reset antrian hanya akan menghapus tiket <strong>hari ini</strong>.</li>
+                        <li>Promo &amp; media yang diubah akan tampil realtime di <strong>Display Antrian</strong>.</li>
+                        <li>Jika Admin dijalankan dari Electron, upload slider disarankan via IPC (lebih stabil).</li>
+                        <li>Jika via browser, server perlu endpoint upload <code>/api/display/upload-images</code>.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -823,8 +878,8 @@
         // header brand
         const brandNameEl = document.getElementById("brand-name");
         if (brandNameEl) brandNameEl.textContent = BRANCH_NAME || "BRI";
-        const pillText = document.getElementById("pillText");
-        if (pillText) pillText.textContent = `${BRANCH_NAME} • ADMIN`;
+
+        // ✅ pillText dihapus, jadi tidak ada update pillText lagi
 
         const statusEl = document.getElementById("connection-status");
         const dotEl = document.getElementById("dot");
@@ -1104,13 +1159,11 @@
         // ==========================
         let currentDisplayConfig = null;
 
-        // helper ambil images dari config (biar konsisten)
         function getPromoImagesFromConfig(cfg) {
             const arr = cfg?.promo_images || cfg?.promoImages || cfg?.slider_images || cfg?.sliderImages || cfg?.images || [];
             return Array.isArray(arr) ? arr.filter(Boolean).map(String) : [];
         }
 
-        // render list images di admin
         const imgListEl = document.getElementById("imgList");
         function renderPromoImagesList(images) {
             const list = Array.isArray(images) ? images : [];
@@ -1139,7 +1192,6 @@
             }).join("");
         }
 
-        // 
         let promoIsEditing = false;
         let promoIsDirty = false;
 
@@ -1150,38 +1202,27 @@
             promoInputEl.addEventListener("input", () => { promoIsDirty = true; });
         }
 
-
-        // Load config: coba dari SERVER dulu, kalau gagal -> IPC
         async function loadDisplayConfig() {
-            // 1) server
             try {
                 const json = await fetchJson("/api/display/config");
                 const cfg = json?.config ? json.config : json;
                 currentDisplayConfig = cfg;
 
-                // promo text
                 const promoTextEl = document.getElementById("promo-input");
                 if (promoTextEl) {
-                    // jangan ganggu user kalau sedang mengetik
                     if (!promoIsEditing && !promoIsDirty) {
                         promoTextEl.value = (cfg.promo_text || cfg.promoText || "").toString();
-
                     }
                 }
 
-                // video label
                 const labelEl = document.getElementById("video-file-label");
                 const videoPath = cfg.video_path || cfg.videoPath || null;
                 if (labelEl) labelEl.textContent = videoPath ? `File: ${videoPath}` : "Tidak ada video terpilih.";
 
-                // images list (kalau server ngga punya, tetap render dari cfg)
                 renderPromoImagesList(getPromoImagesFromConfig(cfg));
                 return;
-            } catch (e) {
-                // lanjut IPC
-            }
+            } catch (e) { }
 
-            // 2) IPC fallback
             try {
                 if (!ipcRenderer) return;
                 const cfg = await ipcRenderer.invoke("display:getConfig");
@@ -1199,11 +1240,9 @@
             }
         }
 
-        // simpan promo text: server dulu, fallback IPC
         async function savePromoText() {
             const promoText = (document.getElementById("promo-input")?.value || "").trim();
 
-            // 1) server
             try {
                 const res = await fetch(`${API_BASE}/api/display/config`, {
                     method: "POST",
@@ -1219,7 +1258,6 @@
                 alert("Teks promo berhasil disimpan (server).");
                 return;
             } catch (e) {
-                // 2) IPC
                 try {
                     if (!ipcRenderer) { alert("Gagal simpan ke server, dan IPC tidak tersedia."); return; }
                     const next = await ipcRenderer.invoke("display:updatePromo", { promoText });
@@ -1233,7 +1271,6 @@
         }
         window.savePromoText = savePromoText;
 
-        // pilih video: IPC
         const videoPickerEl = document.getElementById("videoPicker");
 
         async function uploadVideoToServer(file) {
@@ -1257,7 +1294,7 @@
 
                 try {
                     await uploadVideoToServer(file);
-                    await loadDisplayConfig(); // refresh label + config
+                    await loadDisplayConfig();
                     alert("Video promo berhasil diupload & disimpan (server).");
                 } catch (e) {
                     console.error(e);
@@ -1265,16 +1302,13 @@
                 }
             });
         }
-
         window.choosePromoVideo = choosePromoVideo;
-
 
         // ==========================
         // ✅ PILIH GAMBAR SLIDER
         // ==========================
         const imgPickerEl = document.getElementById("imgPicker");
 
-        // update config images ke server
         async function savePromoImagesToServer(images) {
             const res = await fetch(`${API_BASE}/api/display/config`, {
                 method: "POST",
@@ -1285,7 +1319,6 @@
             return await res.json();
         }
 
-        // (opsional) upload file gambar ke server (butuh endpoint)
         async function uploadImagesToServer(files) {
             const fd = new FormData();
             for (const f of files) fd.append("files", f);
@@ -1297,28 +1330,19 @@
             if (!res.ok) throw new Error("HTTP " + res.status);
 
             const json = await res.json();
-            // ✅ server mengembalikan { ok:true, config:{...} }
             return json?.config ? json.config : json;
         }
 
-
         async function choosePromoImages() {
-            // ✅ 1) Electron: pakai IPC (WAJIB kalau server tidak punya endpoint upload)
             if (ipcRenderer) {
                 try {
                     const next = await ipcRenderer.invoke("display:chooseSliderImages");
-
-                    // dukung beberapa bentuk return
-                    // - { ok:true, files:[...] }
-                    // - { promoImages:[...] } / { images:[...] } / cfg object
                     let imgs = [];
                     if (next && Array.isArray(next.files)) imgs = next.files;
                     else imgs = getPromoImagesFromConfig(next);
 
                     currentDisplayConfig = next || currentDisplayConfig;
-                    // kalau config return tidak ada, tetap render list dari imgs
                     if (imgs.length) {
-                        // bikin pseudo config agar list kebaca
                         currentDisplayConfig = { ...(currentDisplayConfig || {}), promoImages: imgs, promo_images: imgs };
                     }
 
@@ -1330,7 +1354,6 @@
                 }
             }
 
-            // 2) browser mode: pilih file => upload ke server
             if (!imgPickerEl) return;
             imgPickerEl.value = "";
             imgPickerEl.click();
@@ -1343,7 +1366,6 @@
                 if (!files.length) return;
 
                 try {
-                    // ✅ server sudah upload + merge + simpan ke DB
                     const cfg = await uploadImagesToServer(files);
                     currentDisplayConfig = cfg;
 
@@ -1354,7 +1376,6 @@
                     alert("Gagal upload gambar. Pastikan server hidup & endpoint /api/display/upload-images ada.");
                 }
             });
-
         }
 
         async function removePromoImage(idx) {
@@ -1362,7 +1383,6 @@
             if (idx < 0 || idx >= current.length) return;
             const nextArr = current.filter((_, i) => i !== idx);
 
-            // server dulu
             try {
                 const saved = await savePromoImagesToServer(nextArr);
                 currentDisplayConfig = saved?.config ? saved.config : saved;
@@ -1370,10 +1390,8 @@
                 return;
             } catch { }
 
-            // IPC fallback: kalau handler remove satuan tidak ada, minimal kasih info
             try {
                 if (!ipcRenderer) throw new Error("IPC tidak tersedia");
-                // kalau kamu punya handler update list, pakai ini (kalau tidak ada, akan catch)
                 const saved = await ipcRenderer.invoke("display:updatePromoImages", { promoImages: nextArr });
                 currentDisplayConfig = saved;
                 renderPromoImagesList(getPromoImagesFromConfig(saved));
@@ -1387,13 +1405,10 @@
         async function clearPromoImages() {
             if (!confirm("Hapus semua gambar slider?")) return;
 
-            // ✅ prioritas IPC clear (biar tidak error endpoint)
             if (ipcRenderer) {
                 try {
                     const res = await ipcRenderer.invoke("display:clearSliderImages");
-                    // dukung return ok boolean
                     currentDisplayConfig = res || currentDisplayConfig;
-                    // reset list tampilan
                     renderPromoImagesList([]);
                     alert("Semua gambar slider dihapus (IPC).");
                     return;
@@ -1402,7 +1417,6 @@
                 }
             }
 
-            // server fallback
             const nextArr = [];
             try {
                 const saved = await savePromoImagesToServer(nextArr);

@@ -1,5 +1,5 @@
 // FILE: main.js
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -165,6 +165,44 @@ function createWindowByMode(mode, cfg) {
     height,
     title,
     webPreferences: { nodeIntegration: true, contextIsolation: false },
+    autoHideMenuBar: false, // normal: menu bar boleh tampil
+  });
+
+  // normal mode
+  win.setMenuBarVisibility(true);
+  win.setAutoHideMenuBar(false);
+
+  // helper biar rapi
+  function hideMenu() {
+    win.setMenuBarVisibility(false);
+    win.setAutoHideMenuBar(true);
+  }
+  function showMenu() {
+    win.setMenuBarVisibility(true);
+    win.setAutoHideMenuBar(false);
+  }
+
+  // ✅ Fullscreen level window (win.setFullScreen / menu fullscreen)
+  win.on("enter-full-screen", hideMenu);
+  win.on("leave-full-screen", showMenu);
+
+  // ✅ Fullscreen level webContents (biasanya kepakai saat F11)
+  win.webContents.on("enter-html-full-screen", hideMenu);
+  win.webContents.on("leave-html-full-screen", showMenu);
+
+  // ✅ normal mode: tampilkan menu bar
+  win.setMenuBarVisibility(true);
+
+  // ✅ opsi 2: saat fullscreen -> sembunyikan menu bar
+  win.on("enter-full-screen", () => {
+    win.setMenuBarVisibility(false);
+    win.setAutoHideMenuBar(true);
+  });
+
+  // ✅ keluar fullscreen -> tampilkan lagi
+  win.on("leave-full-screen", () => {
+    win.setMenuBarVisibility(true);
+    win.setAutoHideMenuBar(false);
   });
 
   win.loadFile(file);
