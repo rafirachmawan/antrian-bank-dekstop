@@ -1,9 +1,92 @@
 // FILE: electron/main.js
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+// ✅ ambil fungsi db dari root project (karena main.js ada di folder electron/)
+const { getDisplayConfig, setDisplayConfig } = require("../db");
+
 let mainWindows = [];
+
+// ==========================
+// ✅ IPC HELPERS (slider images)
+// ==========================
+function ensurePromoImagesDir() {
+  const baseDir = app.getPath("userData");
+  const dir = path.join(baseDir, "media", "promo-images");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function sanitizeFileName(name) {
+  return String(name || "file")
+    .replace(/[^\w.\-]+/g, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 180);
+}
+
+// ✅ register IPC handlers (tanpa ubah logika lain)
+function registerIpcHandlers() {
+  // pilih beberapa gambar slider -> copy ke userData/media/promo-images -> simpan list ke DB
+  ipcMain.handle("display:chooseSliderImages", async () => {
+    const win = BrowserWindow.getFocusedWindow();
+
+    const result = await dialog.showOpenDialog(win, {
+      title: "Pilih Gambar Slider",
+      properties: ["openFile", "multiSelections"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp"] }],
+    });
+
+    if (result.canceled || !result.filePaths?.length) {
+      return { ok: true, files: [] };
+    }
+
+    const imagesDir = ensurePromoImagesDir();
+
+    // ambil list sekarang supaya merge (tidak menimpa)
+    const current = await getDisplayConfig();
+    const currentList = Array.isArray(current?.promoImages)
+      ? current.promoImages
+      : [];
+
+    const newPaths = [];
+
+    for (const srcAbs of result.filePaths) {
+      const ext = path.extname(srcAbs).toLowerCase();
+      const base = sanitizeFileName(path.basename(srcAbs, ext));
+      const filename = `${base}__${Date.now()}${ext || ".bin"}`;
+      const dstAbs = path.join(imagesDir, filename);
+
+      // copy ke folder media
+      fs.copyFileSync(srcAbs, dstAbs);
+
+      // simpan sebagai path URL sesuai server.js kamu:
+      // GET /media/promo-images/:name
+      newPaths.push(`/media/promo-images/${encodeURIComponent(filename)}`);
+    }
+
+    const merged = [...currentList, ...newPaths].filter(Boolean);
+
+    await setDisplayConfig({ promo_images: merged });
+
+    // return bentuk yang admin.html kamu sudah support: {files:[...]}
+    return { ok: true, files: merged };
+  });
+
+  // hapus semua slider images (hanya list di DB)
+  ipcMain.handle("display:clearSliderImages", async () => {
+    await setDisplayConfig({ promo_images: [] });
+    return { ok: true };
+  });
+
+  // opsional: kalau admin.html kamu pakai remove satuan / update list
+  ipcMain.handle("display:updatePromoImages", async (_evt, payload) => {
+    const arr = payload?.promoImages;
+    const next = Array.isArray(arr) ? arr.map(String).filter(Boolean) : [];
+    await setDisplayConfig({ promo_images: next });
+    return await getDisplayConfig();
+  });
+}
 
 // baca config per PC
 function loadConfig() {
@@ -101,6 +184,9 @@ function createWindows() {
 }
 
 app.whenReady().then(() => {
+  // ✅ tambahkan ini (tidak mengubah logika lain)
+  registerIpcHandlers();
+
   createWindows();
 
   app.on("activate", () => {

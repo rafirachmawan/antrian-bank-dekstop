@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 
 const {
   takeTicket,
@@ -13,14 +14,59 @@ const {
   clearTodayTickets,
   getDisplayConfig,
   setDisplayConfig,
+  getUserDataPathSafe,
 } = require("./db");
 
-function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
+function safeMkdir(p) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+}
+function sanitizeFileName(name) {
+  return String(name || "file")
+    .replace(/[^\w.\-]+/g, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 180);
+}
+function extOf(original) {
+  const e = path.extname(original || "").toLowerCase();
+  return e && e.length <= 10 ? e : "";
+}
+
+/**
+ * createServer({ port, host, userDataPath })
+ * ✅ userDataPath dipakai supaya folder media selalu konsisten dengan Electron (app.getPath('userData'))
+ */
+function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   const app = express();
   app.use(cors());
-
-  // ✅ aman kalau nanti ada payload besar
   app.use(express.json({ limit: "20mb" }));
+
+  // ✅ media folders di PC SERVER (konsisten)
+  const baseDir =
+    (userDataPath && String(userDataPath)) ||
+    (getUserDataPathSafe ? getUserDataPathSafe() : process.cwd());
+
+  const mediaRoot = path.join(baseDir, "media");
+  const videoDir = path.join(mediaRoot, "promo-video");
+  const imagesDir = path.join(mediaRoot, "promo-images");
+  safeMkdir(videoDir);
+  safeMkdir(imagesDir);
+
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        if (req.path.includes("upload-video")) return cb(null, videoDir);
+        return cb(null, imagesDir);
+      },
+      filename: (req, file, cb) => {
+        const base = sanitizeFileName(
+          path.basename(file.originalname, path.extname(file.originalname))
+        );
+        const ext = extOf(file.originalname) || ".bin";
+        cb(null, `${base}__${Date.now()}${ext}`);
+      },
+    }),
+    limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  });
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -31,7 +77,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
   });
 
   // ===================== QUEUE =====================
-  // Primary: /api/take-ticket
   app.post("/api/take-ticket", async (req, res) => {
     try {
       const { serviceType } = req.body;
@@ -42,7 +87,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  // Alias: /api/tickets/take (biar HTML lama tetap jalan)
   app.post("/api/tickets/take", async (req, res) => {
     try {
       const { serviceType } = req.body;
@@ -53,19 +97,16 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  // Primary: /api/call-next
   app.post("/api/call-next", async (req, res) => {
     try {
       const { serviceType, counterName } = req.body;
       const called = await callNext(serviceType, counterName);
-      // called bisa null kalau kosong
       res.json({ ok: true, called });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
     }
   });
 
-  // Alias: /api/tickets/next (biar HTML lama tetap jalan)
   app.post("/api/tickets/next", async (req, res) => {
     try {
       const { serviceType, counterName } = req.body;
@@ -76,11 +117,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  /**
-   * ✅ STATE
-   * Penting: DISPLAY kamu biasanya expect object state langsung (tellerNow/csNow/queues).
-   * Jadi /api/state kita balikin state langsung.
-   */
   app.get("/api/state", async (_req, res) => {
     try {
       const state = await getState();
@@ -90,7 +126,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  // Optional: kalau kamu butuh format lama yang dibungkus
   app.get("/api/state/full", async (_req, res) => {
     try {
       res.json({ ok: true, state: await getState() });
@@ -100,7 +135,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
   });
 
   // ===================== ADMIN =====================
-  // Primary: /api/admin/summary
   app.get("/api/admin/summary", async (_req, res) => {
     try {
       res.json({ ok: true, summary: await getTodaySummary() });
@@ -109,7 +143,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  // Alias: /api/admin/today-summary
   app.get("/api/admin/today-summary", async (_req, res) => {
     try {
       res.json({ ok: true, summary: await getTodaySummary() });
@@ -118,7 +151,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  // Primary: /api/admin/calls
   app.get("/api/admin/calls", async (_req, res) => {
     try {
       res.json({ ok: true, rows: await getTodayCalls() });
@@ -127,7 +159,6 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
     }
   });
 
-  // Alias: /api/admin/today-calls
   app.get("/api/admin/today-calls", async (_req, res) => {
     try {
       res.json({ ok: true, rows: await getTodayCalls() });
@@ -148,7 +179,21 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
   // ===================== DISPLAY CONFIG =====================
   app.get("/api/display/config", async (_req, res) => {
     try {
-      res.json({ ok: true, config: await getDisplayConfig() });
+      const cfg = await getDisplayConfig();
+      res.json({
+        ok: true,
+        config: {
+          promo_text: cfg.promoText,
+          video_path: cfg.videoPath,
+          promo_images: cfg.promoImages || [],
+          updated_at: cfg.updatedAt,
+          // legacy
+          promoText: cfg.promoText,
+          videoPath: cfg.videoPath,
+          promoImages: cfg.promoImages || [],
+          updatedAt: cfg.updatedAt,
+        },
+      });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
     }
@@ -156,51 +201,140 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
 
   app.post("/api/display/config", async (req, res) => {
     try {
-      const { promo_text, video_path } = req.body || {};
+      const body = req.body || {};
+      const promo_text = body.promo_text;
+      const video_path = body.video_path;
+      const promo_images = body.promo_images;
+
+      const cfg = await setDisplayConfig({
+        promo_text,
+        video_path,
+        promo_images,
+      });
+
       res.json({
         ok: true,
-        config: await setDisplayConfig({ promo_text, video_path }),
+        config: {
+          promo_text: cfg.promoText,
+          video_path: cfg.videoPath,
+          promo_images: cfg.promoImages || [],
+          updated_at: cfg.updatedAt,
+          promoText: cfg.promoText,
+          videoPath: cfg.videoPath,
+          promoImages: cfg.promoImages || [],
+          updatedAt: cfg.updatedAt,
+        },
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
     }
   });
 
+  // ✅ Upload VIDEO ke server (Admin pakai ini) + simpan ke DB
+  app.post(
+    "/api/display/upload-video",
+    upload.single("file"),
+    async (req, res) => {
+      try {
+        if (!req.file)
+          return res.status(400).json({ ok: false, error: "No file" });
+        const abs = req.file.path; // path absolute di server
+        const cfg = await setDisplayConfig({ video_path: abs });
+        res.json({ ok: true, config: cfg });
+      } catch (e) {
+        res.status(500).json({ ok: false, error: String(e?.message || e) });
+      }
+    }
+  );
+
+  // ✅ Upload IMAGES ke server (multiple) + ✅ simpan ke DB (merge, tidak hilang)
+  app.post(
+    "/api/display/upload-images",
+    upload.array("files", 20),
+    async (req, res) => {
+      try {
+        const files = req.files || [];
+        if (!files.length)
+          return res.status(400).json({ ok: false, error: "No files" });
+
+        const current = await getDisplayConfig();
+        const currentList = Array.isArray(current?.promoImages)
+          ? current.promoImages
+          : [];
+
+        // simpan sebagai path URL yang bisa dibuka Display
+        const newPaths = files.map(
+          (f) =>
+            `/media/promo-images/${encodeURIComponent(path.basename(f.path))}`
+        );
+
+        const merged = [...currentList, ...newPaths].filter(Boolean);
+
+        const cfg = await setDisplayConfig({ promo_images: merged });
+
+        res.json({
+          ok: true,
+          config: {
+            promo_text: cfg.promoText,
+            video_path: cfg.videoPath,
+            promo_images: cfg.promoImages || [],
+            updated_at: cfg.updatedAt,
+            promoText: cfg.promoText,
+            videoPath: cfg.videoPath,
+            promoImages: cfg.promoImages || [],
+            updatedAt: cfg.updatedAt,
+          },
+        });
+      } catch (e) {
+        res.status(500).json({ ok: false, error: String(e?.message || e) });
+      }
+    }
+  );
+
+  // ✅ Serve images slider
+  app.get("/media/promo-images/:name", (req, res) => {
+    try {
+      const file = String(req.params.name || "");
+      const safe = decodeURIComponent(file);
+      const abs = path.join(imagesDir, safe);
+
+      if (!abs.startsWith(imagesDir)) return res.status(400).send("Bad path");
+      if (!fs.existsSync(abs)) return res.status(404).send("Not found");
+
+      res.setHeader("Cache-Control", "no-store");
+      res.sendFile(abs);
+    } catch (e) {
+      res.status(500).send(String(e?.message || e));
+    }
+  });
+
   /**
-   * ✅ PENTING: serve video promo agar DISPLAY di PC lain bisa akses
-   * - Admin menyimpan video_path berupa path file di PC server (mis: C:\...\promo.mp4)
-   * - Display PC lain cukup set src ke: http://IP-SERVER:3000/media/promo
+   * ✅ STREAM VIDEO promo dari path yang disimpan di DB server
+   * Display PC lain pakai: http://IP-SERVER:3000/media/promo
    */
   app.get("/media/promo", async (req, res) => {
     try {
       const cfg = await getDisplayConfig();
-
-      // dukung dua kemungkinan nama field dari db.js
-      const videoPath = cfg?.video_path || cfg?.videoPath;
+      const videoPath = cfg?.videoPath;
 
       if (!videoPath || typeof videoPath !== "string") {
         return res.status(404).send("No promo video set");
       }
 
-      // normalize path
       const absPath = path.isAbsolute(videoPath)
         ? videoPath
         : path.join(process.cwd(), videoPath);
-
-      if (!fs.existsSync(absPath)) {
+      if (!fs.existsSync(absPath))
         return res.status(404).send("Promo video file not found");
-      }
 
       const stat = fs.statSync(absPath);
       const fileSize = stat.size;
       const range = req.headers.range;
 
-      // MP4 streaming support
       if (range) {
         const parts = range.replace(/bytes=/, "").split("-");
         const start = parseInt(parts[0], 10);
         const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-
         const chunkSize = end - start + 1;
         const file = fs.createReadStream(absPath, { start, end });
 
@@ -230,6 +364,7 @@ function createServer({ port = 3000, host = "0.0.0.0" } = {}) {
 
   const server = app.listen(port, host, () => {
     console.log(`✅ Queue Server running on http://${host}:${port}`);
+    console.log("✅ Media root:", mediaRoot);
   });
 
   return { app, server };

@@ -84,19 +84,29 @@ async function initDb() {
     );
   `;
 
+  // ✅ tambah promo_images untuk slider
   const sqlConfig = `
     CREATE TABLE IF NOT EXISTS display_config (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       promo_text TEXT DEFAULT '',
       video_path TEXT DEFAULT NULL,
+      promo_images TEXT DEFAULT '[]',
       updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
     );
   `;
 
   await run(sqlTickets);
   await run(sqlConfig);
+
+  // ✅ kalau DB lama: pastikan kolom promo_images ada
+  try {
+    await run(
+      `ALTER TABLE display_config ADD COLUMN promo_images TEXT DEFAULT '[]'`
+    );
+  } catch {}
+
   await run(
-    `INSERT OR IGNORE INTO display_config (id, promo_text, video_path) VALUES (1,'',NULL);`
+    `INSERT OR IGNORE INTO display_config (id, promo_text, video_path, promo_images) VALUES (1,'',NULL,'[]');`
   );
 }
 
@@ -104,15 +114,21 @@ async function initDb() {
 function todayKeySQL() {
   return "date('now','localtime')";
 }
-
 function pad3(n) {
   return String(n).padStart(3, "0");
 }
-
 function normalizeService(serviceType) {
   if (serviceType === "TELLER") return "TELLER";
   if (serviceType === "CS") return "CS";
   throw new Error("serviceType invalid");
+}
+function safeParseJsonArray(x) {
+  try {
+    const arr = JSON.parse(x || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
 }
 
 // ============= QUEUE LOGIC =============
@@ -185,11 +201,7 @@ async function callNext(serviceType, counterName) {
     [counterName, row.id]
   );
 
-  return {
-    ticketCode: row.ticket_code,
-    counterName,
-    serviceType,
-  };
+  return { ticketCode: row.ticket_code, counterName, serviceType };
 }
 
 // Ambil state untuk display (sedang dilayani + daftar waiting)
@@ -302,32 +314,40 @@ async function clearTodayTickets() {
 // ============= DISPLAY CONFIG =============
 async function getDisplayConfig() {
   const row = await get(
-    `SELECT promo_text, video_path, updated_at FROM display_config WHERE id = 1 LIMIT 1`
+    `SELECT promo_text, video_path, promo_images, updated_at FROM display_config WHERE id = 1 LIMIT 1`
   );
 
   return {
     promoText: row?.promo_text || "",
     videoPath: row?.video_path || null,
+    promoImages: safeParseJsonArray(row?.promo_images),
     updatedAt: row?.updated_at || null,
   };
 }
 
-async function setDisplayConfig({ promo_text, video_path }) {
-  // update hanya yang dikirim
+async function setDisplayConfig({ promo_text, video_path, promo_images }) {
   const current = await getDisplayConfig();
 
   const nextPromo = promo_text !== undefined ? promo_text : current.promoText;
   const nextVideo = video_path !== undefined ? video_path : current.videoPath;
+
+  const nextImages =
+    promo_images !== undefined
+      ? Array.isArray(promo_images)
+        ? promo_images
+        : safeParseJsonArray(promo_images)
+      : current.promoImages;
 
   await run(
     `
     UPDATE display_config
     SET promo_text = ?,
         video_path = ?,
+        promo_images = ?,
         updated_at = datetime('now','localtime')
     WHERE id = 1
     `,
-    [nextPromo, nextVideo]
+    [nextPromo, nextVideo, JSON.stringify(nextImages)]
   );
 
   return getDisplayConfig();
@@ -336,17 +356,15 @@ async function setDisplayConfig({ promo_text, video_path }) {
 // ============= EXPORT =============
 module.exports = {
   initDb,
-
   takeTicket,
   callNext,
   getState,
-
-  // admin
   getTodaySummary,
   getTodayCalls,
   clearTodayTickets,
-
-  // display
   getDisplayConfig,
   setDisplayConfig,
+  // helper (dipakai server)
+  getDbPath,
+  getUserDataPathSafe,
 };

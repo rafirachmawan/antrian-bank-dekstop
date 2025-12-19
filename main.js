@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
-// ✅ INI TAMBAHKAN
+// ✅ INI TAMBAHKAN (sesuai kode kamu)
 const fixedUserData = path.join(app.getPath("appData"), "antrian-bank-desktop");
 app.setPath("userData", fixedUserData);
 
@@ -294,26 +294,54 @@ function buildThermalReceiptHtml(payload) {
 `;
 }
 
+/** helper: pastikan folder promo-images ada */
+function ensurePromoImagesDir() {
+  // ✅ samakan dengan server.js: userData/media/promo-images
+  const dir = path.join(app.getPath("userData"), "media", "promo-images");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+/** helper: copy file image -> userData/promo-images, return filename */
+function copyImageToPromoDir(filePath) {
+  const dir = ensurePromoImagesDir();
+  const ext = path.extname(filePath).toLowerCase() || ".jpg";
+  const base = path
+    .basename(filePath, ext)
+    .replace(/[^\w\-]+/g, "_")
+    .slice(0, 40);
+  const stamp = Date.now();
+  const name = `${base}_${stamp}${ext}`;
+  const target = path.join(dir, name);
+  fs.copyFileSync(filePath, target);
+  return name;
+}
+
+/** ✅ helper: normalisasi bentuk return config agar admin.html/display.html gampang */
+function toRendererDisplayConfig(cfg) {
+  return {
+    promoText: cfg?.promoText || "",
+    videoPath: cfg?.videoPath || null,
+    promoImages: Array.isArray(cfg?.promoImages) ? cfg.promoImages : [],
+    updatedAt: cfg?.updatedAt || null,
+  };
+}
+
 /** ✅ REGISTER IPC (sekali saja) */
 function registerIpcHandlers() {
-  // ===== Display config (promo/video) =====
+  // ===== Display config (promo/video/slider) =====
   ipcMain.handle("display:getConfig", async () => {
     const cfg = await getDisplayConfig();
-    return {
-      promoText: cfg?.promoText || "",
-      videoPath: cfg?.videoPath || null,
-    };
+    return toRendererDisplayConfig(cfg);
   });
 
   ipcMain.handle("display:updatePromo", async (_evt, payload) => {
     const promoText = (payload?.promoText || "").toString();
     const next = await setDisplayConfig({ promo_text: promoText });
-    return {
-      promoText: next?.promoText || "",
-      videoPath: next?.videoPath || null,
-    };
+    return toRendererDisplayConfig(next);
   });
 
+  // ✅ ini dipakai admin.html kamu (pilih video)
   ipcMain.handle("display:chooseVideo", async () => {
     const res = await dialog.showOpenDialog({
       title: "Pilih video promo (MP4)",
@@ -322,7 +350,6 @@ function registerIpcHandlers() {
         { name: "Video", extensions: ["mp4", "mkv", "mov", "avi", "webm"] },
       ],
     });
-
     if (res.canceled || !res.filePaths?.[0]) throw new Error("cancelled");
 
     const picked = res.filePaths[0];
@@ -337,18 +364,56 @@ function registerIpcHandlers() {
     fs.copyFileSync(picked, target);
 
     const next = await setDisplayConfig({ video_path: target });
-    return {
-      promoText: next?.promoText || "",
-      videoPath: next?.videoPath || null,
-    };
+    return toRendererDisplayConfig(next);
   });
 
   ipcMain.handle("display:clearVideo", async () => {
     const next = await setDisplayConfig({ video_path: null });
-    return {
-      promoText: next?.promoText || "",
-      videoPath: next?.videoPath || null,
-    };
+    return toRendererDisplayConfig(next);
+  });
+
+  // ✅✅✅ FIX: admin.html kamu memanggil "display:choosePromoImages"
+  // jadi kita sediakan handler ini (alias) agar tombol gambar pasti respon.
+  ipcMain.handle("display:choosePromoImages", async () => {
+    const res = await dialog.showOpenDialog({
+      title: "Pilih gambar slider (multiple)",
+      properties: ["openFile", "multiSelections"],
+      filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png", "webp"] }],
+    });
+
+    // kalau cancel: tetap balikin config terbaru
+    if (res.canceled || !res.filePaths?.length) {
+      const cfg = await getDisplayConfig();
+      return toRendererDisplayConfig(cfg);
+    }
+
+    const current = await getDisplayConfig();
+    const currentList = Array.isArray(current?.promoImages)
+      ? current.promoImages
+      : [];
+
+    const newNames = [];
+    for (const p of res.filePaths) {
+      try {
+        const fname = copyImageToPromoDir(p);
+        newNames.push(fname);
+      } catch (e) {
+        console.error("❌ copy slider image failed:", p, e);
+      }
+    }
+
+    // gabung tanpa menghapus yg lama
+    const merged = [...currentList, ...newNames].filter(Boolean);
+
+    const next = await setDisplayConfig({ promo_images: merged });
+    return toRendererDisplayConfig(next);
+  });
+
+  // ✅ FIX: admin.html kamu memanggil "display:updatePromoImages" saat hapus/clear
+  ipcMain.handle("display:updatePromoImages", async (_evt, payload) => {
+    const promoImages = payload?.promoImages;
+    const next = await setDisplayConfig({ promo_images: promoImages });
+    return toRendererDisplayConfig(next);
   });
 
   // ===== Admin =====
@@ -363,10 +428,8 @@ function registerIpcHandlers() {
   ipcMain.handle("panel:callNext", async (_evt, payload) => {
     const serviceType = (payload?.serviceType || "").toString().toUpperCase();
     const counterName = (payload?.counterName || "").toString();
-
     const result = await callNext(serviceType, counterName);
-    // result bisa null kalau tidak ada WAITING
-    return result;
+    return result; // bisa null kalau tidak ada WAITING
   });
 
   // ✅ optional: ambil state via IPC
@@ -396,7 +459,6 @@ function registerIpcHandlers() {
       await printWin.loadURL(
         "data:text/html;charset=utf-8," + encodeURIComponent(html)
       );
-
       await new Promise((r) => setTimeout(r, 250));
 
       const deviceName =
@@ -447,7 +509,12 @@ app.whenReady().then(() => {
 
   // ===== SERVER + ADMIN =====
   if (mode === "server-admin") {
-    serverRef = createServer({ port: cfg.serverPort, host: "0.0.0.0" });
+    // ✅ Tambahan aman: kirim userDataPath ke server agar media dir konsisten
+    serverRef = createServer({
+      port: cfg.serverPort,
+      host: "0.0.0.0",
+      userDataPath: app.getPath("userData"),
+    });
 
     const ip = getLocalIPv4();
     const serverApiBase = `http://localhost:${cfg.serverPort}`;

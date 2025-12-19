@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <title>Display Antrian Nasabah</title>
     <style>
+        /* ====== CSS KAMU (TIDAK DIUBAH) ====== */
         * {
             box-sizing: border-box;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -23,7 +24,6 @@
             gap: 10px;
         }
 
-        /* ================= HEADER (BIRU) ================= */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -115,7 +115,6 @@
             color: #ffffff;
         }
 
-        /* ================= LAYOUT GRID ================= */
         .main-grid {
             flex: 1;
             display: grid;
@@ -136,7 +135,6 @@
             overflow: hidden;
         }
 
-        /* ================= RIGHT PANEL: SIMETRIS 50/50 ================= */
         .right-panel {
             display: flex;
             flex-direction: column;
@@ -153,7 +151,6 @@
             min-height: 0;
         }
 
-        /* ================= LEFT PANEL ================= */
         .section-title {
             margin: 0 0 10px 0;
             font-size: 13px;
@@ -337,8 +334,6 @@
             background: rgba(255, 255, 255, 0.6);
         }
 
-        /* ================= RIGHT MEDIA: PROFESIONAL ================= */
-        /* “wadah” yang elegan: border tipis + shadow halus */
         .media-card {
             position: relative;
             border-radius: 16px;
@@ -362,17 +357,14 @@
             display: flex;
         }
 
-        /* ✅ VIDEO full */
         #promoVideo {
             width: 100%;
             height: 100%;
             display: block;
             object-fit: cover;
-            /* ganti ke contain kalau mau tidak kepotong */
             background: #0b1220;
         }
 
-        /* ✅ SLIDER full */
         .promo-slider {
             position: relative;
             width: 100%;
@@ -388,7 +380,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* ganti ke contain kalau mau tidak kepotong */
             opacity: 0;
             transition: opacity 600ms ease;
             display: block;
@@ -399,7 +390,21 @@
             opacity: 1;
         }
 
-        /* ================= FOOTER ================= */
+        .promo-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 18px;
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            background: radial-gradient(800px 380px at 20% 0%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 60%),
+                linear-gradient(180deg, rgba(37, 99, 235, 0.18), rgba(15, 23, 42, 0.92));
+        }
+
         .footer {
             display: flex;
             justify-content: space-between;
@@ -425,7 +430,6 @@
             box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
         }
 
-        /* ================= RUNNING TEXT ================= */
         .running-text {
             background: linear-gradient(135deg, #0f5fb3, #1565c0);
             color: #ffffff;
@@ -456,7 +460,6 @@
             }
         }
 
-        /* ================= SETTINGS OVERLAY (tetap) ================= */
         .settings-overlay {
             position: fixed;
             inset: 0;
@@ -570,7 +573,6 @@
 </head>
 
 <body>
-    <!-- TOP BAR -->
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-logo-box">
@@ -589,12 +591,10 @@
     </div>
 
     <div class="main-grid">
-        <!-- LEFT -->
         <div class="panel">
             <h2 class="section-title">Sedang Dilayani</h2>
 
             <div class="current-wrapper">
-                <!-- TELLER -->
                 <div class="current-card">
                     <div class="current-header">
                         <div class="current-label-block">
@@ -613,7 +613,6 @@
                     </div>
                 </div>
 
-                <!-- CS -->
                 <div class="current-card">
                     <div class="current-header">
                         <div class="current-label-block">
@@ -643,21 +642,18 @@
             </div>
         </div>
 
-        <!-- RIGHT -->
         <div class="panel right-panel">
-            <!-- VIDEO: tanpa judul & tanpa tombol pengaturan -->
             <div class="video-box media-card">
                 <video id="promoVideo" autoplay loop muted playsinline>
                     Browser tidak mendukung video.
                 </video>
             </div>
 
-            <!-- PROMO IMAGE: tanpa judul -->
             <div class="promo-box media-card">
-                <div class="promo-slider">
-                    <img class="promo-slide active" src="assets/promo1.jpg" alt="promo 1">
-                    <img class="promo-slide" src="assets/promo2.jpg" alt="promo 2">
-                    <img class="promo-slide" src="assets/promo3.jpg" alt="promo 3">
+                <div id="promo-slider" class="promo-slider">
+                    <div id="promo-placeholder" class="promo-placeholder">
+                        PROMO IMAGE BELUM DISET<br />Silakan upload dari Admin Panel
+                    </div>
                 </div>
             </div>
         </div>
@@ -671,12 +667,10 @@
         <div>Silakan menunggu nomor antrian Anda dipanggil.</div>
     </div>
 
-    <!-- RUNNING TEXT -->
     <div class="running-text">
-        <span>SELAMAT DATANG DI BRI — SIAP MELAYANI DENGAN SEPENUH HATI</span>
+        <span id="runningText">SELAMAT DATANG DI BRI — SIAP MELAYANI DENGAN SEPENUH HATI</span>
     </div>
 
-    <!-- SETTINGS OVERLAY (tetap ada, dibuka via Ctrl+Shift+P) -->
     <div id="settings-overlay" class="settings-overlay hidden">
         <div class="settings-panel">
             <div class="settings-header">
@@ -707,36 +701,9 @@
     </div>
 
     <script>
-        // =========================
-        // ✅ PROMO SLIDER (pake .promo-slide) - AMAN (tanpa variabel undefined)
-        // =========================
-        function startPromoSlides() {
-            const slides = Array.from(document.querySelectorAll(".promo-slide"));
-            if (!slides.length) return;
-
-            let idx = slides.findIndex((el) => el.classList.contains("active"));
-            if (idx < 0) idx = 0;
-
-            setInterval(() => {
-                slides[idx].classList.remove("active");
-                idx = (idx + 1) % slides.length;
-                slides[idx].classList.add("active");
-            }, 5000);
-        }
-        startPromoSlides();
-
-        // =========================
-        // ===== SCRIPT ASLI KAMU =====
-        // =========================
-
-        // IPC optional: kalau display ini ada di PC server-admin, bisa tetap pilih video via dialog.
-        // Kalau di PC lain, fungsi pilih video akan ditolak/ga jalan (wajar).
         let ipcRenderer = null;
-        try {
-            ipcRenderer = require("electron").ipcRenderer;
-        } catch { }
+        try { ipcRenderer = require("electron").ipcRenderer; } catch { }
 
-        // ======= KONFIG SERVER CABANG =======
         const API_BASE =
             window.queueConfig && window.queueConfig.apiBase
                 ? window.queueConfig.apiBase
@@ -747,12 +714,10 @@
                 ? window.queueConfig.branchName
                 : "BRI";
 
-        // brand header
         const brandNameEl = document.getElementById("brand-name");
         if (brandNameEl) brandNameEl.textContent = BRANCH_NAME;
 
         const statusTextEl = document.getElementById("statusText");
-
         const tellerNowEl = document.getElementById("teller-now");
         const tellerCounterEl = document.getElementById("teller-counter");
         const csNowEl = document.getElementById("cs-now");
@@ -761,11 +726,14 @@
         const csQueueEl = document.getElementById("cs-queue");
         const promoVideoEl = document.getElementById("promoVideo");
 
+        const promoSliderEl = document.getElementById("promo-slider");
+        const promoPlaceholderEl = document.getElementById("promo-placeholder");
+        const runningTextEl = document.getElementById("runningText");
+
         let lastTellerTicket = null;
         let lastCsTicket = null;
         let initialized = false;
 
-        // ======= JAM & TANGGAL DI HEADER =======
         function formatTanggalID(date) {
             const hari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
             const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
@@ -785,21 +753,8 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        // ======= SUARA: dingdong + TTS =======
         const dingAudio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-
-        const digitMap = {
-            "0": "nol",
-            "1": "satu",
-            "2": "dua",
-            "3": "tiga",
-            "4": "empat",
-            "5": "lima",
-            "6": "enam",
-            "7": "tujuh",
-            "8": "delapan",
-            "9": "sembilan",
-        };
+        const digitMap = { "0": "nol", "1": "satu", "2": "dua", "3": "tiga", "4": "empat", "5": "lima", "6": "enam", "7": "tujuh", "8": "delapan", "9": "sembilan" };
 
         let cachedVoice = null;
         function getIndonesianVoicePreferFemale() {
@@ -836,39 +791,19 @@
             });
         }
 
-        function digitsToWords(numStr) {
-            return Array.from(numStr).map((ch) => digitMap[ch] || ch).join(" ");
-        }
+        function digitsToWords(numStr) { return Array.from(numStr).map((ch) => digitMap[ch] || ch).join(" "); }
 
         function makeSentence(ticketCode, counterName, serviceLabel) {
-            let prefix = "";
-            let num = ticketCode || "";
-
-            if (num.startsWith("T-")) {
-                prefix = "T";
-                num = num.replace("T-", "");
-            } else if (num.startsWith("CS-")) {
-                prefix = "C";
-                num = num.replace("CS-", "");
-            } else if (num.startsWith("T")) {
-                prefix = "T";
-                num = num.slice(1);
-            } else if (num.startsWith("C")) {
-                prefix = "C";
-                num = num.slice(1);
-            } else {
-                prefix = num.charAt(0);
-                num = num.slice(1);
-            }
+            let prefix = ""; let num = ticketCode || "";
+            if (num.startsWith("T-")) { prefix = "T"; num = num.replace("T-", ""); }
+            else if (num.startsWith("CS-")) { prefix = "C"; num = num.replace("CS-", ""); }
+            else if (num.startsWith("T")) { prefix = "T"; num = num.slice(1); }
+            else if (num.startsWith("C")) { prefix = "C"; num = num.slice(1); }
+            else { prefix = num.charAt(0); num = num.slice(1); }
 
             const spokenNumber = /^\d+$/.test(num) ? digitsToWords(num) : num;
             const spokenPrefix = prefix === "C" ? "C" : "T";
-
-            const loketLabel =
-                serviceLabel === "Customer Service"
-                    ? counterName.replace(/^CS\s*/i, "Customer Service ")
-                    : counterName;
-
+            const loketLabel = serviceLabel === "Customer Service" ? counterName.replace(/^CS\s*/i, "Customer Service ") : counterName;
             return `Nomor antrian ${spokenPrefix} ${spokenNumber}, silakan menuju ${serviceLabel} ${loketLabel}.`;
         }
 
@@ -876,17 +811,13 @@
             if (!ticketCode || !counterName) return;
             const label = serviceType === "TELLER" ? "Teller" : "Customer Service";
             const sentence = makeSentence(ticketCode, counterName, label);
-
             try {
                 dingAudio.currentTime = 0;
                 dingAudio.play().catch(() => speak(sentence));
                 setTimeout(() => speak(sentence), 900);
-            } catch {
-                speak(sentence);
-            }
+            } catch { speak(sentence); }
         }
 
-        // ======= RENDER ANTRIAN =======
         function renderQueueList(container, items) {
             container.innerHTML = "";
             if (!items || items.length === 0) {
@@ -896,7 +827,6 @@
                 container.appendChild(span);
                 return;
             }
-
             items.forEach((ticket) => {
                 const row = document.createElement("div");
                 row.className = "queue-item";
@@ -944,31 +874,22 @@
             renderQueueList(csQueueEl, state.csQueue || state.cs_queue || []);
 
             if (initialized) {
-                if (tellerTicket && tellerTicket !== lastTellerTicket) {
-                    announce("TELLER", tellerTicket, tellerCounter || "");
-                }
-                if (csTicket && csTicket !== lastCsTicket) {
-                    announce("CS", csTicket, csCounter || "");
-                }
+                if (tellerTicket && tellerTicket !== lastTellerTicket) announce("TELLER", tellerTicket, tellerCounter || "");
+                if (csTicket && csTicket !== lastCsTicket) announce("CS", csTicket, csCounter || "");
             }
-
             lastTellerTicket = tellerTicket;
             lastCsTicket = csTicket;
             initialized = true;
         }
 
-        // ======= AMBIL STATE DARI SERVER CABANG (POLLING) =======
         async function fetchStateFromServer() {
             try {
                 const res = await fetch(`${API_BASE}/api/state`, { cache: "no-store" });
                 if (!res.ok) throw new Error("HTTP " + res.status);
-
                 const data = await res.json().catch(() => ({}));
                 const state = data?.state ? data.state : data;
-
                 if (!state) throw new Error("No state from server");
                 updateDisplay(state);
-
                 if (statusTextEl) statusTextEl.textContent = "Sistem antrian aktif";
             } catch (e) {
                 if (statusTextEl) statusTextEl.textContent = "Sistem terputus (server cabang tidak aktif)";
@@ -980,7 +901,10 @@
 
         // ================= PROMO & VIDEO (REALTIME VIA SERVER) =================
         let currentDisplayConfig = null;
-        let lastVideoUrl = null;
+
+        // ✅ ini yang bikin video bisa reload saat diganti
+        let lastVideoKey = "";
+        let lastPromoImagesKey = "";
 
         function forcePlayVideoSafely() {
             if (!promoVideoEl) return;
@@ -999,26 +923,117 @@
             forcePlayVideoSafely();
         }
 
+        // ================= PROMO SLIDER =================
+        let promoSlideTimer = null;
+
+        function normalizePromoImageUrl(raw) {
+            const s = String(raw || "").trim();
+            if (!s) return "";
+            if (/^(https?:\/\/|file:\/\/)/i.test(s)) return s;
+            if (s.startsWith("/")) return `${API_BASE}${s}`;
+            return `${API_BASE}/media/promo-images/${encodeURIComponent(s)}`;
+        }
+
+        function stopPromoSlides() {
+            if (promoSlideTimer) {
+                clearInterval(promoSlideTimer);
+                promoSlideTimer = null;
+            }
+        }
+
+        function startPromoSlides() {
+            stopPromoSlides();
+            const slides = Array.from(document.querySelectorAll(".promo-slide"));
+            if (!slides.length) return;
+
+            let idx = slides.findIndex((el) => el.classList.contains("active"));
+            if (idx < 0) idx = 0;
+
+            promoSlideTimer = setInterval(() => {
+                slides[idx].classList.remove("active");
+                idx = (idx + 1) % slides.length;
+                slides[idx].classList.add("active");
+            }, 5000);
+        }
+
+        function buildPromoSlides(imageList) {
+            if (!promoSliderEl) return;
+
+            promoSliderEl.querySelectorAll(".promo-slide").forEach((n) => n.remove());
+
+            if (!Array.isArray(imageList) || imageList.length === 0) {
+                if (promoPlaceholderEl) promoPlaceholderEl.style.display = "flex";
+                stopPromoSlides();
+                return;
+            }
+
+            if (promoPlaceholderEl) promoPlaceholderEl.style.display = "none";
+
+            imageList.forEach((raw, i) => {
+                const url = normalizePromoImageUrl(raw);
+                if (!url) return;
+
+                const img = document.createElement("img");
+                img.className = "promo-slide" + (i === 0 ? " active" : "");
+                img.alt = `promo ${i + 1}`;
+                img.src = url + (url.includes("?") ? "&" : "?") + "v=" + Date.now();
+
+                img.addEventListener("error", () => {
+                    console.warn("Promo image gagal load:", img.src);
+                    img.remove();
+                    const remain = promoSliderEl.querySelectorAll(".promo-slide");
+                    if (!remain.length && promoPlaceholderEl) {
+                        promoPlaceholderEl.style.display = "flex";
+                        stopPromoSlides();
+                    }
+                });
+
+                promoSliderEl.appendChild(img);
+            });
+
+            startPromoSlides();
+        }
+
+        function getPromoImagesFromConfig(cfg) {
+            const arr =
+                cfg?.promo_images ||
+                cfg?.promoImages ||
+                cfg?.slider_images ||
+                cfg?.sliderImages ||
+                cfg?.images ||
+                [];
+            return Array.isArray(arr) ? arr.filter(Boolean).map(String) : [];
+        }
+
         function applyPromoAndVideo(cfg) {
             if (!cfg) return;
 
-            const videoPath = cfg.video_path || cfg.videoPath || null;
+            // ✅ Running text selalu bisa diganti dari promo_text
+            const promoText = (cfg.promo_text || cfg.promoText || "").toString().trim();
+            if (runningTextEl && promoText) runningTextEl.textContent = promoText;
+
+            // ✅ VIDEO: reload kalau video_path berubah
+            const videoPath = (cfg.video_path || cfg.videoPath || "").toString();
+            const videoKey = videoPath ? "SERVER_HAS_VIDEO" : "NO_VIDEO";
 
             const labelEl = document.getElementById("video-file-label");
-            if (labelEl) {
-                labelEl.textContent = videoPath ? `File: ${videoPath}` : "Tidak ada video terpilih.";
+            if (labelEl) labelEl.textContent = videoPath ? `File: ${videoPath}` : "Tidak ada video terpilih.";
+
+            if (videoKey !== lastVideoKey) {
+                lastVideoKey = videoKey;
+                if (videoPath) {
+                    setVideoSrc(`${API_BASE}/media/promo?v=${Date.now()}`);
+                } else {
+                    setVideoSrc("bank-promo.mp4");
+                }
             }
 
-            // ✅ VIDEO: selalu ambil dari server /media/promo kalau ada videoPath
-            if (videoPath) {
-                const url = `${API_BASE}/media/promo?v=${Date.now()}`;
-                if (!lastVideoUrl || lastVideoUrl.indexOf("/media/promo") === -1) {
-                    lastVideoUrl = url;
-                    setVideoSrc(url);
-                }
-            } else {
-                // fallback lokal
-                setVideoSrc("bank-promo.mp4");
+            // ✅ IMAGES: rebuild slider kalau list berubah
+            const imgs = getPromoImagesFromConfig(cfg);
+            const key = JSON.stringify(imgs);
+            if (key !== lastPromoImagesKey) {
+                lastPromoImagesKey = key;
+                buildPromoSlides(imgs);
             }
         }
 
@@ -1096,7 +1111,8 @@
                 }
                 const next = await ipcRenderer.invoke("display:chooseVideo");
                 currentDisplayConfig = next;
-                lastVideoUrl = null;
+                // biar reload
+                lastVideoKey = "";
                 await loadDisplayConfig();
                 alert("Video promo berhasil diperbarui.");
             } catch (e) {
@@ -1118,18 +1134,14 @@
         }
 
         window.addEventListener("keydown", (e) => {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "p") {
-                toggleSettingsPanel();
-            }
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "p") toggleSettingsPanel();
         });
 
-        // kalau video error, reset supaya bisa reload
         promoVideoEl?.addEventListener("error", () => {
             console.error("❌ Video error. Cek format MP4 (H.264/AAC) atau endpoint /media/promo.");
-            lastVideoUrl = null;
+            lastVideoKey = "";
         });
 
-        // paksa play lagi saat siap
         promoVideoEl?.addEventListener("loadedmetadata", forcePlayVideoSafely);
         promoVideoEl?.addEventListener("canplay", forcePlayVideoSafely);
     </script>
