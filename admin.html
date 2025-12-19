@@ -1139,6 +1139,18 @@
             }).join("");
         }
 
+        // 
+        let promoIsEditing = false;
+        let promoIsDirty = false;
+
+        const promoInputEl = document.getElementById("promo-input");
+        if (promoInputEl) {
+            promoInputEl.addEventListener("focus", () => { promoIsEditing = true; });
+            promoInputEl.addEventListener("blur", () => { promoIsEditing = false; });
+            promoInputEl.addEventListener("input", () => { promoIsDirty = true; });
+        }
+
+
         // Load config: coba dari SERVER dulu, kalau gagal -> IPC
         async function loadDisplayConfig() {
             // 1) server
@@ -1149,7 +1161,13 @@
 
                 // promo text
                 const promoTextEl = document.getElementById("promo-input");
-                if (promoTextEl) promoTextEl.value = (cfg.promo_text || cfg.promoText || "").toString();
+                if (promoTextEl) {
+                    // jangan ganggu user kalau sedang mengetik
+                    if (!promoIsEditing && !promoIsDirty) {
+                        promoTextEl.value = (cfg.promo_text || cfg.promoText || "").toString();
+
+                    }
+                }
 
                 // video label
                 const labelEl = document.getElementById("video-file-label");
@@ -1195,6 +1213,9 @@
                 if (!res.ok) throw new Error("HTTP " + res.status);
                 const json = await res.json();
                 currentDisplayConfig = json?.config ? json.config : json;
+                promoIsDirty = false;
+                promoIsEditing = false;
+
                 alert("Teks promo berhasil disimpan (server).");
                 return;
             } catch (e) {

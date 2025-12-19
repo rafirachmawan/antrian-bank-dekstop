@@ -416,8 +416,9 @@
             </div>
 
             <div class="bottom-strip">
-                <span>SELAMAT DATANG • SILAKAN AMBIL NOMOR ANTRIAN ANDA • TERIMA KASIH</span>
+                <span id="kioskRunningText">SELAMAT DATANG • SILAKAN AMBIL NOMOR ANTRIAN ANDA • TERIMA KASIH</span>
             </div>
+
         </div>
     </div>
 
@@ -446,6 +447,43 @@
         }
         pingServer();
         setInterval(pingServer, 5000);
+
+        // 
+        // =======================
+        // ✅ Running text Kiosk ikut Display (ambil dari /api/display/config)
+        // =======================
+        const kioskRunningTextEl = document.getElementById("kioskRunningText");
+        let lastRunningText = "";
+
+        async function syncRunningTextFromServer() {
+            try {
+                const res = await fetch(`${API_BASE}/api/display/config`, { cache: "no-store" });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const json = await res.json().catch(() => ({}));
+                const cfg = json?.config || json;
+
+                const nextText = (cfg?.promo_text || cfg?.promoText || "").toString().trim();
+
+                // kalau kosong, jangan timpa (biar tetap ada teks default)
+                if (!nextText) return;
+
+                // kalau sama, gak usah set (biar animasi gak reset)
+                if (nextText === lastRunningText) return;
+
+                lastRunningText = nextText;
+                if (kioskRunningTextEl) kioskRunningTextEl.textContent = nextText;
+            } catch (e) {
+                // kalau server mati/putus, biarkan teks lama tetap jalan
+                // console.log("syncRunningTextFromServer error:", e);
+            }
+        }
+
+        // jalankan sekali saat start
+        syncRunningTextFromServer();
+
+        // polling ringan (misal 2 detik, sama kayak display)
+        setInterval(syncRunningTextFromServer, 2000);
+
 
         // =======================
         // ✅ Video ikut display (tanpa putus-putus)
