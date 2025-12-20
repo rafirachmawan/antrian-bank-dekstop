@@ -10,38 +10,61 @@
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
+        :root {
+            --bri-blue: #0b56b3;
+            --bri-blue-2: #0a4ea2;
+            --bri-blue-3: #0a63c7;
+
+            /* ✅ biru muda (dibikin lebih soft & mirip panel video) */
+            --bri-light: #7dd3fc;
+            /* sky-300 */
+            --bri-light-2: #38bdf8;
+            /* sky-400 */
+
+            --text: #0f172a;
+            --muted: #64748b;
+            --line: #e5e7eb;
+            --panel-bg: rgba(255, 255, 255, 0.94);
+        }
+
         body {
             margin: 0;
             height: 100vh;
-            background: linear-gradient(180deg, #dff1ff 0%, #b7ddff 45%, #9fcbff 100%);
-            color: #0f172a;
+            background:
+                radial-gradient(1200px 420px at 10% 0%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%),
+                linear-gradient(180deg, #e8f3ff 0%, #cfe7ff 45%, #b8dcff 100%);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             padding: 12px 14px;
         }
 
+        /* ================= TOP BAR ================= */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             border-radius: 14px;
             padding: 12px 16px;
-            box-shadow: 0 14px 34px rgba(21, 101, 192, 0.35);
+            box-shadow: 0 14px 34px rgba(11, 86, 179, 0.28);
             margin-bottom: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.20);
             color: #fff;
+            min-height: 64px;
+            gap: 12px;
         }
 
         .top-left {
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
         }
 
         .top-title {
             font-size: 18px;
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: 0.02em;
         }
 
@@ -53,40 +76,71 @@
         .top-right-pill {
             background: rgba(255, 255, 255, 0.14);
             border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 7px 12px;
+            padding: 8px 14px;
             border-radius: 999px;
             color: #eff6ff;
-            font-size: 11px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
             backdrop-filter: blur(6px);
+            flex: 0 0 auto;
         }
 
-        /* ✅ BG logo putih agar keliatan */
         .pill-logo {
-            width: 22px;
-            height: 22px;
+            width: 34px;
+            height: 34px;
             border-radius: 999px;
-            background: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.30);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
         }
 
         .pill-logo img {
-            width: 86%;
-            height: 86%;
+            width: 80%;
+            height: 80%;
             object-fit: contain;
             display: block;
+            filter: brightness(0) invert(1);
+            opacity: .98;
         }
 
+        #branch-pill {
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        .top-datetime {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 130px;
+        }
+
+        .top-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .92);
+            white-space: nowrap;
+        }
+
+        .top-time {
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        /* ================= BODY ================= */
         .page-body {
             flex: 1;
             min-height: 0;
@@ -97,14 +151,16 @@
         }
 
         .panel {
-            background: rgba(255, 255, 255, 0.92);
+            background: var(--panel-bg);
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.70);
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
             overflow: hidden;
             min-height: 0;
+            backdrop-filter: blur(8px);
         }
 
+        /* ================= LEFT KIOSK ================= */
         .kiosk-panel {
             display: flex;
             align-items: center;
@@ -117,8 +173,9 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 20% 10%, rgba(37, 99, 235, 0.12), transparent 45%),
-                radial-gradient(circle at 85% 70%, rgba(34, 197, 94, 0.10), transparent 45%);
+            background:
+                radial-gradient(circle at 16% 12%, rgba(11, 86, 179, 0.16), transparent 48%),
+                radial-gradient(circle at 85% 70%, rgba(11, 86, 179, 0.10), transparent 48%);
             pointer-events: none;
         }
 
@@ -129,36 +186,24 @@
             border-radius: 20px;
             background: #ffffff;
             box-shadow: 0 26px 60px rgba(15, 23, 42, 0.16);
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--line);
             position: relative;
             z-index: 1;
         }
 
-        .card-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-
-        .title-block {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
         .title {
             font-size: 22px;
-            font-weight: 800;
+            font-weight: 900;
             color: #0f172a;
             letter-spacing: 0.01em;
+            margin-bottom: 6px;
         }
 
         .subtitle {
             font-size: 12px;
-            color: #64748b;
+            color: var(--muted);
             line-height: 1.45;
+            margin-bottom: 14px;
         }
 
         .buttons {
@@ -173,7 +218,7 @@
             border: none;
             padding: 16px 18px;
             font-size: 15px;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
             transition: transform 0.05s ease, box-shadow 0.12s ease, filter 0.15s ease;
             display: flex;
@@ -189,21 +234,24 @@
             filter: brightness(0.98);
         }
 
+        /* ✅ Biru tua (Teller) */
         .btn-teller {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: #fff7ed;
-            box-shadow: 0 16px 34px rgba(248, 113, 22, 0.45);
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
+            color: #ffffff;
+            box-shadow: 0 16px 34px rgba(11, 86, 179, 0.30);
         }
 
+        /* ✅ Biru muda (Customer Service) -> dibuat soft & text putih */
         .btn-cs {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #ecfdf5;
-            box-shadow: 0 16px 34px rgba(34, 197, 94, 0.40);
+            background: linear-gradient(135deg, var(--bri-light), var(--bri-light-2));
+            color: #ffffff;
+            /* ✅ putih */
+            box-shadow: 0 16px 34px rgba(56, 189, 248, 0.35);
         }
 
         .info-pill {
             font-size: 11px;
-            color: #64748b;
+            color: var(--muted);
             text-align: center;
             margin-bottom: 10px;
         }
@@ -215,7 +263,6 @@
             padding: 14px 12px;
             text-align: center;
             margin-bottom: 12px;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
         }
 
         .ticket-title {
@@ -237,20 +284,20 @@
 
         .ticket-footer {
             font-size: 11px;
-            color: #64748b;
+            color: var(--muted);
             line-height: 1.5;
         }
 
         .btn-print {
             width: 100%;
-            background: #e2e8f0;
+            background: #ffffff;
             color: #0f172a;
             font-size: 12px;
             padding: 12px 14px;
-            box-shadow: none;
             border: 1px solid #cbd5e1;
             border-radius: 14px;
-            font-weight: 800;
+            font-weight: 900;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
         }
 
         .footer-note {
@@ -260,17 +307,11 @@
             text-align: center;
         }
 
-        .conn {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 10px;
-            text-align: center;
+        #conn {
+            display: none !important;
         }
 
-        .conn strong {
-            color: #0f172a;
-        }
-
+        /* ================= RIGHT: VIDEO CARD + INFO CARD ================= */
         .video-panel {
             display: flex;
             flex-direction: column;
@@ -279,48 +320,180 @@
             gap: 10px;
         }
 
-        .video-frame {
-            flex: 1;
+        .video-card {
+            flex: 1 1 auto;
             min-height: 0;
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
-            background: #0b1220;
+            background: #ffffff;
             border: 1px solid rgba(15, 23, 42, 0.10);
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
-        .video-frame::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.10), transparent 55%);
-            pointer-events: none;
+        .video-card-head {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, rgba(11, 86, 179, 0.10), rgba(79, 195, 255, 0.08));
+            border-bottom: 1px solid #e5e7eb;
         }
 
-        /* ✅ biar tidak kepotong */
+        .video-card-title {
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+        }
+
+        .video-card-meta {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .video-frame {
+            flex: 1 1 auto;
+            min-height: 0;
+            background: #ffffff;
+            padding: 10px;
+            position: relative;
+        }
+
         .video-frame video {
             width: 100%;
             height: 100%;
             display: block;
             object-fit: contain;
-            /* ⬅️ ganti dari cover */
-            background: #000;
-            /* ruang sisa jadi hitam rapi */
+            background: #ffffff;
+            border-radius: 12px;
+        }
+
+        .video-info {
+            flex: 0 0 auto;
+            padding: 10px 12px 12px;
+            border-top: 1px solid #eef2f7;
+            background: #ffffff;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .info-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 10px 10px;
+            background: linear-gradient(135deg, rgba(11, 86, 179, 0.07), rgba(79, 195, 255, 0.06));
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+            min-height: 64px;
+        }
+
+        .info-label {
+            font-size: 10px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .info-sub {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        .security-box {
+            grid-column: 1 / -1;
+            border-radius: 14px;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, rgba(11, 86, 179, 0.12), rgba(79, 195, 255, 0.08));
+            border: 1px solid rgba(11, 86, 179, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .security-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        /* ✅ "Tips Keamanan" jadi hitam */
+        .security-title {
+            font-size: 12px;
+            font-weight: 900;
+            color: #0f172a;
+            /* ✅ hitam */
+            letter-spacing: .04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .security-text {
+            font-size: 11px;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .security-badge {
+            flex: 0 0 auto;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            box-shadow: 0 12px 26px rgba(11, 86, 179, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            white-space: nowrap;
         }
 
         .bottom-strip {
             height: 44px;
             border-radius: 999px;
-            background: linear-gradient(135deg, #1565c0, #1e88e5);
+            background: linear-gradient(135deg, var(--bri-blue-2), var(--bri-blue-3));
             color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             letter-spacing: 0.10em;
-            font-weight: 800;
+            font-weight: 900;
             font-size: 12px;
-            box-shadow: 0 12px 28px rgba(21, 101, 192, 0.30);
+            box-shadow: 0 12px 28px rgba(11, 86, 179, 0.26);
             border: 1px solid rgba(255, 255, 255, 0.18);
             overflow: hidden;
             position: relative;
@@ -350,7 +523,11 @@
             }
 
             .video-panel {
-                height: 38vh;
+                height: 42vh;
+            }
+
+            .video-info {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -363,26 +540,26 @@
             <div class="top-subtitle">Silakan ambil nomor antrian sebelum menuju Teller / Customer Service.</div>
         </div>
 
-        <div class="top-right-pill">
-            <span class="pill-logo">
-                <img src="assets/logo-astro.png" alt="Logo">
-            </span>
-            <span id="branch-pill">BRI</span>
+        <div style="display:flex; align-items:center; gap:12px; flex:0 0 auto;">
+            <div class="top-datetime">
+                <div id="hdr-date" class="top-date">-</div>
+                <div id="hdr-time" class="top-time">-</div>
+            </div>
+
+            <div class="top-right-pill">
+                <span class="pill-logo">
+                    <img src="assets/logo-astro.png" alt="Logo">
+                </span>
+                <span id="branch-pill">BRI</span>
+            </div>
         </div>
     </div>
 
     <div class="page-body">
         <div class="panel kiosk-panel">
             <div class="card-wrapper">
-                <div class="card-header-row">
-                    <div class="title-block">
-                        <div class="title">Ambil Nomor Antrian</div>
-                        <div class="subtitle">
-                            Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.
-                        </div>
-                    </div>
-                    <!-- (brand pill dihapus sesuai request) -->
-                </div>
+                <div class="title">Ambil Nomor Antrian</div>
+                <div class="subtitle">Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.</div>
 
                 <div class="buttons">
                     <button class="btn-teller" onclick="take('TELLER')">Ambil Antrian Teller</button>
@@ -394,31 +571,60 @@
                 <div class="ticket">
                     <div class="ticket-title">Nomor Antrian Anda</div>
                     <div id="ticket-number" class="ticket-number">-</div>
-                    <div class="ticket-footer">
-                        Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
+                    <div class="ticket-footer">Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
                     </div>
                 </div>
 
                 <button class="btn-print" onclick="window.print()">Cetak Ulang Halaman</button>
 
                 <div class="footer-note">Jika struk tidak tercetak, silakan hubungi petugas kami.</div>
-                <div id="conn" class="conn">Menghubungkan ke server…</div>
+                <div id="conn">Menghubungkan ke server…</div>
             </div>
         </div>
 
         <div class="panel video-panel">
-            <div class="video-frame">
-                <video id="kioskVideo" autoplay loop muted playsinline preload="auto"
-                    controlslist="nodownload noplaybackrate">
-                    <source id="kioskVideoSource" src="assets/kiosk-promo.mp4" type="video/mp4" />
-                    Browser tidak mendukung video.
-                </video>
+            <div class="video-card">
+                <div class="video-card-head">
+                    <div class="video-card-title">
+                        <span class="live-dot"></span> Informasi & Promo
+                    </div>
+                    <div id="videoMeta" class="video-card-meta"></div>
+                </div>
+
+                <div class="video-frame">
+                    <video id="kioskVideo" autoplay loop muted playsinline preload="auto"
+                        controlslist="nodownload noplaybackrate">
+                        <source id="kioskVideoSource" src="assets/kiosk-promo.mp4" type="video/mp4" />
+                        Browser tidak mendukung video.
+                    </video>
+                </div>
+
+                <div class="video-info">
+                    <div class="info-box">
+                        <div class="info-label">Jam Operasional</div>
+                        <div class="info-value">08.00 – 15.00</div>
+                        <div class="info-sub">Senin – Jumat (WIB)</div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-label">Layanan</div>
+                        <div class="info-value">Teller & CS</div>
+                        <div class="info-sub">Silakan ambil nomor sesuai kebutuhan.</div>
+                    </div>
+
+                    <div class="security-box">
+                        <div class="security-left">
+                            <div class="security-title">Tips Keamanan</div>
+                            <div class="security-text">BRI tidak pernah meminta PIN/OTP. Waspada penipuan.</div>
+                        </div>
+                        <div class="security-badge">AMAN</div>
+                    </div>
+                </div>
             </div>
 
             <div class="bottom-strip">
                 <span id="kioskRunningText">SELAMAT DATANG • SILAKAN AMBIL NOMOR ANTRIAN ANDA • TERIMA KASIH</span>
             </div>
-
         </div>
     </div>
 
@@ -448,9 +654,27 @@
         pingServer();
         setInterval(pingServer, 5000);
 
-        // 
         // =======================
-        // ✅ Running text Kiosk ikut Display (ambil dari /api/display/config)
+        // ✅ Tanggal / Jam
+        // =======================
+        function pad2(n) { return String(n).padStart(2, "0"); }
+        function formatTanggalPanjang(date) {
+            const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            return `${hari[date.getDay()]}, ${pad2(date.getDate())} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+        }
+        function updateClock() {
+            const now = new Date();
+            const dEl = document.getElementById("hdr-date");
+            const tEl = document.getElementById("hdr-time");
+            if (dEl) dEl.textContent = formatTanggalPanjang(now);
+            if (tEl) tEl.textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // =======================
+        // ✅ Running text ikut Display
         // =======================
         const kioskRunningTextEl = document.getElementById("kioskRunningText");
         let lastRunningText = "";
@@ -463,30 +687,18 @@
                 const cfg = json?.config || json;
 
                 const nextText = (cfg?.promo_text || cfg?.promoText || "").toString().trim();
-
-                // kalau kosong, jangan timpa (biar tetap ada teks default)
                 if (!nextText) return;
-
-                // kalau sama, gak usah set (biar animasi gak reset)
                 if (nextText === lastRunningText) return;
 
                 lastRunningText = nextText;
                 if (kioskRunningTextEl) kioskRunningTextEl.textContent = nextText;
-            } catch (e) {
-                // kalau server mati/putus, biarkan teks lama tetap jalan
-                // console.log("syncRunningTextFromServer error:", e);
-            }
+            } catch (e) { }
         }
-
-        // jalankan sekali saat start
         syncRunningTextFromServer();
-
-        // polling ringan (misal 2 detik, sama kayak display)
         setInterval(syncRunningTextFromServer, 2000);
 
-
         // =======================
-        // ✅ Video ikut display (tanpa putus-putus)
+        // ✅ Video ikut display (tanpa putus)
         // =======================
         function safeNormalizePath(p) {
             if (!p) return null;
@@ -500,6 +712,7 @@
         async function applyVideoFromDisplayConfig() {
             const videoEl = document.getElementById("kioskVideo");
             const sourceEl = document.getElementById("kioskVideoSource");
+            const metaEl = document.getElementById("videoMeta");
             if (!videoEl || !sourceEl) return;
 
             let nextSrc = "assets/kiosk-promo.mp4";
@@ -515,9 +728,10 @@
                 }
             } catch { }
 
-            // ✅ kalau sama, jangan reload (biar video gak restart)
             if (lastAppliedSrc === nextSrc) return;
             lastAppliedSrc = nextSrc;
+
+            if (metaEl) metaEl.textContent = "";
 
             sourceEl.src = nextSrc;
             try {
@@ -527,13 +741,9 @@
             } catch { }
         }
 
-        // jalankan sekali saat start
         applyVideoFromDisplayConfig();
-
-        // cek config lebih jarang (biar ringan & gak reset)
         setInterval(applyVideoFromDisplayConfig, 10000);
 
-        // ✅ kalau video error / stuck, retry play pelan tanpa reload src terus
         (function setupVideoStability() {
             const videoEl = document.getElementById("kioskVideo");
             if (!videoEl) return;
@@ -553,7 +763,6 @@
             videoEl.addEventListener("stalled", retryPlay);
             videoEl.addEventListener("waiting", retryPlay);
 
-            // kalau tab/window fokus kembali, pastikan play
             window.addEventListener("focus", () => {
                 try {
                     const p = videoEl.play();
@@ -563,9 +772,8 @@
         })();
 
         // =======================
-        // PRINT THERMAL
+        // PRINT THERMAL (LOGIKA TETAP)
         // =======================
-        function pad2(n) { return String(n).padStart(2, "0"); }
         function formatNow() {
             const d = new Date();
             return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;

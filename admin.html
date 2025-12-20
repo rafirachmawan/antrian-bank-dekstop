@@ -18,11 +18,27 @@
             /* ✅ supaya gak ada scroll body, scroll-nya pindah ke panel */
         }
 
+        /* =========================
+       THEME: BRI BLUE (seperti gambar)
+       ========================= */
+        :root {
+            --bri-blue: #0b56b3;
+            --bri-blue-2: #0a4ea2;
+            --bri-blue-3: #0a63c7;
+            --panel-bg: rgba(255, 255, 255, .94);
+            --text: #0f172a;
+            --muted: #64748b;
+            --line: #e5e7eb;
+        }
+
         body {
             margin: 0;
             height: 100vh;
-            background: linear-gradient(180deg, #dff1ff 0%, #b7ddff 45%, #9fcbff 100%);
-            color: #111827;
+            /* ✅ dominan biru seperti gambar */
+            background:
+                radial-gradient(1200px 420px at 10% 0%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%),
+                linear-gradient(180deg, #e8f3ff 0%, #cfe7ff 45%, #b8dcff 100%);
+            color: var(--text);
             padding: 10px 14px;
             display: flex;
             flex-direction: column;
@@ -35,38 +51,45 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #1e88e5, #1565c0);
-            border-radius: 12px;
-            padding: 10px 16px;
-            box-shadow: 0 10px 26px rgba(21, 101, 192, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            min-height: 58px;
+
+            /* ✅ sesuai gambar: dominan biru solid/gradient halus */
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
+            border-radius: 14px;
+            padding: 12px 18px;
+            box-shadow: 0 14px 28px rgba(11, 86, 179, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            min-height: 62px;
         }
 
         .brand-left {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             min-width: 260px;
         }
 
         .brand-logo-box {
-            width: 52px;
-            height: 38px;
-            border-radius: 8px;
-            background: transparent;
+            width: 60px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.10);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex: 0 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .brand-logo-box img {
-            width: 100%;
-            height: 100%;
+            width: 86%;
+            height: 86%;
             object-fit: contain;
             display: block;
+
+            /* ✅ logo jadi putih seperti gambar */
+            filter: brightness(0) invert(1);
+            opacity: .98;
         }
 
         .brand-text {
@@ -78,15 +101,15 @@
 
         .brand-name {
             font-size: 18px;
-            font-weight: 800;
-            letter-spacing: 0.06em;
+            font-weight: 900;
+            letter-spacing: 0.08em;
             color: #ffffff;
             line-height: 1.1;
         }
 
         .brand-tagline {
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.88);
             line-height: 1.1;
         }
 
@@ -104,13 +127,13 @@
         .top-date-time {
             text-align: right;
             font-size: 11px;
-            color: rgba(255, 255, 255, .9);
-            min-width: 120px;
+            color: rgba(255, 255, 255, .92);
+            min-width: 130px;
         }
 
         .top-time {
             font-size: 18px;
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: 0.16em;
             color: #ffffff;
             line-height: 1.1;
@@ -127,18 +150,16 @@
         }
 
         .panel {
-            background: rgba(255, 255, 255, .92);
-            border-radius: 14px;
+            background: var(--panel-bg);
+            border-radius: 16px;
             padding: 12px;
-            border: 1px solid rgba(255, 255, 255, .7);
+            border: 1px solid rgba(255, 255, 255, .75);
             box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
             display: flex;
             flex-direction: column;
             min-height: 0;
-            /* ✅ penting */
             overflow: hidden;
-            /* ✅ panel tidak membesar kebawah */
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
         }
 
         .panel-header-row {
@@ -155,16 +176,15 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow: auto;
-            /* ✅ scroll internal */
             padding-right: 4px;
-            /* biar gak nabrak scrollbar */
         }
 
         .panel-title {
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.16em;
-            color: #1f2937;
+            color: #0b1220;
+            font-weight: 800;
         }
 
         .panel-subtitle {
@@ -187,7 +207,7 @@
         }
 
         .btn-small:hover {
-            background: #e5e7eb;
+            background: #eef2ff;
         }
 
         .btn-danger {
@@ -201,18 +221,30 @@
         }
 
         /* ================= LEFT PANEL ================= */
+
+        /* ✅ bikin layout kiri jadi flex-column supaya "Riwayat realtime" turun & bisa terlihat penuh */
+        .left-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+            /* scroll dipindah ke mini-log-list */
+            padding-right: 0;
+            /* biar rapih */
+        }
+
         .call-grid {
+            flex: 0 0 auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 10px;
             min-height: 0;
         }
 
         .call-card {
             border-radius: 14px;
             padding: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--line);
             background: #ffffff;
             box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
             display: flex;
@@ -230,13 +262,13 @@
 
         .call-name {
             font-size: 16px;
-            font-weight: 800;
-            color: #0f172a;
+            font-weight: 900;
+            color: #0b1220;
         }
 
         .call-desc {
             font-size: 11px;
-            color: #64748b;
+            color: var(--muted);
             margin-top: 2px;
         }
 
@@ -246,11 +278,12 @@
             text-transform: uppercase;
             padding: 6px 10px;
             border-radius: 999px;
-            border: 1px solid #dbeafe;
-            background: #eff6ff;
-            color: #1d4ed8;
+            border: 1px solid rgba(11, 86, 179, 0.22);
+            background: rgba(11, 86, 179, 0.10);
+            color: var(--bri-blue);
             white-space: nowrap;
             flex: 0 0 auto;
+            font-weight: 800;
         }
 
         .call-badge.cs {
@@ -285,8 +318,8 @@
         .last-box {
             border-radius: 12px;
             padding: 10px 12px;
-            border: 1px solid #dbeafe;
-            background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+            border: 1px solid rgba(11, 86, 179, 0.22);
+            background: linear-gradient(180deg, rgba(11, 86, 179, 0.10) 0%, #ffffff 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -315,9 +348,9 @@
 
         .last-number {
             font-size: 24px;
-            font-weight: 900;
+            font-weight: 950;
             letter-spacing: 0.10em;
-            color: #0f172a;
+            color: #0b1220;
             line-height: 1.1;
         }
 
@@ -332,7 +365,7 @@
             width: 100%;
             border-radius: 999px;
             padding: 11px 14px;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
             font-size: 13px;
             transition: transform .06s ease, filter .12s ease;
@@ -343,10 +376,11 @@
             filter: brightness(.98);
         }
 
+        /* ✅ tombol dominan biru BRI */
         .call-btn.teller {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             color: #eef2ff;
-            box-shadow: 0 14px 32px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 14px 32px rgba(11, 86, 179, 0.28);
         }
 
         .call-btn.cs {
@@ -362,11 +396,17 @@
         }
 
         .mini-log {
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
+            /* ✅ “Riwayat” ditaruh lebih kebawah & dibuat fleksibel */
+            flex: 1 1 auto;
+            min-height: 0;
+
+            border-radius: 14px;
+            border: 1px solid var(--line);
             background: #ffffff;
             overflow: hidden;
             box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+            display: flex;
+            flex-direction: column;
         }
 
         .mini-log-head {
@@ -386,7 +426,7 @@
             letter-spacing: 0.16em;
             text-transform: uppercase;
             color: #334155;
-            font-weight: 700;
+            font-weight: 900;
         }
 
         .mini-log-clear {
@@ -400,12 +440,13 @@
         }
 
         .mini-log-clear:hover {
-            background: #e5e7eb;
+            background: #eef2ff;
         }
 
         .mini-log-list {
-            max-height: 220px;
-            /* ✅ biar gak mendorong layout kebawah */
+            /* ✅ tidak pakai max-height lagi -> jadi terlihat penuh sesuai sisa ruang panel */
+            flex: 1 1 auto;
+            min-height: 0;
             overflow: auto;
         }
 
@@ -432,11 +473,12 @@
             font-size: 11px;
             letter-spacing: .12em;
             text-transform: uppercase;
-            border: 1px solid #dbeafe;
-            background: #eff6ff;
-            color: #1d4ed8;
+            border: 1px solid rgba(11, 86, 179, 0.22);
+            background: rgba(11, 86, 179, 0.10);
+            color: var(--bri-blue);
             width: fit-content;
             white-space: nowrap;
+            font-weight: 900;
         }
 
         .mini-badge.cs {
@@ -446,9 +488,9 @@
         }
 
         .mini-num {
-            font-weight: 900;
+            font-weight: 950;
             letter-spacing: .10em;
-            color: #0f172a;
+            color: #0b1220;
         }
 
         .mini-loket {
@@ -493,11 +535,11 @@
             border: none;
             padding: 8px 14px;
             font-size: 12px;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             color: #eef2ff;
-            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+            box-shadow: 0 10px 22px rgba(11, 86, 179, 0.35);
             white-space: nowrap;
         }
 
@@ -506,7 +548,7 @@
             border: 1px solid #d1d5db;
             padding: 8px 14px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             background: #ffffff;
             color: #111827;
@@ -544,7 +586,7 @@
 
         .img-name {
             color: #0f172a;
-            font-weight: 700;
+            font-weight: 800;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -567,7 +609,7 @@
         }
 
         .img-btn:hover {
-            background: #e5e7eb;
+            background: #eef2ff;
         }
 
         .img-btn.danger {
@@ -593,7 +635,7 @@
         }
 
         .note-title {
-            font-weight: 800;
+            font-weight: 900;
             margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.12em;
@@ -604,7 +646,7 @@
         .footer {
             flex: 0 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             font-size: 11px;
             color: #334155;
@@ -612,22 +654,10 @@
             min-height: 18px;
         }
 
+        /* ✅ "Terhubung ke server cabang..." dihapus, jadi status-row & dot gak dipakai */
+        .status-row,
         .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: #22c55e;
-        }
-
-        .status-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            min-width: 0;
-        }
-
-        .status-dot.offline {
-            background: #ef4444;
+            display: none !important;
         }
 
         /* ================= RESPONSIVE ================= */
@@ -675,6 +705,7 @@
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-logo-box">
+                <!-- ✅ logo dibuat putih via CSS filter -->
                 <img src="assets/logo-astro.png" alt="Logo">
             </div>
             <div class="brand-text">
@@ -684,7 +715,6 @@
         </div>
 
         <div class="top-right">
-            <!-- ✅ pill kanan atas dihapus -->
             <div class="top-date-time">
                 <div id="hdr-date"></div>
                 <div id="hdr-time" class="top-time"></div>
@@ -706,7 +736,8 @@
                 </div>
             </div>
 
-            <div class="panel-body">
+            <!-- ✅ pakai left-body supaya riwayat turun & terlihat penuh -->
+            <div class="panel-body left-body">
                 <div class="call-grid">
                     <!-- TELLER -->
                     <div class="call-card">
@@ -856,11 +887,8 @@
         </div>
     </div>
 
+    <!-- ✅ Footer bawah: "Terhubung ke server cabang..." DIHAPUS -->
     <div class="footer">
-        <div class="status-row">
-            <div id="dot" class="status-dot"></div>
-            <span id="connection-status">Menghubungkan ke server cabang...</span>
-        </div>
         <div id="footer-date">Hari ini:</div>
     </div>
 
@@ -911,7 +939,8 @@
             const now = new Date();
             document.getElementById("hdr-time").textContent = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
             document.getElementById("hdr-date").textContent = formatTanggalPendek(now);
-            document.getElementById("footer-date").textContent = `Hari ini: ${formatTanggalPanjang(now)}`;
+            const footerDateEl = document.getElementById("footer-date");
+            if (footerDateEl) footerDateEl.textContent = `Hari ini: ${formatTanggalPanjang(now)}`;
         }
         updateClock();
         setInterval(updateClock, 1000);
