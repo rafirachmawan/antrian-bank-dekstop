@@ -5,10 +5,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Panel - Antrian Bank Astro</title>
+
+    <!-- ✅ Font lebih profesional (tanpa mengubah logika JS) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         html,
@@ -25,6 +32,11 @@
             --bri-blue: #0b56b3;
             --bri-blue-2: #0a4ea2;
             --bri-blue-3: #0a63c7;
+
+            /* ✅ biru muda (samakan dengan kiosk) */
+            --bri-light: #4fc3ff;
+            --bri-light-2: #2aa8ff;
+
             --panel-bg: rgba(255, 255, 255, .94);
             --text: #0f172a;
             --muted: #64748b;
@@ -34,7 +46,6 @@
         body {
             margin: 0;
             height: 100vh;
-            /* ✅ dominan biru seperti gambar */
             background:
                 radial-gradient(1200px 420px at 10% 0%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%),
                 linear-gradient(180deg, #e8f3ff 0%, #cfe7ff 45%, #b8dcff 100%);
@@ -52,26 +63,25 @@
             justify-content: space-between;
             align-items: center;
 
-            /* ✅ sesuai gambar: dominan biru solid/gradient halus */
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
-            border-radius: 14px;
-            padding: 12px 18px;
-            box-shadow: 0 14px 28px rgba(11, 86, 179, 0.28);
+            border-radius: 16px;
+            padding: 14px 20px;
+            box-shadow: 0 16px 34px rgba(11, 86, 179, 0.28);
             border: 1px solid rgba(255, 255, 255, 0.20);
-            min-height: 62px;
+            min-height: 70px;
         }
 
         .brand-left {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: 260px;
+            gap: 14px;
+            min-width: 280px;
         }
 
         .brand-logo-box {
-            width: 60px;
-            height: 40px;
-            border-radius: 10px;
+            width: 66px;
+            height: 46px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.10);
             display: flex;
             align-items: center;
@@ -82,8 +92,8 @@
         }
 
         .brand-logo-box img {
-            width: 86%;
-            height: 86%;
+            width: 88%;
+            height: 88%;
             object-fit: contain;
             display: block;
 
@@ -100,17 +110,18 @@
         }
 
         .brand-name {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.10em;
             color: #ffffff;
             line-height: 1.1;
         }
 
         .brand-tagline {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.88);
-            line-height: 1.1;
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.90);
+            line-height: 1.15;
         }
 
         .top-right {
@@ -119,22 +130,23 @@
             gap: 12px;
         }
 
-        /* ✅ pill kanan atas DIHAPUS TOTAL (tidak dipakai) */
         .bank-pill {
             display: none !important;
         }
 
         .top-date-time {
             text-align: right;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: 600;
             color: rgba(255, 255, 255, .92);
-            min-width: 130px;
+            min-width: 190px;
+            /* ✅ lebih lega biar tidak turun baris */
         }
 
         .top-time {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 900;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.12em;
             color: #ffffff;
             line-height: 1.1;
         }
@@ -146,7 +158,6 @@
             grid-template-columns: 3fr 2fr;
             gap: 10px;
             min-height: 0;
-            /* ✅ penting supaya children bisa scroll */
         }
 
         .panel {
@@ -184,13 +195,14 @@
             text-transform: uppercase;
             letter-spacing: 0.16em;
             color: #0b1220;
-            font-weight: 800;
+            font-weight: 900;
         }
 
         .panel-subtitle {
             font-size: 11px;
             color: #6b7280;
             margin-top: 2px;
+            font-weight: 500;
         }
 
         .btn-small {
@@ -199,6 +211,7 @@
             background: #ffffff;
             padding: 6px 12px;
             font-size: 11px;
+            font-weight: 700;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -222,15 +235,12 @@
 
         /* ================= LEFT PANEL ================= */
 
-        /* ✅ bikin layout kiri jadi flex-column supaya "Riwayat realtime" turun & bisa terlihat penuh */
         .left-body {
             display: flex;
             flex-direction: column;
             gap: 12px;
             overflow: hidden;
-            /* scroll dipindah ke mini-log-list */
             padding-right: 0;
-            /* biar rapih */
         }
 
         .call-grid {
@@ -239,6 +249,8 @@
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             min-height: 0;
+            align-items: stretch;
+            /* ✅ tinggi kedua card dibuat sama */
         }
 
         .call-card {
@@ -249,8 +261,11 @@
             box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            /* ✅ konsisten */
             min-height: 0;
+            height: 100%;
+            /* ✅ pastikan nge-stretch */
         }
 
         .call-head {
@@ -258,6 +273,9 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: 10px;
+
+            /* ✅ FIX sejajar */
+            min-height: 54px;
         }
 
         .call-name {
@@ -270,6 +288,7 @@
             font-size: 11px;
             color: var(--muted);
             margin-top: 2px;
+            font-weight: 500;
         }
 
         .call-badge {
@@ -283,13 +302,13 @@
             color: var(--bri-blue);
             white-space: nowrap;
             flex: 0 0 auto;
-            font-weight: 800;
+            font-weight: 900;
         }
 
         .call-badge.cs {
-            border-color: #bbf7d0;
-            background: #ecfdf5;
-            color: #15803d;
+            border-color: rgba(79, 195, 255, 0.65);
+            background: rgba(79, 195, 255, 0.16);
+            color: #0a4ea2;
         }
 
         .form-row {
@@ -298,10 +317,14 @@
             gap: 10px;
             align-items: center;
             margin-top: 2px;
+
+            /* ✅ FIX sejajar */
+            min-height: 44px;
         }
 
         .form-row label {
             font-size: 12px;
+            font-weight: 700;
             color: #475569;
         }
 
@@ -309,10 +332,14 @@
             width: 100%;
             border-radius: 999px;
             border: 1px solid #d1d5db;
-            padding: 10px 12px;
             background: #fff;
             font-size: 13px;
             outline: none;
+
+            /* ✅ FIX tinggi konsisten Windows */
+            height: 40px;
+            line-height: 40px;
+            padding: 0 14px;
         }
 
         .last-box {
@@ -324,11 +351,14 @@
             justify-content: space-between;
             align-items: center;
             gap: 10px;
+
+            /* ✅ FIX sejajar */
+            min-height: 74px;
         }
 
         .last-box.cs {
-            border-color: #bbf7d0;
-            background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+            border-color: rgba(79, 195, 255, 0.65);
+            background: linear-gradient(180deg, rgba(79, 195, 255, 0.16) 0%, #ffffff 100%);
         }
 
         .last-left {
@@ -344,11 +374,12 @@
             text-transform: uppercase;
             color: #334155;
             opacity: .85;
+            font-weight: 800;
         }
 
         .last-number {
             font-size: 24px;
-            font-weight: 950;
+            font-weight: 900;
             letter-spacing: 0.10em;
             color: #0b1220;
             line-height: 1.1;
@@ -358,6 +389,13 @@
             font-size: 12px;
             color: #475569;
             white-space: nowrap;
+
+            /* ✅ bantu sejajar */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 20px;
+            font-weight: 700;
         }
 
         .call-btn {
@@ -369,6 +407,9 @@
             cursor: pointer;
             font-size: 13px;
             transition: transform .06s ease, filter .12s ease;
+
+            /* ✅ FIX sejajar */
+            min-height: 44px;
         }
 
         .call-btn:active {
@@ -376,7 +417,6 @@
             filter: brightness(.98);
         }
 
-        /* ✅ tombol dominan biru BRI */
         .call-btn.teller {
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             color: #eef2ff;
@@ -384,19 +424,23 @@
         }
 
         .call-btn.cs {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            color: #ecfdf5;
-            box-shadow: 0 14px 32px rgba(22, 163, 74, 0.22);
+            background: linear-gradient(135deg, var(--bri-light), var(--bri-light-2));
+            color: #ffffff;
+            box-shadow: 0 14px 32px rgba(79, 195, 255, 0.35);
         }
 
         .hint {
             font-size: 11px;
             color: #94a3b8;
             margin-top: -2px;
+            font-weight: 600;
+
+            /* ✅ FIX sejajar */
+            min-height: 16px;
+            line-height: 16px;
         }
 
         .mini-log {
-            /* ✅ “Riwayat” ditaruh lebih kebawah & dibuat fleksibel */
             flex: 1 1 auto;
             min-height: 0;
 
@@ -435,6 +479,7 @@
             background: #fff;
             padding: 6px 10px;
             font-size: 11px;
+            font-weight: 800;
             cursor: pointer;
             white-space: nowrap;
         }
@@ -444,7 +489,6 @@
         }
 
         .mini-log-list {
-            /* ✅ tidak pakai max-height lagi -> jadi terlihat penuh sesuai sisa ruang panel */
             flex: 1 1 auto;
             min-height: 0;
             overflow: auto;
@@ -458,6 +502,7 @@
             border-bottom: 1px solid #f1f5f9;
             align-items: center;
             font-size: 12px;
+            font-weight: 600;
         }
 
         .mini-item:nth-child(even) {
@@ -482,13 +527,13 @@
         }
 
         .mini-badge.cs {
-            border-color: #bbf7d0;
-            background: #ecfdf5;
-            color: #15803d;
+            border-color: rgba(79, 195, 255, 0.65);
+            background: rgba(79, 195, 255, 0.16);
+            color: #0a4ea2;
         }
 
         .mini-num {
-            font-weight: 950;
+            font-weight: 900;
             letter-spacing: .10em;
             color: #0b1220;
         }
@@ -500,6 +545,7 @@
         .mini-jam {
             color: #64748b;
             text-align: right;
+            font-weight: 700;
         }
 
         .mini-empty {
@@ -507,6 +553,7 @@
             text-align: center;
             color: #6b7280;
             font-size: 12px;
+            font-weight: 600;
         }
 
         /* ================= RIGHT PANEL ================= */
@@ -520,6 +567,7 @@
             font-size: 13px;
             background: #f9fafb;
             color: #111827;
+            font-weight: 500;
         }
 
         .promo-actions {
@@ -560,6 +608,7 @@
             color: #6b7280;
             margin-top: 6px;
             word-break: break-all;
+            font-weight: 600;
         }
 
         .img-list {
@@ -578,6 +627,7 @@
             padding: 10px 12px;
             border-bottom: 1px solid #f1f5f9;
             font-size: 12px;
+            font-weight: 600;
         }
 
         .img-row:last-child {
@@ -604,6 +654,7 @@
             background: #fff;
             padding: 6px 10px;
             font-size: 11px;
+            font-weight: 800;
             cursor: pointer;
             white-space: nowrap;
         }
@@ -632,6 +683,7 @@
             line-height: 1.6;
             color: #4b5563;
             box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+            font-weight: 500;
         }
 
         .note-title {
@@ -644,17 +696,10 @@
 
         /* ================= FOOTER ================= */
         .footer {
-            flex: 0 0 auto;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            font-size: 11px;
-            color: #334155;
-            padding: 0 2px;
-            min-height: 18px;
+            display: none !important;
+            /* ✅ footer bawah dihapus total (tanggal pindah ke header) */
         }
 
-        /* ✅ "Terhubung ke server cabang..." dihapus, jadi status-row & dot gak dipakai */
         .status-row,
         .status-dot {
             display: none !important;
@@ -679,7 +724,7 @@
             }
 
             .top-date-time {
-                min-width: 110px;
+                min-width: 160px;
             }
         }
 
@@ -689,11 +734,11 @@
             }
 
             .brand-name {
-                font-size: 16px;
+                font-size: 18px;
             }
 
             .top-time {
-                font-size: 16px;
+                font-size: 18px;
                 letter-spacing: 0.12em;
             }
         }
@@ -705,7 +750,6 @@
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-logo-box">
-                <!-- ✅ logo dibuat putih via CSS filter -->
                 <img src="assets/logo-astro.png" alt="Logo">
             </div>
             <div class="brand-text">
@@ -716,6 +760,7 @@
 
         <div class="top-right">
             <div class="top-date-time">
+                <!-- ✅ gabung jadi satu baris seperti kiosk -->
                 <div id="hdr-date"></div>
                 <div id="hdr-time" class="top-time"></div>
             </div>
@@ -736,7 +781,6 @@
                 </div>
             </div>
 
-            <!-- ✅ pakai left-body supaya riwayat turun & terlihat penuh -->
             <div class="panel-body left-body">
                 <div class="call-grid">
                     <!-- TELLER -->
@@ -830,7 +874,8 @@
             <div class="panel-body">
                 <!-- PROMO TEXT -->
                 <div>
-                    <div style="font-size:12px; color:#334155; margin-bottom:6px;">Teks Promo Hari Ini</div>
+                    <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Teks Promo Hari Ini
+                    </div>
                     <textarea id="promo-input" class="promo-textarea"
                         placeholder="Tulis teks promo yang akan tampil di layar Display..."></textarea>
 
@@ -841,7 +886,7 @@
 
                 <!-- VIDEO -->
                 <div style="margin-top:6px;">
-                    <div style="font-size:12px; color:#334155; margin-bottom:6px;">Video Promo</div>
+                    <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Video Promo</div>
                     <div class="promo-actions" style="margin-top:0;">
                         <button class="btn-secondary" onclick="choosePromoVideo()">📂 Pilih Video Promo...</button>
                     </div>
@@ -850,7 +895,8 @@
 
                 <!-- SLIDER IMAGES -->
                 <div style="margin-top:14px;">
-                    <div style="font-size:12px; color:#334155; margin-bottom:6px;">Gambar Slider Promo (Multiple)</div>
+                    <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Gambar Slider Promo
+                        (Multiple)</div>
 
                     <div class="promo-actions" style="margin-top:0;">
                         <button class="btn-secondary" onclick="choosePromoImages()">🖼️ Pilih Gambar Slider...</button>
@@ -858,13 +904,13 @@
                             style="border-color:#fecaca;color:#b91c1c;background:#fee2e2;">🗑️ Hapus Semua</button>
                     </div>
 
-                    <div style="font-size:11px;color:#6b7280;margin-top:-6px;">
+                    <div style="font-size:11px;color:#6b7280;margin-top:-6px;font-weight:600;">
                         Disarankan JPG/PNG. Display akan otomatis slide tiap 5 detik.
                     </div>
 
                     <div id="imgList" class="img-list" style="margin-top:10px;">
                         <div class="img-row">
-                            <div class="img-name" style="color:#6b7280;font-weight:600;">Belum ada gambar slider.</div>
+                            <div class="img-name" style="color:#6b7280;font-weight:700;">Belum ada gambar slider.</div>
                             <div></div>
                         </div>
                     </div>
@@ -887,7 +933,7 @@
         </div>
     </div>
 
-    <!-- ✅ Footer bawah: "Terhubung ke server cabang..." DIHAPUS -->
+    <!-- ✅ Footer bawah dihapus (tanggal sudah digabung di header) -->
     <div class="footer">
         <div id="footer-date">Hari ini:</div>
     </div>
@@ -928,8 +974,11 @@
             return `${hari[date.getDay()]}, ${String(date.getDate()).padStart(2, "0")} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
         function formatTanggalPendek(date) {
-            const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-            return `${String(date.getDate()).padStart(2, "0")} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+            const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            // ✅ samakan gaya dengan kiosk: "Sabtu, 20 Des 2025"
+            const bulanPendek = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+            return `${hari[date.getDay()]}, ${String(date.getDate()).padStart(2, "0")} ${bulanPendek[date.getMonth()]} ${date.getFullYear()}`;
         }
         function pad2(n) { return String(n).padStart(2, "0"); }
         function formatJam(date) { return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`; }
@@ -939,6 +988,8 @@
             const now = new Date();
             document.getElementById("hdr-time").textContent = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
             document.getElementById("hdr-date").textContent = formatTanggalPendek(now);
+
+            // footer tetap diupdate (walau disembunyikan) biar aman gak ubah logika lama
             const footerDateEl = document.getElementById("footer-date");
             if (footerDateEl) footerDateEl.textContent = `Hari ini: ${formatTanggalPanjang(now)}`;
         }
@@ -1201,7 +1252,7 @@
             if (!list.length) {
                 imgListEl.innerHTML = `
           <div class="img-row">
-            <div class="img-name" style="color:#6b7280;font-weight:600;">Belum ada gambar slider.</div>
+            <div class="img-name" style="color:#6b7280;font-weight:700;">Belum ada gambar slider.</div>
             <div></div>
           </div>
         `;

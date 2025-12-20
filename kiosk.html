@@ -3,11 +3,19 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kiosk Pengambilan Nomor</title>
+
+    <!-- ✅ Samakan font dengan Admin Panel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900;950&display=swap"
+        rel="stylesheet" />
+
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         :root {
@@ -15,11 +23,9 @@
             --bri-blue-2: #0a4ea2;
             --bri-blue-3: #0a63c7;
 
-            /* ✅ biru muda (dibikin lebih soft & mirip panel video) */
+            /* ✅ biru muda (soft) */
             --bri-light: #7dd3fc;
-            /* sky-300 */
             --bri-light-2: #38bdf8;
-            /* sky-400 */
 
             --text: #0f172a;
             --muted: #64748b;
@@ -39,105 +45,105 @@
             padding: 12px 14px;
         }
 
-        /* ================= TOP BAR ================= */
+        /* ================= TOP BAR (SAMAKAN ADMIN PANEL) ================= */
         .top-bar {
+            flex: 0 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
-            border-radius: 14px;
-            padding: 12px 16px;
-            box-shadow: 0 14px 34px rgba(11, 86, 179, 0.28);
-            margin-bottom: 12px;
+            border-radius: 16px;
+            padding: 14px 20px;
+            box-shadow: 0 16px 34px rgba(11, 86, 179, 0.28);
             border: 1px solid rgba(255, 255, 255, 0.20);
+            min-height: 70px;
             color: #fff;
-            min-height: 64px;
-            gap: 12px;
+            gap: 14px;
+            margin-bottom: 12px;
         }
 
-        .top-left {
+        .brand-left {
             display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        .top-title {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: 0.02em;
-        }
-
-        .top-subtitle {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .top-right-pill {
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 8px 14px;
-            border-radius: 999px;
-            color: #eff6ff;
-            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
-            backdrop-filter: blur(6px);
-            flex: 0 0 auto;
+            gap: 14px;
+            min-width: 280px;
         }
 
-        .pill-logo {
-            width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.16);
-            border: 1px solid rgba(255, 255, 255, 0.30);
-            display: inline-flex;
+        /* ✅ model logo sama admin: kotak */
+        .brand-logo-box {
+            width: 66px;
+            height: 46px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.10);
+            display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+            flex: 0 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
-        .pill-logo img {
-            width: 80%;
-            height: 80%;
+        .brand-logo-box img {
+            width: 88%;
+            height: 88%;
             object-fit: contain;
             display: block;
             filter: brightness(0) invert(1);
             opacity: .98;
         }
 
-        #branch-pill {
-            font-size: 14px;
-            font-weight: 900;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #ffffff;
-            white-space: nowrap;
-        }
-
-        .top-datetime {
-            text-align: right;
+        .brand-text {
             display: flex;
             flex-direction: column;
             gap: 2px;
-            min-width: 130px;
+            min-width: 0;
         }
 
-        .top-date {
-            font-size: 11px;
-            color: rgba(255, 255, 255, .92);
-            white-space: nowrap;
-        }
-
-        .top-time {
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: 0.14em;
+        /* ✅ Nama cabang (BRI) seperti admin */
+        .brand-name {
+            font-size: 20px;
+            font-weight: 950;
+            letter-spacing: 0.10em;
             color: #ffffff;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        /* ✅ Tagline: Pengambilan Nomor (sesuai permintaan) */
+        .brand-tagline {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.90);
+            line-height: 1.15;
+            font-weight: 600;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 520px;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 0 0 auto;
+        }
+
+        .top-date-time {
+            text-align: right;
+            font-size: 12px;
+            color: rgba(255, 255, 255, .92);
+            min-width: 170px;
+            font-weight: 600;
+        }
+
+        /* ✅ jam besar seperti admin */
+        .top-time {
+            font-size: 22px;
+            font-weight: 950;
+            letter-spacing: 0.16em;
+            color: #ffffff;
+            line-height: 1.1;
         }
 
         /* ================= BODY ================= */
@@ -234,18 +240,15 @@
             filter: brightness(0.98);
         }
 
-        /* ✅ Biru tua (Teller) */
         .btn-teller {
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             color: #ffffff;
             box-shadow: 0 16px 34px rgba(11, 86, 179, 0.30);
         }
 
-        /* ✅ Biru muda (Customer Service) -> dibuat soft & text putih */
         .btn-cs {
             background: linear-gradient(135deg, var(--bri-light), var(--bri-light-2));
             color: #ffffff;
-            /* ✅ putih */
             box-shadow: 0 16px 34px rgba(56, 189, 248, 0.35);
         }
 
@@ -447,12 +450,10 @@
             min-width: 0;
         }
 
-        /* ✅ "Tips Keamanan" jadi hitam */
         .security-title {
             font-size: 12px;
             font-weight: 900;
             color: #0f172a;
-            /* ✅ hitam */
             letter-spacing: .04em;
             white-space: nowrap;
             overflow: hidden;
@@ -530,27 +531,46 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media (max-width: 560px) {
+            .brand-left {
+                min-width: 0;
+            }
+
+            .brand-name {
+                font-size: 18px;
+            }
+
+            .top-time {
+                font-size: 18px;
+                letter-spacing: 0.12em;
+            }
+
+            .top-date-time {
+                min-width: 120px;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- ✅ TOP BAR versi Admin Panel -->
     <div class="top-bar">
-        <div class="top-left">
-            <div class="top-title">PENGAMBILAN NOMOR</div>
-            <div class="top-subtitle">Silakan ambil nomor antrian sebelum menuju Teller / Customer Service.</div>
+        <div class="brand-left">
+            <div class="brand-logo-box">
+                <img src="assets/logo-astro.png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <!-- ✅ ini akan diisi BRANCH_NAME oleh JS (tanpa ubah logic) -->
+                <div id="branch-pill" class="brand-name">BRI</div>
+                <div class="brand-tagline">PENGAMBILAN NOMOR ANTRIAN</div>
+            </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:12px; flex:0 0 auto;">
-            <div class="top-datetime">
-                <div id="hdr-date" class="top-date">-</div>
-                <div id="hdr-time" class="top-time">-</div>
-            </div>
-
-            <div class="top-right-pill">
-                <span class="pill-logo">
-                    <img src="assets/logo-astro.png" alt="Logo">
-                </span>
-                <span id="branch-pill">BRI</span>
+        <div class="top-right">
+            <div class="top-date-time">
+                <div id="hdr-date"></div>
+                <div id="hdr-time" class="top-time"></div>
             </div>
         </div>
     </div>
