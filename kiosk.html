@@ -43,107 +43,133 @@
             display: flex;
             flex-direction: column;
             padding: 12px 14px;
+            gap: 10px;
         }
 
-        /* ================= TOP BAR (SAMAKAN ADMIN PANEL) ================= */
+        /* ================= TOP BAR (SAMAKAN DISPLAY) ================= */
         .top-bar {
             flex: 0 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 14px;
 
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
-            border-radius: 16px;
-            padding: 14px 20px;
-            box-shadow: 0 16px 34px rgba(11, 86, 179, 0.28);
+            border-radius: 18px;
+
+            padding: 18px 24px;
+            min-height: 92px;
+
+            box-shadow: 0 18px 38px rgba(11, 86, 179, 0.30);
             border: 1px solid rgba(255, 255, 255, 0.20);
-            min-height: 70px;
+            position: relative;
+            overflow: hidden;
             color: #fff;
-            gap: 14px;
-            margin-bottom: 12px;
+        }
+
+        .top-bar::after {
+            content: "";
+            position: absolute;
+            inset: -90px -140px auto auto;
+            width: 340px;
+            height: 340px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 70%);
+            transform: rotate(15deg);
+            pointer-events: none;
         }
 
         .brand-left {
             display: flex;
-            align-items: center;
-            gap: 14px;
-            min-width: 280px;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            z-index: 1;
+            min-width: 320px;
         }
 
-        /* ✅ model logo sama admin: kotak */
+        .brand-title-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
         .brand-logo-box {
-            width: 66px;
-            height: 46px;
-            border-radius: 12px;
+            width: 62px;
+            height: 62px;
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex: 0 0 auto;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.20);
         }
 
         .brand-logo-box img {
-            width: 88%;
-            height: 88%;
+            width: 90%;
+            height: 90%;
             object-fit: contain;
             display: block;
             filter: brightness(0) invert(1);
             opacity: .98;
         }
 
-        .brand-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        /* ✅ Nama cabang (BRI) seperti admin */
         .brand-name {
-            font-size: 20px;
+            font-size: 52px;
             font-weight: 950;
-            letter-spacing: 0.10em;
+            letter-spacing: 0.06em;
             color: #ffffff;
-            line-height: 1.1;
+            line-height: 1;
             text-transform: uppercase;
-        }
-
-        /* ✅ Tagline: Pengambilan Nomor (sesuai permintaan) */
-        .brand-tagline {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.90);
-            line-height: 1.15;
-            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 520px;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
+        }
+
+        /* ✅ Tagline HARUS turun di bawah logo (seperti display) */
+        .brand-tagline {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 800;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 560px;
+            margin-top: 2px;
+            /* start sejajar kiri logo */
+            padding-left: 0;
         }
 
         .top-right {
+            position: relative;
+            z-index: 1;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 0 0 auto;
-        }
-
-        .top-date-time {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            min-width: 190px;
             text-align: right;
-            font-size: 12px;
-            color: rgba(255, 255, 255, .92);
-            min-width: 170px;
-            font-weight: 600;
         }
 
-        /* ✅ jam besar seperti admin */
+        .top-date {
+            font-size: 13px;
+            font-weight: 800;
+            opacity: 0.95;
+            white-space: nowrap;
+        }
+
         .top-time {
-            font-size: 22px;
+            font-size: 34px;
             font-weight: 950;
             letter-spacing: 0.16em;
             color: #ffffff;
-            line-height: 1.1;
+            white-space: nowrap;
+            line-height: 1.02;
         }
 
         /* ================= BODY ================= */
@@ -212,6 +238,39 @@
             margin-bottom: 14px;
         }
 
+        /* ✅ Ticket dulu, baru tombol (sesuai permintaan) */
+        .ticket {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            border-radius: 16px;
+            border: 1px dashed #cbd5e1;
+            padding: 14px 12px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .ticket-title {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            margin-bottom: 8px;
+        }
+
+        .ticket-number {
+            font-family: "Courier New", monospace;
+            font-size: 46px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .ticket-footer {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
         .buttons {
             display: flex;
             flex-direction: column;
@@ -257,38 +316,6 @@
             color: var(--muted);
             text-align: center;
             margin-bottom: 10px;
-        }
-
-        .ticket {
-            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-            border-radius: 16px;
-            border: 1px dashed #cbd5e1;
-            padding: 14px 12px;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .ticket-title {
-            font-size: 11px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            margin-bottom: 8px;
-        }
-
-        .ticket-number {
-            font-family: "Courier New", monospace;
-            font-size: 46px;
-            font-weight: 900;
-            letter-spacing: 0.18em;
-            color: #0f172a;
-            margin-bottom: 6px;
-        }
-
-        .ticket-footer {
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.5;
         }
 
         .btn-print {
@@ -538,40 +565,39 @@
             }
 
             .brand-name {
-                font-size: 18px;
+                font-size: 42px;
             }
 
             .top-time {
-                font-size: 18px;
+                font-size: 26px;
                 letter-spacing: 0.12em;
             }
 
-            .top-date-time {
-                min-width: 120px;
+            .top-right {
+                min-width: 150px;
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- ✅ TOP BAR versi Admin Panel -->
+    <!-- ✅ TOP BAR versi DISPLAY -->
     <div class="top-bar">
         <div class="brand-left">
-            <div class="brand-logo-box">
-                <img src="assets/logo-astro.png" alt="Logo">
-            </div>
-            <div class="brand-text">
-                <!-- ✅ ini akan diisi BRANCH_NAME oleh JS (tanpa ubah logic) -->
+            <div class="brand-title-row">
+                <div class="brand-logo-box">
+                    <img src="assets/logo-astro.png" alt="Logo">
+                </div>
                 <div id="branch-pill" class="brand-name">BRI</div>
-                <div class="brand-tagline">PENGAMBILAN NOMOR ANTRIAN</div>
             </div>
+
+            <!-- ✅ ini turun tepat di bawah logo (sesuai permintaan) -->
+            <div class="brand-tagline">PENGAMBILAN NOMOR ANTRIAN</div>
         </div>
 
         <div class="top-right">
-            <div class="top-date-time">
-                <div id="hdr-date"></div>
-                <div id="hdr-time" class="top-time"></div>
-            </div>
+            <div id="hdr-date" class="top-date"></div>
+            <div id="hdr-time" class="top-time"></div>
         </div>
     </div>
 
@@ -581,19 +607,21 @@
                 <div class="title">Ambil Nomor Antrian</div>
                 <div class="subtitle">Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.</div>
 
-                <div class="buttons">
-                    <button class="btn-teller" onclick="take('TELLER')">Ambil Antrian Teller</button>
-                    <button class="btn-cs" onclick="take('CS')">Ambil Antrian Customer Service</button>
-                </div>
-
-                <div class="info-pill">Tekan tombol sesuai kebutuhan layanan Anda.</div>
-
+                <!-- ✅ NOMOR dulu -->
                 <div class="ticket">
                     <div class="ticket-title">Nomor Antrian Anda</div>
                     <div id="ticket-number" class="ticket-number">-</div>
                     <div class="ticket-footer">Simpan nomor ini. Nomor akan dipanggil sesuai urutan pada layar display.
                     </div>
                 </div>
+
+                <!-- ✅ Baru tombol (sesuai permintaan) -->
+                <div class="buttons">
+                    <button class="btn-teller" onclick="take('TELLER')">Ambil Antrian Teller</button>
+                    <button class="btn-cs" onclick="take('CS')">Ambil Antrian Customer Service</button>
+                </div>
+
+                <div class="info-pill">Tekan tombol sesuai kebutuhan layanan Anda.</div>
 
                 <button class="btn-print" onclick="window.print()">Cetak Ulang Halaman</button>
 
@@ -612,7 +640,8 @@
                 </div>
 
                 <div class="video-frame">
-                    <video id="kioskVideo" autoplay loop muted playsinline preload="auto"
+                    <!-- ✅ SUARA DITAMPILKAN: muted dihapus -->
+                    <video id="kioskVideo" autoplay loop playsinline preload="auto"
                         controlslist="nodownload noplaybackrate">
                         <source id="kioskVideoSource" src="assets/kiosk-promo.mp4" type="video/mp4" />
                         Browser tidak mendukung video.
@@ -675,7 +704,7 @@
         setInterval(pingServer, 5000);
 
         // =======================
-        // ✅ Tanggal / Jam
+        // ✅ Tanggal / Jam (format sama seperti sebelumnya)
         // =======================
         function pad2(n) { return String(n).padStart(2, "0"); }
         function formatTanggalPanjang(date) {
@@ -718,7 +747,7 @@
         setInterval(syncRunningTextFromServer, 2000);
 
         // =======================
-        // ✅ Video ikut display (tanpa putus)
+        // ✅ Video ikut display (tanpa putus) + suara muncul
         // =======================
         function safeNormalizePath(p) {
             if (!p) return null;
@@ -728,6 +757,31 @@
 
         let lastAppliedSrc = null;
         let videoRetryTimer = null;
+
+        function forcePlayVideoSafely() {
+            const videoEl = document.getElementById("kioskVideo");
+            if (!videoEl) return;
+
+            try {
+                videoEl.playsInline = true;
+
+                // ✅ coba nyalakan suara
+                videoEl.muted = false;
+                videoEl.volume = 1;
+
+                const p = videoEl.play?.();
+                if (p && typeof p.catch === "function") {
+                    p.catch(() => {
+                        // fallback: kalau autoplay audio diblok, tetap jalan tapi muted
+                        try {
+                            videoEl.muted = true;
+                            videoEl.volume = 0;
+                            videoEl.play?.().catch(() => { });
+                        } catch { }
+                    });
+                }
+            } catch { }
+        }
 
         async function applyVideoFromDisplayConfig() {
             const videoEl = document.getElementById("kioskVideo");
@@ -756,8 +810,7 @@
             sourceEl.src = nextSrc;
             try {
                 videoEl.load();
-                const p = videoEl.play();
-                if (p && typeof p.catch === "function") p.catch(() => { });
+                forcePlayVideoSafely();
             } catch { }
         }
 
@@ -772,10 +825,7 @@
                 if (videoRetryTimer) return;
                 videoRetryTimer = setTimeout(() => {
                     videoRetryTimer = null;
-                    try {
-                        const p = videoEl.play();
-                        if (p && typeof p.catch === "function") p.catch(() => { });
-                    } catch { }
+                    forcePlayVideoSafely();
                 }, 1200);
             }
 
@@ -783,12 +833,10 @@
             videoEl.addEventListener("stalled", retryPlay);
             videoEl.addEventListener("waiting", retryPlay);
 
-            window.addEventListener("focus", () => {
-                try {
-                    const p = videoEl.play();
-                    if (p && typeof p.catch === "function") p.catch(() => { });
-                } catch { }
-            });
+            videoEl.addEventListener("loadedmetadata", forcePlayVideoSafely);
+            videoEl.addEventListener("canplay", forcePlayVideoSafely);
+
+            window.addEventListener("focus", () => forcePlayVideoSafely());
         })();
 
         // =======================
