@@ -87,14 +87,12 @@
         .brand-left {
             display: flex;
             flex-direction: column;
-            /* ✅ supaya tagline benar-benar di bawah */
             gap: 4px;
             position: relative;
             z-index: 1;
             min-width: 320px;
         }
 
-        /* ✅ baris atas: LOGO + tulisan BRI sejajar */
         .brand-title-row {
             display: flex;
             align-items: center;
@@ -102,7 +100,6 @@
             min-width: 0;
         }
 
-        /* ✅ logo BRI */
         .brand-logo-box {
             width: 62px;
             height: 62px;
@@ -126,10 +123,8 @@
             opacity: .98;
         }
 
-        /* ✅ tulisan BRI: dibesarkan agar “sekelas” tinggi logo */
         .brand-name {
             font-size: 52px;
-            /* ✅ BESAR */
             font-weight: 950;
             letter-spacing: 0.06em;
             color: #ffffff;
@@ -141,7 +136,6 @@
             text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
         }
 
-        /* ✅ tagline di bawah (lebih kecil) */
         .brand-tagline {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.92);
@@ -151,12 +145,9 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 560px;
-
-            /* ✅ mulai dari bawah logo (rata kiri logo) */
             padding-left: 0;
             margin-top: 2px;
         }
-
 
         .top-right {
             position: relative;
@@ -252,7 +243,6 @@
             flex: 0 0 auto;
         }
 
-        /* ✅ WARNA DISAMAKAN DENGAN BUTTON CS DI KIOSK */
         .current-card {
             background: linear-gradient(135deg, var(--bri-light), var(--bri-light-2));
             border-radius: 14px;
@@ -775,22 +765,19 @@
 <body>
     <div class="top-bar">
         <div class="brand-left">
-            <!-- ✅ baris atas: LOGO + BRI -->
             <div class="brand-title-row">
                 <div class="brand-logo-box">
-                    <!-- ✅ ganti ke logo BRI kamu -->
                     <img src="assets/logo-astro.png" alt="Logo BRI">
                 </div>
                 <div id="brand-name" class="brand-name">BRI</div>
             </div>
 
-            <!-- ✅ tagline di bawah -->
             <div class="brand-tagline">Melayani dengan sepenuh hati</div>
         </div>
 
         <div class="top-right">
-            <div id="top-date" class="top-date">08 Des 2025</div>
-            <div id="top-time" class="top-time">15:54</div>
+            <div id="top-date" class="top-date">Minggu, 21 Desember 2025</div>
+            <div id="top-time" class="top-time">18:45:00</div>
         </div>
     </div>
 
@@ -962,19 +949,18 @@
         let lastCsTicket = null;
         let initialized = false;
 
+        // ✅ DIUBAH: format tanggal jadi panjang seperti kiosk (Minggu, 21 Desember 2025)
+        function pad2(n) { return String(n).padStart(2, "0"); }
         function formatTanggalID(date) {
-            const hari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-            const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-            const h = hari[date.getDay()];
-            const d = String(date.getDate()).padStart(2, "0");
-            const m = bulan[date.getMonth()];
-            const y = date.getFullYear();
-            return `${h}, ${d} ${m} ${y}`;
+            const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            return `${hari[date.getDay()]}, ${pad2(date.getDate())} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
 
+        // ✅ DIUBAH: jam pakai detik (HH:MM:SS) seperti kiosk
         function updateClock() {
             const now = new Date();
-            const t = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 5);
+            const t = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
             document.getElementById("top-time").textContent = t;
             document.getElementById("top-date").textContent = formatTanggalID(now);
         }

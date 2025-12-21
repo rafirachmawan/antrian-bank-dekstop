@@ -9,7 +9,7 @@
     <!-- ✅ Font lebih profesional (tanpa mengubah logika JS) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900;950&display=swap"
         rel="stylesheet" />
 
     <style>
@@ -41,6 +41,10 @@
             --text: #0f172a;
             --muted: #64748b;
             --line: #e5e7eb;
+
+            /* ✅ kontrol header brand biar konsisten */
+            --brand-logo-size: 62px;
+            --brand-logo-gap: 14px;
         }
 
         body {
@@ -62,93 +66,127 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 14px;
 
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
-            border-radius: 16px;
-            padding: 14px 20px;
-            box-shadow: 0 16px 34px rgba(11, 86, 179, 0.28);
+            border-radius: 18px;
+
+            /* ✅ dibuat “sekelas” display/kiosk */
+            padding: 18px 24px;
+            min-height: 92px;
+
+            box-shadow: 0 18px 38px rgba(11, 86, 179, 0.30);
             border: 1px solid rgba(255, 255, 255, 0.20);
-            min-height: 70px;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
         }
 
+        .top-bar::after {
+            content: "";
+            position: absolute;
+            inset: -90px -140px auto auto;
+            width: 340px;
+            height: 340px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 70%);
+            transform: rotate(15deg);
+            pointer-events: none;
+        }
+
+        /* ✅ brand kiri: baris LOGO+BRI, lalu tagline di bawah (seperti gambar kamu) */
         .brand-left {
             display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            z-index: 1;
+            min-width: 360px;
+        }
+
+        .brand-title-row {
+            display: flex;
             align-items: center;
-            gap: 14px;
-            min-width: 280px;
+            gap: var(--brand-logo-gap);
+            min-width: 0;
         }
 
         .brand-logo-box {
-            width: 66px;
-            height: 46px;
-            border-radius: 12px;
+            width: var(--brand-logo-size);
+            height: var(--brand-logo-size);
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex: 0 0 auto;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.20);
         }
 
         .brand-logo-box img {
-            width: 88%;
-            height: 88%;
+            width: 90%;
+            height: 90%;
             object-fit: contain;
             display: block;
-
-            /* ✅ logo jadi putih seperti gambar */
             filter: brightness(0) invert(1);
             opacity: .98;
         }
 
-        .brand-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
+        /* ✅ tulisan BRI dibesarkan agar sebanding tinggi logo */
         .brand-name {
-            font-size: 20px;
-            font-weight: 900;
-            letter-spacing: 0.10em;
+            font-size: 52px;
+            font-weight: 950;
+            letter-spacing: 0.06em;
             color: #ffffff;
-            line-height: 1.1;
+            line-height: 1;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
         }
 
+        /* ✅ tagline: posisinya “di bawah tulisan BRI”, jadi geser ke kanan setara lebar logo+gap */
         .brand-tagline {
-            font-size: 12px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.90);
-            line-height: 1.15;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 700;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 640px;
+
+            padding-left: 0px;
+            margin-top: 2px;
         }
 
         .top-right {
+            position: relative;
+            z-index: 1;
             display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .bank-pill {
-            display: none !important;
-        }
-
-        .top-date-time {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            min-width: 220px;
             text-align: right;
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, .92);
-            min-width: 190px;
-            /* ✅ lebih lega biar tidak turun baris */
+        }
+
+        #hdr-date {
+            font-size: 13px;
+            font-weight: 800;
+            opacity: 0.95;
+            white-space: nowrap;
         }
 
         .top-time {
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: 0.12em;
+            font-size: 34px;
+            font-weight: 950;
+            letter-spacing: 0.16em;
             color: #ffffff;
-            line-height: 1.1;
+            white-space: nowrap;
+            line-height: 1.02;
         }
 
         /* ================= LAYOUT GRID ================= */
@@ -250,7 +288,6 @@
             gap: 10px;
             min-height: 0;
             align-items: stretch;
-            /* ✅ tinggi kedua card dibuat sama */
         }
 
         .call-card {
@@ -262,10 +299,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            /* ✅ konsisten */
             min-height: 0;
             height: 100%;
-            /* ✅ pastikan nge-stretch */
         }
 
         .call-head {
@@ -273,8 +308,6 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: 10px;
-
-            /* ✅ FIX sejajar */
             min-height: 54px;
         }
 
@@ -317,8 +350,6 @@
             gap: 10px;
             align-items: center;
             margin-top: 2px;
-
-            /* ✅ FIX sejajar */
             min-height: 44px;
         }
 
@@ -335,8 +366,6 @@
             background: #fff;
             font-size: 13px;
             outline: none;
-
-            /* ✅ FIX tinggi konsisten Windows */
             height: 40px;
             line-height: 40px;
             padding: 0 14px;
@@ -351,8 +380,6 @@
             justify-content: space-between;
             align-items: center;
             gap: 10px;
-
-            /* ✅ FIX sejajar */
             min-height: 74px;
         }
 
@@ -389,8 +416,6 @@
             font-size: 12px;
             color: #475569;
             white-space: nowrap;
-
-            /* ✅ bantu sejajar */
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -407,8 +432,6 @@
             cursor: pointer;
             font-size: 13px;
             transition: transform .06s ease, filter .12s ease;
-
-            /* ✅ FIX sejajar */
             min-height: 44px;
         }
 
@@ -434,8 +457,6 @@
             color: #94a3b8;
             margin-top: -2px;
             font-weight: 600;
-
-            /* ✅ FIX sejajar */
             min-height: 16px;
             line-height: 16px;
         }
@@ -443,7 +464,6 @@
         .mini-log {
             flex: 1 1 auto;
             min-height: 0;
-
             border-radius: 14px;
             border: 1px solid var(--line);
             background: #ffffff;
@@ -723,23 +743,32 @@
                 grid-template-columns: 90px 1fr 140px 80px;
             }
 
-            .top-date-time {
-                min-width: 160px;
+            .top-right {
+                min-width: 180px;
             }
         }
 
         @media (max-width: 560px) {
-            .brand-left {
-                min-width: 0;
+            :root {
+                --brand-logo-size: 54px;
+                --brand-logo-gap: 12px;
             }
 
             .brand-name {
-                font-size: 18px;
+                font-size: 42px;
+            }
+
+            .brand-tagline {
+                font-size: 12px;
             }
 
             .top-time {
-                font-size: 18px;
+                font-size: 26px;
                 letter-spacing: 0.12em;
+            }
+
+            .top-right {
+                min-width: 150px;
             }
         }
     </style>
@@ -749,21 +778,21 @@
     <!-- TOP BAR -->
     <div class="top-bar">
         <div class="brand-left">
-            <div class="brand-logo-box">
-                <img src="assets/logo-astro.png" alt="Logo">
-            </div>
-            <div class="brand-text">
+            <!-- ✅ baris atas: LOGO + BRI -->
+            <div class="brand-title-row">
+                <div class="brand-logo-box">
+                    <img src="assets/logo-astro.png" alt="Logo">
+                </div>
                 <div id="brand-name" class="brand-name">BRI</div>
-                <div class="brand-tagline">Melayani dengan sepenuh hati</div>
             </div>
+
+            <!-- ✅ tagline di bawah tulisan BRI (seperti contoh kamu) -->
+            <div class="brand-tagline">Melayani dengan sepenuh hati</div>
         </div>
 
         <div class="top-right">
-            <div class="top-date-time">
-                <!-- ✅ gabung jadi satu baris seperti kiosk -->
-                <div id="hdr-date"></div>
-                <div id="hdr-time" class="top-time"></div>
-            </div>
+            <div id="hdr-date"></div>
+            <div id="hdr-time" class="top-time"></div>
         </div>
     </div>
 
@@ -867,7 +896,8 @@
                 <div>
                     <div class="panel-title">Pengaturan Promo &amp; Video</div>
                     <div class="panel-subtitle" style="margin-top:4px">Teks, video, dan gambar slider akan tampil di
-                        Display.</div>
+                        Display.
+                    </div>
                 </div>
             </div>
 
@@ -975,8 +1005,6 @@
         }
         function formatTanggalPendek(date) {
             const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            // ✅ samakan gaya dengan kiosk: "Sabtu, 20 Des 2025"
             const bulanPendek = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
             return `${hari[date.getDay()]}, ${String(date.getDate()).padStart(2, "0")} ${bulanPendek[date.getMonth()]} ${date.getFullYear()}`;
         }
