@@ -979,8 +979,17 @@
         try { ipcRenderer = require("electron").ipcRenderer; } catch { /* browser mode */ }
 
         // ====== KONFIG SERVER CABANG ======
-        const API_BASE = (window.queueConfig && window.queueConfig.apiBase) ? window.queueConfig.apiBase : "http://localhost:3000";
+        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
+            ? window.queueConfig.apiBase
+            : "http://192.168.1.107:3000";
+
         const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
+
+        // ✅✅✅ PEMBETULAN: deteksi apakah ini SERVER lokal (boleh fallback IPC) atau CLIENT (jangan pernah fallback IPC)
+        // - mode server-admin di main.js memakai apiBase = http://localhost:PORT
+        // - mode client (PC teller) apiBase = http://IP-SATPAM:PORT
+        const IS_SERVER_LOCAL =
+            /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(API_BASE || "").trim());
 
         // header brand
         const brandNameEl = document.getElementById("brand-name");
@@ -1206,6 +1215,14 @@
                 }
                 return;
             } catch (e) {
+                // ✅✅✅ PEMBETULAN: PC CLIENT (teller) JANGAN jatuh ke IPC (karena itu DB lokal, pasti kosong)
+                if (!IS_SERVER_LOCAL) {
+                    console.error("Gagal panggil via server (client mode):", e);
+                    alert("Gagal memanggil nomor. Pastikan PC ini terhubung ke server pusat (Satpam).");
+                    return;
+                }
+
+                // fallback IPC tetap dipertahankan untuk server-local (tanpa ubah logika besar)
                 try {
                     if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
                     const result = await ipcRenderer.invoke("panel:callNext", { serviceType, counterName });
@@ -1252,6 +1269,15 @@
                 alert("Antrian hari ini sudah direset (server cabang).");
                 return;
             } catch (e) {
+                // ✅✅✅ PEMBETULAN: PC CLIENT jangan reset lokal (karena itu bukan DB pusat)
+                if (!IS_SERVER_LOCAL) {
+                    console.error("Reset gagal via server (client mode):", e);
+                    setOffline("Reset gagal. Pastikan terhubung ke server pusat.");
+                    alert("Gagal mereset antrian hari ini. Pastikan PC ini terhubung ke server pusat (Satpam).");
+                    return;
+                }
+
+                // fallback IPC tetap dipertahankan untuk server-local
                 try {
                     if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
                     await ipcRenderer.invoke("admin:clearTodayTickets");
@@ -1450,7 +1476,8 @@
         async function choosePromoImages() {
             if (ipcRenderer) {
                 try {
-                    const next = await ipcRenderer.invoke("display:chooseSliderImages");
+                    // ✅ FIX: samakan dengan main.js kamu (handler yang ada: display:choosePromoImages)
+                    const next = await ipcRenderer.invoke("display:choosePromoImages");
                     let imgs = [];
                     if (next && Array.isArray(next.files)) imgs = next.files;
                     else imgs = getPromoImagesFromConfig(next);
@@ -1464,7 +1491,7 @@
                     alert("Gambar slider berhasil diperbarui (IPC).");
                     return;
                 } catch (e) {
-                    console.warn("IPC chooseSliderImages gagal, coba browser upload...", e);
+                    console.warn("IPC choosePromoImages gagal, coba browser upload...", e);
                 }
             }
 
@@ -1519,17 +1546,8 @@
         async function clearPromoImages() {
             if (!confirm("Hapus semua gambar slider?")) return;
 
-            if (ipcRenderer) {
-                try {
-                    const res = await ipcRenderer.invoke("display:clearSliderImages");
-                    currentDisplayConfig = res || currentDisplayConfig;
-                    renderPromoImagesList([]);
-                    alert("Semua gambar slider dihapus (IPC).");
-                    return;
-                } catch (e) {
-                    console.warn("IPC clearSliderImages gagal, coba server...", e);
-                }
-            }
+            // ✅ NOTE: Tidak pakai IPC clear karena di main.js kamu belum ada handler "display:clearSliderImages"
+            // Jadi clear dilakukan via server (agar tidak ubah logika besar).
 
             const nextArr = [];
             try {
