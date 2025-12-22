@@ -89,6 +89,36 @@ function writeJsonSafe(p, obj) {
   } catch {}
 }
 
+// ==============================
+// ✅ BUNDLE AUDIO -> COPY KE userData (sekali saja)
+// - Kamu taruh audio di: projectRoot/assets/audio/*.wav
+// - Saat server start: auto copy ke: <userData>/media/audio/
+// - PC lain install: audio ikut karena dari assets
+// ==============================
+function copyAudioIfMissing(srcDir, destDir) {
+  try {
+    if (!fs.existsSync(srcDir)) return;
+    safeMkdir(destDir);
+
+    const files = fs.readdirSync(srcDir);
+    for (const f of files) {
+      const src = path.join(srcDir, f);
+      const dst = path.join(destDir, f);
+
+      try {
+        const st = fs.statSync(src);
+        if (!st.isFile()) continue;
+      } catch {
+        continue;
+      }
+
+      if (!fs.existsSync(dst)) {
+        fs.copyFileSync(src, dst);
+      }
+    }
+  } catch {}
+}
+
 /**
  * createServer({ port, host, userDataPath })
  * ✅ userDataPath dipakai supaya folder media selalu konsisten dengan Electron (app.getPath('userData'))
@@ -108,6 +138,22 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   const imagesDir = path.join(mediaRoot, "promo-images");
   safeMkdir(videoDir);
   safeMkdir(imagesDir);
+
+  // ✅ AUDIO (bundled -> userData)
+  const audioDir = path.join(mediaRoot, "audio");
+  safeMkdir(audioDir);
+
+  // sumber audio bundling (taruh file wav kamu di sini)
+  const bundledAudioDir = path.join(__dirname, "assets", "audio");
+  copyAudioIfMissing(bundledAudioDir, audioDir);
+
+  // serve audio agar bisa dipakai display/admin/kiosk
+  app.use(
+    "/media/audio",
+    express.static(audioDir, {
+      setHeaders: (res) => res.setHeader("Cache-Control", "no-store"),
+    })
+  );
 
   // ✅ folder cache untuk hasil mp3 tts (biar rapi)
   const ttsDir = path.join(mediaRoot, "tts-cache");
@@ -542,6 +588,8 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   const server = app.listen(port, host, () => {
     console.log(`✅ Queue Server running on http://${host}:${port}`);
     console.log("✅ Media root:", mediaRoot);
+    console.log("✅ Audio dir:", audioDir);
+    console.log("✅ Bundled audio dir:", bundledAudioDir);
     console.log("✅ TTS cache:", ttsDir);
     console.log("✅ Daily reset meta:", dailyResetMetaPath);
   });

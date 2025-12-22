@@ -824,11 +824,12 @@
 
                         <div class="form-row">
                             <label for="tellerCounterSel">Loket</label>
+                            <!-- ✅✅✅ GANTI: Teller 1/2/3/4 -> Counter 1/2/3/4 -->
                             <select id="tellerCounterSel">
-                                <option value="Teller 1">Teller 1</option>
-                                <option value="Teller 2">Teller 2</option>
-                                <option value="Teller 3">Teller 3</option>
-                                <option value="Teller 4">Teller 4</option>
+                                <option value="Counter 1">Counter 1</option>
+                                <option value="Counter 2">Counter 2</option>
+                                <option value="Counter 3">Counter 3</option>
+                                <option value="Counter 4">Counter 4</option>
                             </select>
                         </div>
 
@@ -857,10 +858,11 @@
 
                         <div class="form-row">
                             <label for="csCounterSel">Loket</label>
+                            <!-- ✅✅✅ GANTI: CS 1/2/3 -> Counter 1/2/3 -->
                             <select id="csCounterSel">
-                                <option value="CS 1">CS 1</option>
-                                <option value="CS 2">CS 2</option>
-                                <option value="CS 3">CS 3</option>
+                                <option value="Counter 1">Counter 1</option>
+                                <option value="Counter 2">Counter 2</option>
+                                <option value="Counter 3">Counter 3</option>
                             </select>
                         </div>
 
@@ -1157,8 +1159,9 @@
         // PEMANGGILAN
         // ==========================
         function getCounterName(serviceType) {
-            if (serviceType === "TELLER") return document.getElementById("tellerCounterSel")?.value || "Teller 1";
-            return document.getElementById("csCounterSel")?.value || "CS 1";
+            // ✅✅✅ default fallback juga diganti ke Counter (biar konsisten)
+            if (serviceType === "TELLER") return document.getElementById("tellerCounterSel")?.value || "Counter 1";
+            return document.getElementById("csCounterSel")?.value || "Counter 1";
         }
 
         async function callNext(serviceType) {
