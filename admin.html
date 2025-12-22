@@ -805,7 +805,7 @@
                     <div class="panel-subtitle">Panggil nomor berikutnya langsung dari Admin Panel.</div>
                 </div>
                 <div>
-                    <button class="btn-small" onclick="loadData()">⟳ Refresh</button>
+                    <!-- ✅ REFRESH BUTTON DIHAPUS -->
                     <button class="btn-small btn-danger" onclick="resetToday()">✕ Reset Antrian Hari Ini</button>
                 </div>
             </div>
@@ -926,7 +926,8 @@
                 <!-- SLIDER IMAGES -->
                 <div style="margin-top:14px;">
                     <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Gambar Slider Promo
-                        (Multiple)</div>
+                        (Multiple)
+                    </div>
 
                     <div class="promo-actions" style="margin-top:0;">
                         <button class="btn-secondary" onclick="choosePromoImages()">🖼️ Pilih Gambar Slider...</button>
@@ -1236,7 +1237,9 @@
         // RESET HARI INI
         // ==========================
         async function resetToday() {
-            if (!confirm("Yakin ingin menghapus semua tiket hari ini?")) return;
+            // ✅ POPUP KONFIRMASI (lebih jelas)
+            const ok = confirm("Apakah Anda yakin ingin reset antrian hari ini?\n\nSemua tiket hari ini akan dihapus dan tidak bisa dikembalikan.");
+            if (!ok) return;
 
             try {
                 await fetchJson("/api/admin/clear-today", { method: "POST", body: JSON.stringify({}) });

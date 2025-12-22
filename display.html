@@ -1121,33 +1121,14 @@
             return a;
         }
 
-        async function playBellAsset() {
+        function playBellAssetNoWait() {
             try {
                 const a = ensureBellAudio();
                 a.pause();
                 a.currentTime = 0;
                 const p = a.play();
-                if (p && typeof p.catch === "function") await p.catch(() => { });
-
-                await new Promise((res) => {
-                    let done = false;
-                    const finish = () => {
-                        if (done) return;
-                        done = true;
-                        cleanup();
-                        res();
-                    };
-                    const cleanup = () => {
-                        a.removeEventListener("ended", finish);
-                        a.removeEventListener("error", finish);
-                    };
-                    a.addEventListener("ended", finish);
-                    a.addEventListener("error", finish);
-                    setTimeout(finish, 6000);
-                });
-            } catch {
-                await wait(650);
-            }
+                if (p && typeof p.catch === "function") p.catch(() => { });
+            } catch { }
         }
 
         function normalizeTicket(ticketCode) {
@@ -1406,14 +1387,17 @@
                 duckPromoVideo(true);
 
                 for (let i = 0; i < 2; i++) {
-                    await playBellAsset();
-                    await wait(250);
+                    // ✅ bel tetap bunyi tapi tidak menunggu selesai
+                    playBellAssetNoWait();
+
+                    // ✅ jeda kecil biar bel terdengar dulu sedikit
+                    await wait(120);
 
                     let ok = false;
                     for (let k = 0; k < 3; k++) {
                         ok = await playServerTtsFemale(sentence);
                         if (ok) break;
-                        await wait(250);
+                        await wait(180); // ✅ retry lebih cepat
                     }
 
                     if (!ok) {
@@ -1423,7 +1407,7 @@
                         }
                     }
 
-                    await wait(650);
+                    await wait(250); // ✅ jeda antar loop dipercepat
                 }
 
                 duckPromoVideo(false);
