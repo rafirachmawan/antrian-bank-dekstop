@@ -8,7 +8,10 @@
         "from": "config.json",
         "to": "config.json"
       }
-    ]
+    ],
+    "win": {
+      "icon": "assets/icon-bri.ico"
+    }
   },
   "scripts": {
     "start": "set ELECTRON_OVERRIDE_DIST_PATH=C:\\electron-bin\\29.4.6&& electron .",
@@ -34,6 +37,8 @@
   "devDependencies": {
     "electron": "29.4.6",
     "electron-builder": "^26.0.12",
-    "electron-rebuild": "^3.2.9"
+    "electron-rebuild": "^3.2.9",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5"
   }
 }

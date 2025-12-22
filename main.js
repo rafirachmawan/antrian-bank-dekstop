@@ -8,6 +8,11 @@ const os = require("os");
 const fixedUserData = path.join(app.getPath("appData"), "antrian-bank-desktop");
 app.setPath("userData", fixedUserData);
 
+// ✅✅✅ ICON APP (taskbar/window) — pakai icon BRI
+// - untuk Windows paling aman pakai .ico
+// - kamu bilang sudah punya: assets/icon-bri.ico
+const APP_ICON = path.join(__dirname, "assets", "icon-bri.ico");
+
 const {
   initDb,
   getDisplayConfig,
@@ -164,6 +169,8 @@ function createWindowByMode(mode, cfg) {
     width,
     height,
     title,
+    // ✅✅✅ tambahkan icon (taskbar/window) tanpa mengubah logika lain
+    icon: APP_ICON,
     webPreferences: { nodeIntegration: true, contextIsolation: false },
     autoHideMenuBar: false, // normal: menu bar boleh tampil
   });
@@ -218,6 +225,8 @@ function openConfigErrorWindow(mode, cfg) {
     width: 820,
     height: 520,
     title: "Config Error",
+    // ✅✅✅ icon juga di window error
+    icon: APP_ICON,
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
 
@@ -485,6 +494,8 @@ function registerIpcHandlers() {
           show: false,
           width: 420,
           height: 680,
+          // ✅✅✅ icon juga di hidden print window (tidak mengubah logika print)
+          icon: APP_ICON,
           webPreferences: { nodeIntegration: false, contextIsolation: true },
         });
 
