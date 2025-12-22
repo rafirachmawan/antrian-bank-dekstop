@@ -37,6 +37,128 @@
 
             --panel-bg: rgba(255, 255, 255, 0.92);
             --panel-border: rgba(229, 231, 235, 0.95);
+
+            /* ✅✅✅ CONTROL ukuran "selanjutnya" (DEFAULT: windowed) */
+            --next-pad: 12px;
+            --next-min-h: 74px;
+            --next-label: 10px;
+            --next-num: 22px;
+            --next-arrow: 22px;
+            --next-gap: 10px;
+
+            /* ✅✅✅ CONTROL komponen vertikal */
+            --body-pad-y: 12px;
+            --body-pad-x: 14px;
+            --body-gap: 10px;
+
+            --topbar-pad-y: 18px;
+            --topbar-pad-x: 24px;
+            --topbar-min-h: 92px;
+
+            --brand-name: 52px;
+            --top-time: 34px;
+
+            --current-number: 42px;
+
+            --queues-gap: 12px;
+
+            --fill-min-h: 74px;
+
+            --footer-font: 11px;
+            --running-pad: 10px;
+            --running-font: 13px;
+        }
+
+        /* ✅ fullscreen / layar tinggi: naik sedikit */
+        @media (min-height: 900px) {
+            :root {
+                --next-pad: 14px;
+                --next-min-h: 86px;
+                --next-label: 11px;
+                --next-num: 26px;
+                --next-arrow: 26px;
+                --next-gap: 12px;
+            }
+        }
+
+        /* ✅✅✅ WINDOWED (sering kepotong) - tahap 1 */
+        @media (max-height: 860px) {
+            :root {
+                --body-pad-y: 10px;
+                --body-pad-x: 12px;
+                --body-gap: 8px;
+
+                --topbar-pad-y: 14px;
+                --topbar-pad-x: 18px;
+                --topbar-min-h: 80px;
+
+                --brand-name: 46px;
+                --top-time: 30px;
+
+                --current-number: 38px;
+
+                --queues-gap: 10px;
+
+                --fill-min-h: 64px;
+
+                --footer-font: 10px;
+                --running-pad: 8px;
+                --running-font: 12px;
+            }
+        }
+
+        /* ✅✅✅ WINDOWED kecil - tahap 2 */
+        @media (max-height: 780px) {
+            :root {
+                --topbar-min-h: 74px;
+                --brand-name: 42px;
+                --top-time: 28px;
+
+                --current-number: 34px;
+
+                --next-min-h: 66px;
+                --next-num: 20px;
+
+                --fill-min-h: 60px;
+                --running-font: 11px;
+            }
+
+            .brand-logo-box {
+                width: 56px !important;
+                height: 56px !important;
+            }
+        }
+
+        /* ✅✅✅ WINDOWED sangat kecil - tahap 3 (anti ketutup total) */
+        @media (max-height: 720px) {
+            :root {
+                --topbar-pad-y: 12px;
+                --topbar-pad-x: 16px;
+
+                --brand-name: 38px;
+                --top-time: 26px;
+
+                --current-number: 32px;
+
+                --next-pad: 10px;
+                --next-min-h: 60px;
+                --next-num: 18px;
+
+                --fill-min-h: 56px;
+
+                --running-pad: 7px;
+            }
+
+            .queue-fill {
+                gap: 8px !important;
+                margin-top: 8px !important;
+                padding-top: 8px !important;
+            }
+
+            .current-wrapper {
+                gap: 8px !important;
+                margin-bottom: 8px !important;
+            }
         }
 
         body {
@@ -46,13 +168,15 @@
                 radial-gradient(1200px 600px at 20% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%),
                 linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
             color: #111827;
-            padding: 12px 14px;
+            padding: var(--body-pad-y) var(--body-pad-x);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: var(--body-gap);
+            overflow: hidden;
+            /* ✅ tetap tidak scroll */
         }
 
-        /* ================= TOP BAR (DIBESARKAN) ================= */
+        /* ================= TOP BAR ================= */
         .top-bar {
             flex: 0 0 auto;
             display: flex;
@@ -63,8 +187,8 @@
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             border-radius: 18px;
 
-            padding: 18px 24px;
-            min-height: 92px;
+            padding: var(--topbar-pad-y) var(--topbar-pad-x);
+            min-height: var(--topbar-min-h);
 
             box-shadow: 0 18px 38px rgba(11, 86, 179, 0.30);
             border: 1px solid rgba(255, 255, 255, 0.20);
@@ -124,7 +248,7 @@
         }
 
         .brand-name {
-            font-size: 52px;
+            font-size: var(--brand-name);
             font-weight: 950;
             letter-spacing: 0.06em;
             color: #ffffff;
@@ -168,7 +292,7 @@
         }
 
         .top-time {
-            font-size: 34px;
+            font-size: var(--top-time);
             font-weight: 950;
             letter-spacing: 0.16em;
             color: #ffffff;
@@ -183,6 +307,7 @@
             grid-template-columns: 3fr 2fr;
             gap: 12px;
             min-height: 0;
+            overflow: hidden;
         }
 
         .panel {
@@ -223,6 +348,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex: 0 0 auto;
         }
 
         .section-title::before {
@@ -315,15 +441,16 @@
         }
 
         .current-number {
-            font-size: 42px;
+            font-size: var(--current-number);
             font-weight: 950;
             letter-spacing: 0.12em;
-            color: #ffe2b5;
+            color: #ffffff;
             line-height: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
         }
 
         .current-number.cs {
-            color: #d7ffe1;
+            color: #ffffff;
         }
 
         .current-counter-box {
@@ -339,17 +466,18 @@
             color: rgba(15, 23, 42, 0.22);
         }
 
-        /* ================= QUEUE (RAPI, NGISI RUANG) ================= */
+        /* ================= QUEUE ================= */
         .queues-wrap {
             flex: 1;
             min-height: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: var(--queues-gap);
+            overflow: hidden;
         }
 
         .queue-section {
-            flex: 1;
+            flex: 1 1 0;
             min-height: 0;
             display: flex;
             flex-direction: column;
@@ -365,59 +493,73 @@
             flex: 0 0 auto;
         }
 
+        #teller-queue.queue-list,
+        #cs-queue.queue-list {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: var(--next-gap) !important;
+            overflow: hidden !important;
+            align-content: stretch !important;
+        }
+
         .queue-list {
-            flex: 1;
+            flex: 1 1 auto;
             min-height: 0;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            gap: var(--next-gap);
             overflow: hidden;
+            align-content: stretch;
         }
 
         .queue-item {
             background: #eff6ff;
-            border-radius: 12px;
-            padding: 8px 10px;
+            border-radius: 14px;
+            padding: var(--next-pad);
             border: 1px solid #dbeafe;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 12px;
             box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+            min-height: var(--next-min-h);
         }
 
         .queue-item-label {
-            font-size: 10px;
+            font-size: var(--next-label);
             text-transform: uppercase;
             letter-spacing: 0.13em;
             color: #64748b;
-            font-weight: 800;
+            font-weight: 900;
         }
 
         .queue-item-number {
-            font-size: 14px;
+            margin-top: 6px;
+            font-size: var(--next-num);
             font-weight: 950;
             color: #0f172a;
+            letter-spacing: 0.10em;
+            line-height: 1;
         }
 
         .queue-item-arrow {
-            font-size: 18px;
+            font-size: var(--next-arrow);
             color: #2563eb;
             font-weight: 950;
         }
 
         .empty {
             grid-column: 1 / -1;
-            height: 100%;
-            min-height: 64px;
+            min-height: var(--next-min-h);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             color: #64748b;
-            font-weight: 800;
+            font-weight: 900;
             border: 1px dashed rgba(148, 163, 184, 0.55);
-            border-radius: 12px;
+            border-radius: 14px;
             background: rgba(255, 255, 255, 0.65);
         }
 
@@ -499,10 +641,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            font-size: var(--footer-font);
             color: #334155;
             padding: 0 6px;
             gap: 12px;
+            flex: 0 0 auto;
         }
 
         .status {
@@ -525,12 +668,13 @@
             color: #ffffff;
             border-radius: 999px;
             overflow: hidden;
-            padding: 10px 0;
-            font-size: 13px;
+            padding: var(--running-pad) 0;
+            font-size: var(--running-font);
             font-weight: 900;
             letter-spacing: 0.10em;
             box-shadow: 0 12px 28px rgba(11, 86, 179, 0.22);
             border: 1px solid rgba(255, 255, 255, 0.18);
+            flex: 0 0 auto;
         }
 
         .running-text span {
@@ -682,7 +826,7 @@
             background: linear-gradient(135deg, rgba(11, 86, 179, 0.08), rgba(255, 255, 255, 0.90));
             box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
             padding: 10px 12px;
-            min-height: 74px;
+            min-height: var(--fill-min-h);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -741,18 +885,8 @@
                 height: 54px;
             }
 
-            .brand-name {
-                font-size: 42px;
-            }
-
             .brand-tagline {
-                padding-left: 68px;
                 font-size: 12px;
-            }
-
-            .top-time {
-                font-size: 26px;
-                letter-spacing: 0.12em;
             }
 
             .top-right {
@@ -949,7 +1083,6 @@
         let lastCsTicket = null;
         let initialized = false;
 
-        // ✅ DIUBAH: format tanggal jadi panjang seperti kiosk (Minggu, 21 Desember 2025)
         function pad2(n) { return String(n).padStart(2, "0"); }
         function formatTanggalID(date) {
             const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -957,7 +1090,6 @@
             return `${hari[date.getDay()]}, ${pad2(date.getDate())} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
 
-        // ✅ DIUBAH: jam pakai detik (HH:MM:SS) seperti kiosk
         function updateClock() {
             const now = new Date();
             const t = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
@@ -967,69 +1099,336 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        const dingAudio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-        const digitMap = { "0": "nol", "1": "satu", "2": "dua", "3": "tiga", "4": "empat", "5": "lima", "6": "enam", "7": "tujuh", "8": "delapan", "9": "sembilan" };
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        let cachedVoice = null;
-        function getIndonesianVoicePreferFemale() {
-            if (cachedVoice) return cachedVoice;
-            const synth = window.speechSynthesis;
-            if (!synth) return null;
-            const voices = synth.getVoices() || [];
+        function duckPromoVideo(isDuck) {
+            if (!promoVideoEl) return;
+            if (promoVideoEl.__baseVol == null) {
+                promoVideoEl.__baseVol = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 1;
+            }
+            promoVideoEl.volume = isDuck ? 0.12 : promoVideoEl.__baseVol;
+        }
+
+        let __bellAudio = null;
+        function ensureBellAudio() {
+            if (__bellAudio) return __bellAudio;
+            const a = new Audio();
+            a.preload = "auto";
+            a.crossOrigin = "anonymous";
+            a.src = "assets/bel.mp3";
+            a.volume = 1;
+            __bellAudio = a;
+            return a;
+        }
+
+        async function playBellAsset() {
+            try {
+                const a = ensureBellAudio();
+                a.pause();
+                a.currentTime = 0;
+                const p = a.play();
+                if (p && typeof p.catch === "function") await p.catch(() => { });
+
+                await new Promise((res) => {
+                    let done = false;
+                    const finish = () => {
+                        if (done) return;
+                        done = true;
+                        cleanup();
+                        res();
+                    };
+                    const cleanup = () => {
+                        a.removeEventListener("ended", finish);
+                        a.removeEventListener("error", finish);
+                    };
+                    a.addEventListener("ended", finish);
+                    a.addEventListener("error", finish);
+                    setTimeout(finish, 6000);
+                });
+            } catch {
+                await wait(650);
+            }
+        }
+
+        function normalizeTicket(ticketCode) {
+            let t = String(ticketCode || "").trim().toUpperCase();
+
+            if (t.startsWith("T-")) t = "T" + t.slice(2);
+            if (t.startsWith("CS-")) t = "CS" + t.slice(3);
+
+            let prefix = "";
+            let digits = "";
+
+            if (t.startsWith("CS")) {
+                prefix = "CS";
+                digits = t.slice(2).replace(/\D/g, "");
+            } else if (t.startsWith("T")) {
+                prefix = "T";
+                digits = t.slice(1).replace(/\D/g, "");
+            } else {
+                prefix = t.slice(0, 2);
+                digits = t.replace(/\D/g, "");
+            }
+
+            const num = (digits || "0").padStart(3, "0");
+            return `${prefix}${num}`;
+        }
+
+        function normalizeCounterNumber(counterName) {
+            const s = String(counterName || "").trim();
+            const m = s.match(/\d+/);
+            return m ? m[0] : "1";
+        }
+
+        function makeSentence(ticketCode, counterName, serviceLabel) {
+            const ticket = normalizeTicket(ticketCode);
+            const num = normalizeCounterNumber(counterName);
+            return `Nomor antrian ${ticket}. Silahkan menuju ke ${serviceLabel.toLowerCase()} ${num}.`;
+        }
+
+        let __ttsAudio = null;
+        let __ttsObjUrl = null;
+
+        function ensureTtsAudio() {
+            if (__ttsAudio) return __ttsAudio;
+            const a = new Audio();
+            a.preload = "auto";
+            a.crossOrigin = "anonymous";
+            a.volume = 1;
+            __ttsAudio = a;
+            return a;
+        }
+
+        function buildTtsUrls(text) {
+            const qs = `voice=id-ID-GadisNeural&format=mp3&text=${encodeURIComponent(text)}&v=${Date.now()}`;
+            return [
+                `${API_BASE}/api/tts?${qs}`,
+                `${API_BASE}/tts?${qs}`,
+            ];
+        }
+
+        async function playAudioUrlDirect(url) {
+            const a = ensureTtsAudio();
+            try {
+                if (__ttsObjUrl) { try { URL.revokeObjectURL(__ttsObjUrl); } catch { } __ttsObjUrl = null; }
+
+                a.pause();
+                a.currentTime = 0;
+                a.src = url;
+
+                const p = a.play();
+                if (p && typeof p.catch === "function") await p.catch((e) => { throw e; });
+
+                await new Promise((res) => {
+                    let done = false;
+                    const finish = () => {
+                        if (done) return;
+                        done = true;
+                        cleanup();
+                        res();
+                    };
+                    const cleanup = () => {
+                        a.removeEventListener("ended", finish);
+                        a.removeEventListener("error", finish);
+                    };
+                    a.addEventListener("ended", finish);
+                    a.addEventListener("error", finish);
+                    setTimeout(finish, 20000);
+                });
+
+                return true;
+            } catch (e) {
+                console.warn("TTS direct gagal:", url, e);
+                return false;
+            }
+        }
+
+        async function playAudioViaFetchBlob(url) {
+            try {
+                const res = await fetch(url, { cache: "no-store" });
+                const ct = (res.headers.get("content-type") || "").toLowerCase();
+
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                if (!ct.includes("audio")) {
+                    const txt = await res.text().catch(() => "");
+                    console.warn("TTS bukan audio. content-type:", ct, "body:", txt.slice(0, 200));
+                    throw new Error("NOT_AUDIO");
+                }
+
+                const blob = await res.blob();
+                if (!blob || !blob.size) throw new Error("EMPTY_BLOB");
+
+                if (__ttsObjUrl) { try { URL.revokeObjectURL(__ttsObjUrl); } catch { } }
+                __ttsObjUrl = URL.createObjectURL(blob);
+
+                const a = ensureTtsAudio();
+                a.pause();
+                a.currentTime = 0;
+                a.src = __ttsObjUrl;
+
+                const p = a.play();
+                if (p && typeof p.catch === "function") await p.catch((e) => { throw e; });
+
+                await new Promise((resDone) => {
+                    let done = false;
+                    const finish = () => {
+                        if (done) return;
+                        done = true;
+                        cleanup();
+                        resDone();
+                    };
+                    const cleanup = () => {
+                        a.removeEventListener("ended", finish);
+                        a.removeEventListener("error", finish);
+                    };
+                    a.addEventListener("ended", finish);
+                    a.addEventListener("error", finish);
+                    setTimeout(finish, 20000);
+                });
+
+                return true;
+            } catch (e) {
+                console.warn("TTS blob gagal:", url, e);
+                return false;
+            }
+        }
+
+        async function playServerTtsFemale(text) {
+            const urls = buildTtsUrls(text);
+
+            if (statusTextEl) statusTextEl.textContent = "Memanggil antrian...";
+
+            for (const u of urls) {
+                const ok = await playAudioUrlDirect(u);
+                if (ok) { if (statusTextEl) statusTextEl.textContent = "Sistem antrian aktif"; return true; }
+            }
+
+            for (const u of urls) {
+                const ok = await playAudioViaFetchBlob(u);
+                if (ok) { if (statusTextEl) statusTextContent = "Sistem antrian aktif"; return true; }
+            }
+
+            if (statusTextEl) statusTextEl.textContent = "TTS ERROR (server tidak kirim audio)";
+            return false;
+        }
+
+        const femaleHints = ["female", "woman", "wanita", "gadis", "putri", "ayu", "sari", "siti", "tiara", "zira", "aria", "jenny", "natasha", "nisa", "alina", "amanda", "ana", "anisa"];
+        const maleHints = ["male", "man", "pria", "bapak", "andi", "budi", "agus", "joko"];
+
+        function listVoices() {
+            try {
+                const s = window.speechSynthesis;
+                if (!s) return [];
+                const v = s.getVoices?.() || [];
+                return Array.isArray(v) ? v : [];
+            } catch { return []; }
+        }
+
+        function pickFemaleVoice() {
+            const voices = listVoices();
             if (!voices.length) return null;
-            const idVoices = voices.filter((v) => (v.lang || "").toLowerCase().startsWith("id"));
-            const femaleLike = idVoices.find((v) => /female|wanita|zira|siti|indonesia/i.test(v.name));
-            if (femaleLike) return (cachedVoice = femaleLike);
-            if (idVoices.length) return (cachedVoice = idVoices[0]);
-            return (cachedVoice = voices[0]);
+
+            const idVoices = voices.filter(v => String(v.lang || "").toLowerCase().startsWith("id"));
+            const pool = idVoices.length ? idVoices : [];
+
+            if (!pool.length) return null;
+
+            const scored = [...pool].sort((a, b) => {
+                const na = String(a.name || "").toLowerCase();
+                const nb = String(b.name || "").toLowerCase();
+
+                const score = (n) =>
+                    (femaleHints.some(h => n.includes(h)) ? 200 : 0) -
+                    (maleHints.some(h => n.includes(h)) ? 180 : 0) +
+                    (n.includes("neural") ? 40 : 0) +
+                    (n.includes("natural") ? 20 : 0) +
+                    (n.includes("microsoft") ? 15 : 0);
+
+                return score(nb) - score(na);
+            });
+
+            return scored[0] || null;
         }
 
-        function speak(text) {
-            const synth = window.speechSynthesis;
-            if (!synth || !text) return;
-            synth.cancel();
-            const utter = new SpeechSynthesisUtterance(text);
-            const voice = getIndonesianVoicePreferFemale();
-            if (voice) utter.voice = voice;
-            utter.lang = "id-ID";
-            utter.rate = 1;
-            utter.pitch = 1.05;
-            utter.volume = 1;
-            synth.speak(utter);
-        }
+        function speakBrowser(text) {
+            return new Promise(async (resolve) => {
+                try {
+                    const synth = window.speechSynthesis;
+                    if (!synth) return resolve(false);
 
-        if (window.speechSynthesis) {
-            window.speechSynthesis.addEventListener("voiceschanged", () => {
-                cachedVoice = null;
-                getIndonesianVoicePreferFemale();
+                    const start = Date.now();
+                    while (!listVoices().length && Date.now() - start < 2500) {
+                        await wait(120);
+                    }
+
+                    const v = pickFemaleVoice();
+                    if (!v) return resolve(false);
+
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = "id-ID";
+                    u.voice = v;
+
+                    u.rate = 0.92;
+                    u.pitch = 1.20;
+                    u.volume = 1;
+
+                    let done = false;
+                    const finish = (ok) => {
+                        if (done) return;
+                        done = true;
+                        resolve(ok);
+                    };
+
+                    u.onend = () => finish(true);
+                    u.onerror = () => finish(false);
+
+                    try { synth.cancel(); } catch { }
+                    setTimeout(() => {
+                        try { synth.speak(u); } catch { finish(false); }
+                    }, 120);
+
+                    setTimeout(() => finish(false), 12000);
+                } catch {
+                    resolve(false);
+                }
             });
         }
 
-        function digitsToWords(numStr) { return Array.from(numStr).map((ch) => digitMap[ch] || ch).join(" "); }
-
-        function makeSentence(ticketCode, counterName, serviceLabel) {
-            let prefix = ""; let num = ticketCode || "";
-            if (num.startsWith("T-")) { prefix = "T"; num = num.replace("T-", ""); }
-            else if (num.startsWith("CS-")) { prefix = "C"; num = num.replace("CS-", ""); }
-            else if (num.startsWith("T")) { prefix = "T"; num = num.slice(1); }
-            else if (num.startsWith("C")) { prefix = "C"; num = num.slice(1); }
-            else { prefix = num.charAt(0); num = num.slice(1); }
-
-            const spokenNumber = /^\d+$/.test(num) ? digitsToWords(num) : num;
-            const spokenPrefix = prefix === "C" ? "C" : "T";
-            const loketLabel = serviceLabel === "Customer Service" ? counterName.replace(/^CS\s*/i, "Customer Service ") : counterName;
-            return `Nomor antrian ${spokenPrefix} ${spokenNumber}, silakan menuju ${serviceLabel} ${loketLabel}.`;
-        }
+        let announceQueue = Promise.resolve();
 
         function announce(serviceType, ticketCode, counterName) {
-            if (!ticketCode || !counterName) return;
+            if (!ticketCode) return;
+
             const label = serviceType === "TELLER" ? "Teller" : "Customer Service";
-            const sentence = makeSentence(ticketCode, counterName, label);
-            try {
-                dingAudio.currentTime = 0;
-                dingAudio.play().catch(() => speak(sentence));
-                setTimeout(() => speak(sentence), 900);
-            } catch { speak(sentence); }
+            const sentence = makeSentence(ticketCode, counterName || "-", label);
+
+            announceQueue = announceQueue.then(async () => {
+                duckPromoVideo(true);
+
+                for (let i = 0; i < 2; i++) {
+                    await playBellAsset();
+                    await wait(250);
+
+                    let ok = false;
+                    for (let k = 0; k < 3; k++) {
+                        ok = await playServerTtsFemale(sentence);
+                        if (ok) break;
+                        await wait(250);
+                    }
+
+                    if (!ok) {
+                        ok = await speakBrowser(sentence);
+                        if (!ok) {
+                            console.warn("Tidak ada voice id-ID di browser / TTS server gagal. Pemanggilan dibatalkan agar tidak logat Inggris.");
+                        }
+                    }
+
+                    await wait(650);
+                }
+
+                duckPromoVideo(false);
+                if (statusTextEl) statusTextEl.textContent = "Sistem antrian aktif";
+            });
         }
 
         function renderQueueList(container, items) {
@@ -1041,7 +1440,10 @@
                 container.appendChild(span);
                 return;
             }
-            items.forEach((ticket) => {
+
+            const list = items.slice(0, 2);
+
+            list.forEach((ticket) => {
                 const row = document.createElement("div");
                 row.className = "queue-item";
 
@@ -1125,6 +1527,8 @@
 
                 promoVideoEl.muted = false;
                 promoVideoEl.volume = 1;
+
+                promoVideoEl.__baseVol = promoVideoEl.volume;
 
                 const p = promoVideoEl.play?.();
                 if (p && typeof p.catch === "function") {
@@ -1362,6 +1766,8 @@
 
         promoVideoEl?.addEventListener("loadedmetadata", forcePlayVideoSafely);
         promoVideoEl?.addEventListener("canplay", forcePlayVideoSafely);
+
+        try { ensureBellAudio(); } catch { }
     </script>
 </body>
 

@@ -4,6 +4,8 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const os = require("os");
+const { spawn } = require("child_process");
 
 const {
   takeTicket,
@@ -31,6 +33,34 @@ function extOf(original) {
   return e && e.length <= 10 ? e : "";
 }
 
+// =========================================================
+// ✅ SIMPLE TTS VIA PYTHON (cewek Indonesia)
+// - Display.html tetap panggil: /api/tts?text=...
+// - Server generate mp3 via: python tts.py "text" "output.mp3"
+// - Response: audio/mpeg (BUKAN JSON)
+// =========================================================
+function runPythonTts({ pythonCmd, scriptPath, text, outFile }) {
+  return new Promise((resolve, reject) => {
+    const args = [scriptPath, text, outFile];
+
+    const p = spawn(pythonCmd, args, {
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let out = "";
+    let err = "";
+    p.stdout.on("data", (d) => (out += d.toString()));
+    p.stderr.on("data", (d) => (err += d.toString()));
+
+    p.on("error", (e) => reject(e));
+    p.on("close", (code) => {
+      if (code === 0) return resolve({ ok: true, out });
+      reject(new Error(`python exit ${code}. ${err || out}`));
+    });
+  });
+}
+
 /**
  * createServer({ port, host, userDataPath })
  * ✅ userDataPath dipakai supaya folder media selalu konsisten dengan Electron (app.getPath('userData'))
@@ -50,6 +80,10 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   const imagesDir = path.join(mediaRoot, "promo-images");
   safeMkdir(videoDir);
   safeMkdir(imagesDir);
+
+  // ✅ folder cache untuk hasil mp3 tts (biar rapi)
+  const ttsDir = path.join(mediaRoot, "tts-cache");
+  safeMkdir(ttsDir);
 
   const upload = multer({
     storage: multer.diskStorage({
@@ -74,6 +108,75 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
       service: "queue-server",
       time: new Date().toISOString(),
     });
+  });
+
+  /* =========================================================
+     ✅ TTS ENDPOINT (buat display.html)
+     - GET /api/tts?text=...&voice=...&format=mp3
+     - alias: /tts
+     - Output: AUDIO (audio/mpeg)
+  ========================================================= */
+  app.get(["/api/tts", "/tts"], async (req, res) => {
+    try {
+      const text = String(req.query.text || "").trim();
+      if (!text)
+        return res.status(400).json({ ok: false, error: "Missing text" });
+
+      const format = String(req.query.format || "mp3").toLowerCase();
+      if (format !== "mp3") {
+        return res.status(400).json({ ok: false, error: "Only mp3 supported" });
+      }
+
+      // ✅ path ke tts.py (root project)
+      const scriptPath = path.join(__dirname, "tts.py");
+      if (!fs.existsSync(scriptPath)) {
+        return res.status(500).json({
+          ok: false,
+          error: "tts.py not found. Pastikan file tts.py ada di root project.",
+        });
+      }
+
+      // ✅ pilih command python (windows biasanya python)
+      const pythonCmd = process.env.PYTHON_CMD || "python";
+
+      // ✅ file output unik per request (biar gak tabrakan)
+      const outFile = path.join(
+        ttsDir,
+        `tts_${Date.now()}_${Math.random().toString(16).slice(2)}.mp3`
+      );
+
+      await runPythonTts({
+        pythonCmd,
+        scriptPath,
+        text,
+        outFile,
+      });
+
+      if (!fs.existsSync(outFile)) {
+        return res
+          .status(500)
+          .json({ ok: false, error: "TTS output mp3 tidak terbentuk." });
+      }
+
+      const audioBuf = fs.readFileSync(outFile);
+
+      // bersihin file cache (biar gak numpuk)
+      try {
+        fs.unlinkSync(outFile);
+      } catch {}
+
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Content-Length", String(audioBuf.length));
+      res.status(200).end(audioBuf);
+    } catch (e) {
+      // kalau python belum siap, akan masuk sini
+      res.status(500).json({
+        ok: false,
+        error: String(e?.message || e),
+        hint: "Pastikan: pip install edge-tts && python ada di PATH",
+      });
+    }
   });
 
   // ===================== QUEUE =====================
@@ -262,14 +365,12 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
           ? current.promoImages
           : [];
 
-        // simpan sebagai path URL yang bisa dibuka Display
         const newPaths = files.map(
           (f) =>
             `/media/promo-images/${encodeURIComponent(path.basename(f.path))}`
         );
 
         const merged = [...currentList, ...newPaths].filter(Boolean);
-
         const cfg = await setDisplayConfig({ promo_images: merged });
 
         res.json({
@@ -365,6 +466,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   const server = app.listen(port, host, () => {
     console.log(`✅ Queue Server running on http://${host}:${port}`);
     console.log("✅ Media root:", mediaRoot);
+    console.log("✅ TTS cache:", ttsDir);
   });
 
   return { app, server };

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kiosk Pengambilan Nomor</title>
 
-    <!-- ✅ Samakan font dengan Admin Panel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900;950&display=swap"
@@ -23,7 +22,6 @@
             --bri-blue-2: #0a4ea2;
             --bri-blue-3: #0a63c7;
 
-            /* ✅ biru muda (soft) */
             --bri-light: #7dd3fc;
             --bri-light-2: #38bdf8;
 
@@ -46,7 +44,6 @@
             gap: 10px;
         }
 
-        /* ================= TOP BAR (SAMAKAN DISPLAY) ================= */
         .top-bar {
             flex: 0 0 auto;
             display: flex;
@@ -130,7 +127,6 @@
             text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
         }
 
-        /* ✅ Tagline HARUS turun di bawah logo (seperti display) */
         .brand-tagline {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.92);
@@ -141,7 +137,6 @@
             text-overflow: ellipsis;
             max-width: 560px;
             margin-top: 2px;
-            /* start sejajar kiri logo */
             padding-left: 0;
         }
 
@@ -172,7 +167,6 @@
             line-height: 1.02;
         }
 
-        /* ================= BODY ================= */
         .page-body {
             flex: 1;
             min-height: 0;
@@ -192,7 +186,6 @@
             backdrop-filter: blur(8px);
         }
 
-        /* ================= LEFT KIOSK ================= */
         .kiosk-panel {
             display: flex;
             align-items: center;
@@ -238,7 +231,6 @@
             margin-bottom: 14px;
         }
 
-        /* ✅ Ticket dulu, baru tombol (sesuai permintaan) */
         .ticket {
             background: linear-gradient(180deg, #f8fafc, #f1f5f9);
             border-radius: 16px;
@@ -330,6 +322,18 @@
             box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
         }
 
+        .btn-preview {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(11, 86, 179, 0.10), rgba(79, 195, 255, 0.12));
+            color: #0f172a;
+            font-size: 12px;
+            padding: 12px 14px;
+            border: 1px solid rgba(11, 86, 179, 0.20);
+            border-radius: 14px;
+            font-weight: 900;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+
         .footer-note {
             margin-top: 10px;
             font-size: 10px;
@@ -341,7 +345,6 @@
             display: none !important;
         }
 
-        /* ================= RIGHT: VIDEO CARD + INFO CARD ================= */
         .video-panel {
             display: flex;
             flex-direction: column;
@@ -577,11 +580,131 @@
                 min-width: 150px;
             }
         }
+
+        /* ============ MODAL PREVIEW STRUK (FULL) ============ */
+        .receipt-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+        }
+
+        .receipt-modal.show {
+            display: flex;
+        }
+
+        .receipt-modal-card {
+            width: min(980px, 96vw);
+            height: min(92vh, 880px);
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .receipt-modal-head {
+            padding: 14px 16px;
+            background: #0b56b3;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .receipt-modal-title {
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .receipt-modal-x {
+            border: none;
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+            font-weight: 900;
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+
+        .receipt-modal-body {
+            padding: 12px;
+            background: #f1f5f9;
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .receipt-iframe {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .receipt-modal-actions {
+            padding: 14px 14px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            background: #ffffff;
+            flex: 0 0 auto;
+        }
+
+        .receipt-action-btn {
+            border-radius: 14px;
+            border: 1px solid #0f172a;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            background: #fff;
+            color: #0f172a;
+            min-width: 160px;
+        }
+
+        .receipt-action-btn.primary {
+            background: #0f172a;
+            color: #fff;
+            border-color: #0f172a;
+        }
+
+        @media (max-width: 720px) {
+            .receipt-modal {
+                padding: 10px;
+            }
+
+            .receipt-modal-card {
+                width: 98vw;
+                height: 94vh;
+                border-radius: 16px;
+            }
+
+            .receipt-action-btn {
+                min-width: 140px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <!-- ✅ TOP BAR versi DISPLAY -->
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-title-row">
@@ -590,8 +713,6 @@
                 </div>
                 <div id="branch-pill" class="brand-name">BRI</div>
             </div>
-
-            <!-- ✅ ini turun tepat di bawah logo (sesuai permintaan) -->
             <div class="brand-tagline">PENGAMBILAN NOMOR ANTRIAN</div>
         </div>
 
@@ -607,7 +728,6 @@
                 <div class="title">Ambil Nomor Antrian</div>
                 <div class="subtitle">Pilih jenis layanan yang Anda butuhkan, lalu simpan nomor antrian Anda.</div>
 
-                <!-- ✅ NOMOR dulu -->
                 <div class="ticket">
                     <div class="ticket-title">Nomor Antrian Anda</div>
                     <div id="ticket-number" class="ticket-number">-</div>
@@ -615,7 +735,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ Baru tombol (sesuai permintaan) -->
                 <div class="buttons">
                     <button class="btn-teller" onclick="take('TELLER')">Ambil Antrian Teller</button>
                     <button class="btn-cs" onclick="take('CS')">Ambil Antrian Customer Service</button>
@@ -624,6 +743,8 @@
                 <div class="info-pill">Tekan tombol sesuai kebutuhan layanan Anda.</div>
 
                 <button class="btn-print" onclick="window.print()">Cetak Ulang Halaman</button>
+                <button class="btn-print" onclick="testPrintThermal()">🧾 Test Print Thermal (Preview)</button>
+                <button class="btn-preview" onclick="lihatLayoutPrint()">👀 Lihat Layout Print (Tanpa Print)</button>
 
                 <div class="footer-note">Jika struk tidak tercetak, silakan hubungi petugas kami.</div>
                 <div id="conn">Menghubungkan ke server…</div>
@@ -640,7 +761,6 @@
                 </div>
 
                 <div class="video-frame">
-                    <!-- ✅ SUARA DITAMPILKAN: muted dihapus -->
                     <video id="kioskVideo" autoplay loop playsinline preload="auto"
                         controlslist="nodownload noplaybackrate">
                         <source id="kioskVideoSource" src="assets/kiosk-promo.mp4" type="video/mp4" />
@@ -677,6 +797,22 @@
         </div>
     </div>
 
+    <div id="receiptModal" class="receipt-modal" onclick="closeReceiptModalOnBackdrop(event)">
+        <div class="receipt-modal-card" onclick="event.stopPropagation()">
+            <div class="receipt-modal-head">
+                <div class="receipt-modal-title">Preview Struk Antrian</div>
+                <button class="receipt-modal-x" onclick="closeReceiptModal()">✕</button>
+            </div>
+            <div class="receipt-modal-body">
+                <iframe id="receiptFrame" class="receipt-iframe"></iframe>
+            </div>
+            <div class="receipt-modal-actions">
+                <button class="receipt-action-btn" onclick="closeReceiptModal()">Tutup</button>
+                <button class="receipt-action-btn primary" onclick="printFromReceiptIframe()">Print (Manual)</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
             ? window.queueConfig.apiBase
@@ -703,9 +839,6 @@
         pingServer();
         setInterval(pingServer, 5000);
 
-        // =======================
-        // ✅ Tanggal / Jam (format sama seperti sebelumnya)
-        // =======================
         function pad2(n) { return String(n).padStart(2, "0"); }
         function formatTanggalPanjang(date) {
             const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -722,9 +855,6 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        // =======================
-        // ✅ Running text ikut Display
-        // =======================
         const kioskRunningTextEl = document.getElementById("kioskRunningText");
         let lastRunningText = "";
 
@@ -746,9 +876,6 @@
         syncRunningTextFromServer();
         setInterval(syncRunningTextFromServer, 2000);
 
-        // =======================
-        // ✅ Video ikut display (tanpa putus) + suara muncul
-        // =======================
         function safeNormalizePath(p) {
             if (!p) return null;
             if (/^https?:\/\//i.test(p)) return p;
@@ -764,15 +891,12 @@
 
             try {
                 videoEl.playsInline = true;
-
-                // ✅ coba nyalakan suara
                 videoEl.muted = false;
                 videoEl.volume = 1;
 
                 const p = videoEl.play?.();
                 if (p && typeof p.catch === "function") {
                     p.catch(() => {
-                        // fallback: kalau autoplay audio diblok, tetap jalan tapi muted
                         try {
                             videoEl.muted = true;
                             videoEl.volume = 0;
@@ -839,42 +963,50 @@
             window.addEventListener("focus", () => forcePlayVideoSafely());
         })();
 
-        // =======================
-        // PRINT THERMAL (LOGIKA TETAP)
-        // =======================
         function formatNow() {
             const d = new Date();
             return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         }
 
-        async function printTicketThermal({ ticket, serviceType }) {
-            const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
-            const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
-            const waktu = formatNow();
+        // ✅ STRUK: Logo BRI sendiri di atas, teks BANK BRI - CABANG A lebih kecil, hapus "KIOSK PENGAMBILAN NOMOR"
+        function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
+            const logoSrc = "assets/logo-astro.png";
 
-            if (window.kioskPrinter && typeof window.kioskPrinter.printTicket === "function") {
-                try {
-                    await window.kioskPrinter.printTicket({ branch, layanan, ticket, waktu });
-                    return;
-                } catch (e) {
-                    console.error("Silent thermal print gagal, fallback ke dialog print:", e);
-                }
-            }
+            // ✅ selalu pakai format ini (sesuai permintaan kamu)
+            const bankTitle = "BANK BRI - CABANG A";
 
-            const receiptHtml = `
+            return `
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Struk Antrian</title>
+  <title>Preview Struk Antrian</title>
   <style>
     @page { size: 80mm auto; margin: 0; }
     html, body { margin: 0; padding: 0; }
-    body { width: 80mm; font-family: Arial, sans-serif; color: #000; }
+    body { width: 80mm; font-family: Arial, sans-serif; color: #000; background:#fff; }
     .wrap { padding: 10px 10px 12px; }
     .center { text-align: center; }
-    .title { font-size: 14px; font-weight: 700; }
-    .sub { font-size: 11px; margin-top: 2px; }
+
+    /* ✅ logo lebih besar */
+    .logo-only {
+      display:block;
+      margin: 2px auto 6px;
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
+
+    /* ✅ tulisan BANK BRI - CABANG A lebih kecil */
+    .bank-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      line-height: 1.15;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
     .line { border-top: 1px dashed #000; margin: 10px 0; }
     .ticket { font-size: 42px; font-weight: 800; letter-spacing: 2px; margin: 6px 0; }
     .meta { font-size: 11px; line-height: 1.4; }
@@ -884,8 +1016,8 @@
 <body>
   <div class="wrap">
     <div class="center">
-      <div class="title">${branch}</div>
-      <div class="sub">KIOSK PENGAMBILAN NOMOR</div>
+      <img class="logo-only" src="${logoSrc}" alt="Logo BRI" />
+      <div class="bank-title">${bankTitle}</div>
     </div>
 
     <div class="line"></div>
@@ -896,7 +1028,7 @@
     </div>
 
     <div class="center">
-      <div class="sub" style="margin-top:10px;">NOMOR ANTRIAN</div>
+      <div class="meta" style="margin-top:10px;"><b>NOMOR ANTRIAN</b></div>
       <div class="ticket">${ticket}</div>
     </div>
 
@@ -913,24 +1045,87 @@
       <br/>Terima kasih.
     </div>
   </div>
-
-  <script>
-    window.onload = () => {
-      window.focus();
-      window.print();
-      window.onafterprint = () => window.close();
-      setTimeout(() => { try { window.close(); } catch(e){} }, 1500);
-    };
-  <\/script>
 </body>
 </html>`;
-
-            const w = window.open("", "PRINT_TICKET", "width=360,height=650");
-            if (!w) { window.print(); return; }
-            w.document.open();
-            w.document.write(receiptHtml);
-            w.document.close();
         }
+
+        function openReceiptModal(receiptHtml) {
+            const modal = document.getElementById("receiptModal");
+            const frame = document.getElementById("receiptFrame");
+            if (!modal || !frame) return;
+            frame.srcdoc = receiptHtml;
+            modal.classList.add("show");
+        }
+
+        function closeReceiptModal() {
+            const modal = document.getElementById("receiptModal");
+            const frame = document.getElementById("receiptFrame");
+            if (modal) modal.classList.remove("show");
+            if (frame) frame.srcdoc = "";
+        }
+
+        function closeReceiptModalOnBackdrop(e) {
+            closeReceiptModal();
+        }
+
+        function printFromReceiptIframe() {
+            const frame = document.getElementById("receiptFrame");
+            if (!frame) return;
+            try {
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+            } catch (e) {
+                console.error("Print iframe gagal:", e);
+            }
+        }
+
+        window.closeReceiptModal = closeReceiptModal;
+        window.closeReceiptModalOnBackdrop = closeReceiptModalOnBackdrop;
+        window.printFromReceiptIframe = printFromReceiptIframe;
+
+        async function printTicketThermal({ ticket, serviceType, preview = false }) {
+            const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
+            const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
+            const waktu = formatNow();
+
+            if (window.kioskPrinter && typeof window.kioskPrinter.printTicket === "function" && preview !== true) {
+                try {
+                    await window.kioskPrinter.printTicket({ branch, layanan, ticket, waktu });
+                    return;
+                } catch (e) {
+                    console.error("Silent thermal print gagal, fallback ke dialog print:", e);
+                }
+            }
+
+            const receiptHtml = buildReceiptHtml({ branch, layanan, ticket, waktu });
+            openReceiptModal(receiptHtml);
+
+            if (preview !== true) {
+                setTimeout(() => {
+                    try {
+                        printFromReceiptIframe();
+                        setTimeout(() => {
+                            try { closeReceiptModal(); } catch { }
+                        }, 800);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }, 250);
+            }
+        }
+
+        function testPrintThermal() {
+            const dummyTicket = "A001";
+            printTicketThermal({ ticket: dummyTicket, serviceType: "TELLER" });
+        }
+        window.testPrintThermal = testPrintThermal;
+
+        function lihatLayoutPrint() {
+            const shown = (document.getElementById("ticket-number")?.textContent || "").trim();
+            const ticket = shown && shown !== "-" ? shown : "A001";
+            printTicketThermal({ ticket, serviceType: "TELLER", preview: true });
+        }
+        window.lihatLayoutPrint = lihatLayoutPrint;
 
         async function take(serviceType) {
             try {
@@ -945,6 +1140,7 @@
 
                 const ticket = data.ticketCode;
                 document.getElementById("ticket-number").textContent = ticket || "-";
+
                 if (ticket) printTicketThermal({ ticket, serviceType });
 
             } catch (e) {
