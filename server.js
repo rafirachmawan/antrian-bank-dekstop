@@ -61,6 +61,34 @@ function runPythonTts({ pythonCmd, scriptPath, text, outFile }) {
   });
 }
 
+// ==============================
+// ✅ AUTO RESET HARIAN (SERVER-SIDE)
+// - Simpan meta terakhir reset di file JSON kecil (tidak ganggu db.js)
+// - Saat tanggal ganti: clearTodayTickets() otomatis
+// ==============================
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+function ymdNow() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function readJsonSafe(p) {
+  try {
+    if (!fs.existsSync(p)) return null;
+    const raw = fs.readFileSync(p, "utf8");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+function writeJsonSafe(p, obj) {
+  try {
+    fs.writeFileSync(p, JSON.stringify(obj || {}, null, 2), "utf8");
+  } catch {}
+}
+
 /**
  * createServer({ port, host, userDataPath })
  * ✅ userDataPath dipakai supaya folder media selalu konsisten dengan Electron (app.getPath('userData'))
@@ -84,6 +112,38 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   // ✅ folder cache untuk hasil mp3 tts (biar rapi)
   const ttsDir = path.join(mediaRoot, "tts-cache");
   safeMkdir(ttsDir);
+
+  // ✅ file meta reset harian (disimpan di baseDir biar konsisten)
+  const dailyResetMetaPath = path.join(baseDir, "daily-reset-meta.json");
+
+  // ✅ lock biar tidak dobel reset kalau request barengan
+  let resetInFlight = null;
+
+  async function ensureDailyReset() {
+    // kalau ada reset yang sedang berjalan, tunggu saja
+    if (resetInFlight) return resetInFlight;
+
+    const today = ymdNow();
+    const meta = readJsonSafe(dailyResetMetaPath) || {};
+    const last = String(meta.lastResetYMD || "");
+
+    if (last === today) return;
+
+    // jalankan reset sekali saja
+    resetInFlight = (async () => {
+      try {
+        await clearTodayTickets();
+        writeJsonSafe(dailyResetMetaPath, {
+          lastResetYMD: today,
+          resetAt: new Date().toISOString(),
+        });
+      } finally {
+        resetInFlight = null;
+      }
+    })();
+
+    return resetInFlight;
+  }
 
   const upload = multer({
     storage: multer.diskStorage({
@@ -182,6 +242,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   // ===================== QUEUE =====================
   app.post("/api/take-ticket", async (req, res) => {
     try {
+      await ensureDailyReset();
       const { serviceType } = req.body;
       const ticketCode = await takeTicket(serviceType);
       res.json({ ok: true, ticketCode });
@@ -192,6 +253,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.post("/api/tickets/take", async (req, res) => {
     try {
+      await ensureDailyReset();
       const { serviceType } = req.body;
       const ticketCode = await takeTicket(serviceType);
       res.json({ ok: true, ticketCode });
@@ -202,6 +264,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.post("/api/call-next", async (req, res) => {
     try {
+      await ensureDailyReset();
       const { serviceType, counterName } = req.body;
       const called = await callNext(serviceType, counterName);
       res.json({ ok: true, called });
@@ -212,6 +275,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.post("/api/tickets/next", async (req, res) => {
     try {
+      await ensureDailyReset();
       const { serviceType, counterName } = req.body;
       const called = await callNext(serviceType, counterName);
       res.json({ ok: true, called });
@@ -222,6 +286,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.get("/api/state", async (_req, res) => {
     try {
+      await ensureDailyReset();
       const state = await getState();
       res.json(state);
     } catch (e) {
@@ -231,6 +296,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.get("/api/state/full", async (_req, res) => {
     try {
+      await ensureDailyReset();
       res.json({ ok: true, state: await getState() });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
@@ -240,6 +306,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   // ===================== ADMIN =====================
   app.get("/api/admin/summary", async (_req, res) => {
     try {
+      await ensureDailyReset();
       res.json({ ok: true, summary: await getTodaySummary() });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
@@ -248,6 +315,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.get("/api/admin/today-summary", async (_req, res) => {
     try {
+      await ensureDailyReset();
       res.json({ ok: true, summary: await getTodaySummary() });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
@@ -256,6 +324,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.get("/api/admin/calls", async (_req, res) => {
     try {
+      await ensureDailyReset();
       res.json({ ok: true, rows: await getTodayCalls() });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
@@ -264,6 +333,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.get("/api/admin/today-calls", async (_req, res) => {
     try {
+      await ensureDailyReset();
       res.json({ ok: true, rows: await getTodayCalls() });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
@@ -272,7 +342,13 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.post("/api/admin/clear-today", async (_req, res) => {
     try {
+      // clear manual tetap sama, tapi meta juga ikut di-set hari ini
       await clearTodayTickets();
+      writeJsonSafe(dailyResetMetaPath, {
+        lastResetYMD: ymdNow(),
+        resetAt: new Date().toISOString(),
+        manual: true,
+      });
       res.json({ ok: true });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e?.message || e) });
@@ -467,6 +543,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     console.log(`✅ Queue Server running on http://${host}:${port}`);
     console.log("✅ Media root:", mediaRoot);
     console.log("✅ TTS cache:", ttsDir);
+    console.log("✅ Daily reset meta:", dailyResetMetaPath);
   });
 
   return { app, server };
