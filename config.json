@@ -1,5 +1,5 @@
 {
   "serverPort": 3000,
   "branchName": "BANK BRI CABANG A",
-  "apiBase": "http://192.168.1.107:3000"
+  "apiBase": "http://192.168.1.56:3000"
 }
