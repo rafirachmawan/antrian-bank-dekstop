@@ -173,7 +173,6 @@
             flex-direction: column;
             gap: var(--body-gap);
             overflow: hidden;
-            /* ✅ tetap tidak scroll */
         }
 
         /* ================= TOP BAR ================= */
@@ -1101,6 +1100,20 @@
 
         function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+        // ✅✅✅ FIX TAMPILAN NOMOR: hilangkan spasi "A - 001" => "A-001"
+        // Tidak mengubah logika antrian, cuma display text.
+        function normalizeTicketCode(code) {
+            let s = String(code || "").trim();
+            if (!s) return "";
+            // hapus spasi di sekitar dash dan rapikan
+            s = s.replace(/\s+/g, "");
+            // kalau format A001/B001 => jadikan A-001/B-001
+            s = s.replace(/^([A-Z])(\d{3,})$/i, "$1-$2");
+            // kalau sudah ada dash tapi berantakan => rapikan
+            s = s.replace(/-+/g, "-");
+            return s;
+        }
+
         function duckPromoVideo(isDuck) {
             if (!promoVideoEl) return;
             if (promoVideoEl.__baseVol == null) {
@@ -1110,22 +1123,20 @@
         }
 
         // ============================================================
-        // ✅✅✅ SUARA (REQUEST: setelah BELL -> NOMOR_ANTRIAN -> angka)
-        // Aturan:
-        // 1) Setelah BELL: putar "NOMOR_ANTRIAN.wav" dulu, baru angka antrian.
-        // 2) 10 => SEPULUH.wav, 11 => SEBELAS.wav, 12-19 => <digit> + BELAS.wav
-        // 3) Angka terakhir setelah "COUNTER" pakai *_END (10=SEPULUH_END, 11=SEBELAS_END, 12-19 digit + BELAS_END)
-        // 4) Tidak langsung "14": harus putar NOMOR_ANTRIAN dulu sebelum angka berapa pun.
-        // 5) Ulangi 2x: bell -> NOMOR_ANTRIAN -> ... -> bell -> NOMOR_ANTRIAN -> ...
+        // ✅✅✅ SUARA (Sesuai request kamu):
+        // 1) A001 => "nomor antrian" + "A" + "satu_end" + "silahkan menuju ke counter" + "satu_end"
+        // 2) 014 => "empat" + "belas_end"
+        // 3) 020 => "dua" + "puluh_end"
+        // 4) 021 => "dua" + "puluh" + "satu_end"
+        // 5) 100 => "seratus_end"
         // ============================================================
 
         const AUDIO_BASE = `${API_BASE}/media/audio`;
 
-        const PAUSE_AFTER_BELL_MS = 240;   // jeda setelah bel
-        const WORD_GAP_MS = 40;            // jeda antar kata
-        const BETWEEN_REPEAT_MS = 480;     // jeda antar panggilan 1 dan 2
+        const PAUSE_AFTER_BELL_MS = 240;
+        const WORD_GAP_MS = 40;
+        const BETWEEN_REPEAT_MS = 480;
 
-        // ✅ 1 audio player untuk suara (anti kepotong / anti overlap)
         let __voiceAudio = null;
         function ensureVoiceAudio() {
             if (__voiceAudio) return __voiceAudio;
@@ -1137,7 +1148,6 @@
             return a;
         }
 
-        // ✅ bel player sendiri
         let __bellAudio = null;
         function ensureBellAudio() {
             if (__bellAudio) return __bellAudio;
@@ -1159,7 +1169,6 @@
             } catch { }
         }
 
-        // ✅ play 1 file sampai selesai
         function playOne(url) {
             return new Promise((resolve) => {
                 const a = ensureVoiceAudio();
@@ -1190,7 +1199,6 @@
             });
         }
 
-        // ✅ digit NORMAL
         const DIGIT = {
             "0": "NOL.wav",
             "1": "SATU.wav",
@@ -1204,7 +1212,6 @@
             "9": "SEMBILAN.wav",
         };
 
-        // ✅ digit END (untuk kata terakhir)
         const DIGIT_END = {
             "0": "NOL_END.wav",
             "1": "SATU_END.wav",
@@ -1218,13 +1225,15 @@
             "9": "SEMBILAN_END.wav",
         };
 
-        // ✅ puluh/ratus NORMAL vs END
         const PULUH = "PULUH.wav";
         const PULUH_END = "PULUH_END.wav";
         const RATUS = "RATUS.wav";
         const RATUS_END = "RATUS_END.wav";
 
-        // ✅ sepuluh, sebelas, belas (NORMAL vs END)
+        // ✅ khusus 100 / 101-199 agar "seratus" (bukan "satu ratus")
+        const SERATUS = "SERATUS.wav";
+        const SERATUS_END = "SERATUS_END.wav";
+
         const SEPULUH = "SEPULUH.wav";
         const SEPULUH_END = "SEPULUH_END.wav";
         const SEBELAS = "SEBELAS.wav";
@@ -1232,8 +1241,20 @@
         const BELAS = "BELAS.wav";
         const BELAS_END = "BELAS_END.wav";
 
-        // ✅ file gabungan setelah bel (sesuai request: ada file bernama NOMOR_ANTRIAN)
         const NOMOR_ANTRIAN_FILE = "NOMOR_ANTRIAN.wav";
+
+        // ✅ huruf prefix tiket (A/B/...)
+        function ticketPrefixLetter(ticketCode) {
+            const raw = String(ticketCode || "").trim().toUpperCase();
+            const m = raw.match(/^([A-Z])/);
+            return m ? m[1] : "";
+        }
+        function letterFile(letter) {
+            const L = String(letter || "").trim().toUpperCase();
+            if (!L) return "";
+            // asumsi file huruf ada: A.wav, B.wav, dst.
+            return `${L}.wav`;
+        }
 
         async function playNomorAntrianIntro() {
             const ok = await playOne(`${AUDIO_BASE}/${encodeURIComponent(NOMOR_ANTRIAN_FILE)}?v=${Date.now()}`);
@@ -1243,10 +1264,9 @@
         }
 
         function ticketNumberValue(ticketCode) {
-            // T-004 / CS-015 => ambil angka dan buang leading zero => 4 / 15
             const raw = String(ticketCode || "").toUpperCase();
             const digits = raw.replace(/\D/g, "");
-            const n = parseInt(digits || "0", 10);
+            const n = parseInt(digits || "0", 10); // ✅ leading zero otomatis hilang (014 => 14)
             return Number.isFinite(n) ? n : 0;
         }
 
@@ -1256,23 +1276,13 @@
             return Number.isFinite(n) ? n : 1;
         }
 
-        /**
-         * Build token file untuk angka:
-         * - mode "mid": semua token pakai NORMAL
-         * - mode "end": token TERAKHIR pakai *_END (kalau ada)
-         *
-         * Catatan khusus:
-         * - 10 => SEPULUH / SEPULUH_END
-         * - 11 => SEBELAS / SEBELAS_END
-         * - 12-19 => <digit> + BELAS / BELAS_END (END di BELAS)
-         */
         function buildNumberTokens(n, mode) {
             const tokens = [];
             const useEnd = mode === "end";
 
             if (!Number.isFinite(n) || n < 0) n = 0;
 
-            // kalau > 999, fallback: baca per digit (last end kalau mode=end)
+            // fallback kalau >999: baca digit per digit (last pakai _END)
             if (n > 999) {
                 const s = String(n);
                 for (let i = 0; i < s.length; i++) {
@@ -1284,35 +1294,30 @@
                 return tokens;
             }
 
-            // 0-9
             if (n < 10) {
                 const d = String(n);
                 tokens.push(useEnd ? (DIGIT_END[d] || DIGIT[d]) : (DIGIT[d] || DIGIT_END[d]));
                 return tokens;
             }
 
-            // 10
             if (n === 10) {
                 tokens.push(useEnd ? SEPULUH_END : SEPULUH);
                 return tokens;
             }
 
-            // 11
             if (n === 11) {
                 tokens.push(useEnd ? SEBELAS_END : SEBELAS);
                 return tokens;
             }
 
-            // 12-19
             if (n > 11 && n < 20) {
                 const ones = n % 10;
                 const onesDigit = String(ones);
                 if (DIGIT[onesDigit]) tokens.push(DIGIT[onesDigit]);
-                tokens.push(useEnd ? BELAS_END : BELAS);
+                tokens.push(useEnd ? BELAS_END : BELAS); // ✅ belas_end di akhir
                 return tokens;
             }
 
-            // 20-99
             if (n < 100) {
                 const tens = Math.floor(n / 10);
                 const ones = n % 10;
@@ -1321,7 +1326,7 @@
                 if (DIGIT[tensDigit]) tokens.push(DIGIT[tensDigit]);
 
                 if (ones === 0) {
-                    tokens.push(useEnd ? PULUH_END : PULUH);
+                    tokens.push(useEnd ? PULUH_END : PULUH); // ✅ 020 => dua + puluh_end
                 } else {
                     tokens.push(PULUH);
                     const onesDigit = String(ones);
@@ -1330,7 +1335,24 @@
                 return tokens;
             }
 
-            // 100-999
+            // ✅ 100-199 => SERATUS
+            if (n >= 100 && n < 200) {
+                const rest = n % 100;
+
+                if (rest === 0) {
+                    // 100 => seratus_end
+                    tokens.push(useEnd ? SERATUS_END : SERATUS);
+                    return tokens;
+                }
+
+                // 1xx => seratus + (rest...)
+                tokens.push(SERATUS);
+                const restTokens = buildNumberTokens(rest, useEnd ? "end" : "mid");
+                tokens.push(...restTokens);
+                return tokens;
+            }
+
+            // 200-999
             const hundreds = Math.floor(n / 100);
             const rest = n % 100;
 
@@ -1344,28 +1366,34 @@
 
             tokens.push(RATUS);
 
-            // sisa (1-99): kalau mode=end, end-nya berlaku di sisa terakhir
             const restTokens = buildNumberTokens(rest, useEnd ? "end" : "mid");
             tokens.push(...restTokens);
 
             return tokens;
         }
 
-        // ✅ urutan setelah intro NOMOR_ANTRIAN:
-        // angka_tiket (MID) + SILAHKAN + MENUJU + KE + COUNTER + angka_counter (END)
+        // ✅ urutan setelah intro: [HURUF?] + [ANGKA] + kalimat + counter + angka_end
         function buildSequenceAfterIntro(ticketCode, counterName) {
             const seq = [];
 
+            // huruf prefix tiket: A/B/... (A001 => "A")
+            const letter = ticketPrefixLetter(ticketCode);
+            const lf = letterFile(letter);
+            if (lf) seq.push(lf);
+
+            // angka tiket: parseInt (014=>14) dan token akhir akan *_END hanya untuk angka terakhir
             const ticketN = ticketNumberValue(ticketCode);
-            const ticketTokens = buildNumberTokens(ticketN, "mid");
+            const ticketTokens = buildNumberTokens(ticketN, "end"); // ✅ “a1” => satu_end
             ticketTokens.forEach(f => seq.push(f));
 
+            // kalimat tujuan
             seq.push("SILAHKAN.wav");
             seq.push("MENUJU.wav");
             seq.push("KE.wav");
 
             seq.push("COUNTER.wav");
 
+            // counter: harus end
             const cN = counterNumberValue(counterName);
             const counterTokens = buildNumberTokens(cN, "end");
             counterTokens.forEach(f => seq.push(f));
@@ -1377,7 +1405,6 @@
             playBell();
             await wait(PAUSE_AFTER_BELL_MS);
 
-            // ✅ wajib: setelah bel -> NOMOR_ANTRIAN dulu (baru angka, jadi tidak langsung "14")
             await playNomorAntrianIntro();
 
             const seq = buildSequenceAfterIntro(ticketCode, counterName);
@@ -1398,7 +1425,6 @@
             return true;
         }
 
-        // ✅ queue pemanggilan supaya Teller & CS tidak tabrakan
         let announceQueue = Promise.resolve();
 
         function announce(serviceType, ticketCode, counterName) {
@@ -1440,7 +1466,8 @@
 
                 const num = document.createElement("div");
                 num.className = "queue-item-number";
-                num.textContent = ticket;
+                // ✅ hanya display formatting (anti "A - 001")
+                num.textContent = normalizeTicketCode(ticket);
 
                 left.appendChild(lbl);
                 left.appendChild(num);
@@ -1464,10 +1491,11 @@
             const csTicket = csNow?.ticket_code || csNow?.ticketCode || null;
             const csCounter = csNow?.counter_name || csNow?.counterName || null;
 
-            tellerNowEl.textContent = tellerTicket || "-";
+            // ✅ hanya display formatting (anti "A - 001")
+            tellerNowEl.textContent = tellerTicket ? normalizeTicketCode(tellerTicket) : "-";
             tellerCounterEl.textContent = "Loket: " + (tellerCounter || "-");
 
-            csNowEl.textContent = csTicket || "-";
+            csNowEl.textContent = csTicket ? normalizeTicketCode(csTicket) : "-";
             csCounterEl.textContent = "Loket: " + (csCounter || "-");
 
             renderQueueList(tellerQueueEl, state.tellerQueue || state.teller_queue || []);
@@ -1751,7 +1779,6 @@
         promoVideoEl?.addEventListener("loadedmetadata", forcePlayVideoSafely);
         promoVideoEl?.addEventListener("canplay", forcePlayVideoSafely);
 
-        // preload bel supaya respons cepat
         try { ensureBellAudio(); } catch { }
     </script>
 </body>

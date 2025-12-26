@@ -1250,10 +1250,34 @@
             return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         }
 
+        // ✅ FIX tampilan nomor: A001 -> A-001, A008 -> A-008 (tanpa spasi)
+        function normalizeTicketCode(code) {
+            let s = String(code || "").trim();
+            if (!s) return "";
+
+            // hapus spasi (biar gak jadi "A - 001")
+            s = s.replace(/\s+/g, "");
+
+            // A001 / B14 / C100 => A-001 / B-014 / C-100
+            const m = s.match(/^([A-Z])(\d{1,3})$/i);
+            if (m) {
+                const letter = m[1].toUpperCase();
+                const num = m[2].padStart(3, "0");
+                return `${letter}-${num}`;
+            }
+
+            // rapikan dash berlebih
+            s = s.replace(/-+/g, "-");
+            return s;
+        }
+
         // ✅ STRUK: Logo BRI sendiri di atas, teks BANK BRI - CABANG A lebih kecil, hapus "KIOSK PENGAMBILAN NOMOR"
         function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
             const logoSrc = "assets/logo-astro.png";
             const bankTitle = "BANK BRI - CABANG A";
+
+            // ✅ pastikan ticket tampil A-001 juga di struk
+            const shownTicket = normalizeTicketCode(ticket) || ticket;
 
             return `
 <!DOCTYPE html>
@@ -1291,7 +1315,7 @@
 
     <div class="center">
       <div class="meta" style="margin-top:10px;"><b>NOMOR ANTRIAN</b></div>
-      <div class="ticket">${ticket}</div>
+      <div class="ticket">${shownTicket}</div>
     </div>
 
     <div class="line"></div>
@@ -1377,14 +1401,16 @@
         }
 
         function testPrintThermal() {
-            const dummyTicket = "A001";
+            // ✅ dummy ikut format baru
+            const dummyTicket = normalizeTicketCode("A001");
             printTicketThermal({ ticket: dummyTicket, serviceType: "TELLER" });
         }
         window.testPrintThermal = testPrintThermal;
 
         function lihatLayoutPrint() {
             const shown = (document.getElementById("ticket-number")?.textContent || "").trim();
-            const ticket = shown && shown !== "-" ? shown : "A001";
+            const raw = shown && shown !== "-" ? shown : "A001";
+            const ticket = normalizeTicketCode(raw);
             printTicketThermal({ ticket, serviceType: "TELLER", preview: true });
         }
         window.lihatLayoutPrint = lihatLayoutPrint;
@@ -1402,9 +1428,13 @@
                 if (!res.ok || data.ok === false) throw new Error(data.error || ("HTTP " + res.status));
 
                 const ticket = data.ticketCode;
-                document.getElementById("ticket-number").textContent = ticket || "-";
 
-                if (ticket) printTicketThermal({ ticket, serviceType });
+                // ✅ tampilkan A-001 / A-008 (tanpa spasi)
+                const shownTicket = ticket ? normalizeTicketCode(ticket) : "-";
+                document.getElementById("ticket-number").textContent = shownTicket || "-";
+
+                // ✅ print pakai yang sudah diformat biar struk juga A-001
+                if (ticket) printTicketThermal({ ticket: shownTicket, serviceType });
 
             } catch (e) {
                 alert("Gagal mengambil nomor antrian. Pastikan server cabang sudah menyala.");

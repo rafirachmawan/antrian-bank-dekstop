@@ -76,7 +76,7 @@ async function initDb() {
     CREATE TABLE IF NOT EXISTS tickets (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       service_type TEXT NOT NULL,         -- TELLER / CS
-      ticket_code TEXT NOT NULL,          -- T-001 / CS-015
+      ticket_code TEXT NOT NULL,          -- A001 / B015 (atau format lain)
       status TEXT NOT NULL DEFAULT 'WAITING', -- WAITING / CALLED
       counter_name TEXT NULL,             -- Teller 1 / CS 2
       created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
@@ -131,6 +131,27 @@ function safeParseJsonArray(x) {
   }
 }
 
+/**
+ * ✅ PREFIX BARU:
+ * - TELLER => A
+ * - CS     => B
+ * Catatan: ini hanya mengubah bentuk ticket_code, logika antrian tetap sama.
+ */
+function prefixFor(serviceType) {
+  return serviceType === "TELLER" ? "A" : "B";
+}
+
+/**
+ * ✅ ambil angka terakhir dari ticket_code lama
+ * Support format lama: "T-001", "CS-015"
+ * Support format baru: "A001", "B015" / "A-001", "B-015"
+ */
+function extractNumber(ticketCode) {
+  if (!ticketCode) return NaN;
+  const m = String(ticketCode).match(/(\d{1,})\s*$/);
+  return m ? parseInt(m[1], 10) : NaN;
+}
+
 // ============= QUEUE LOGIC =============
 
 // Ambil nomor berikutnya (tambah 1 berdasarkan max hari ini)
@@ -151,13 +172,17 @@ async function takeTicket(serviceType) {
 
   let nextNum = 1;
   if (row && row.ticket_code) {
-    const numPart = row.ticket_code.replace("T-", "").replace("CS-", "");
-    const last = parseInt(numPart, 10);
+    // ✅ lebih aman: ambil angka di belakang apapun prefix-nya
+    const last = extractNumber(row.ticket_code);
     if (!isNaN(last)) nextNum = last + 1;
   }
 
-  const code =
-    serviceType === "TELLER" ? `T-${pad3(nextNum)}` : `CS-${pad3(nextNum)}`;
+  // ✅ FORMAT BARU:
+  // Teller: A001, A002...
+  // CS:     B001, B002...
+  const code = `${prefixFor(serviceType)}${pad3(nextNum)}`;
+  // kalau kamu tetap pengin ada strip, pakai ini:
+  // const code = `${prefixFor(serviceType)}-${pad3(nextNum)}`;
 
   await run(
     `
