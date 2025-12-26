@@ -1150,18 +1150,64 @@
             __fadeTimer = requestAnimationFrame(step);
         }
 
+        // ✅ Fade ducking video: saat panggilan -> turun pelan ke 10%
+        // lalu setelah selesai -> naik pelan ke volume normal
+        let __duckAnimId = null;
+
+        function __clamp01(v) {
+            v = Number(v);
+            if (!Number.isFinite(v)) return 1;
+            return Math.max(0, Math.min(1, v));
+        }
+
         function duckPromoVideo(isDuck) {
             if (!promoVideoEl) return;
 
+            // simpan base volume sekali (volume normal)
             if (promoVideoEl.__baseVol == null) {
                 promoVideoEl.__baseVol = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 1;
             }
 
-            const normalVol = promoVideoEl.__baseVol;
-            const duckVol = Math.max(0, Math.min(1, normalVol * 0.10)); // 10% dari normal
+            const base = __clamp01(promoVideoEl.__baseVol);
+            const target = isDuck ? Math.max(0, Math.min(1, base * 0.10)) : base; // ✅ 10%
 
-            fadeVideoVolume(isDuck ? duckVol : normalVol, 250);
+            // kalau sudah di target (beda tipis), gak usah animasi
+            if (Math.abs((promoVideoEl.volume || 0) - target) < 0.01) {
+                promoVideoEl.volume = target;
+                return;
+            }
+
+            // stop animasi lama biar gak “nabrak”
+            if (__duckAnimId) {
+                cancelAnimationFrame(__duckAnimId);
+                __duckAnimId = null;
+            }
+
+            const startVol = __clamp01(promoVideoEl.volume);
+            const duration = isDuck ? 260 : 420; // turun lebih cepat, naik lebih halus
+            const startT = performance.now();
+
+            const step = (now) => {
+                const t = Math.min(1, (now - startT) / duration);
+                // easing halus
+                const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+                promoVideoEl.volume = startVol + (target - startVol) * ease;
+
+                if (t < 1) {
+                    __duckAnimId = requestAnimationFrame(step);
+                } else {
+                    promoVideoEl.volume = target;
+                    __duckAnimId = null;
+                }
+            };
+
+            __duckAnimId = requestAnimationFrame(step);
         }
+
+
+
+
 
         // ============================================================
         // ✅✅✅ SUARA (Sesuai request kamu):
