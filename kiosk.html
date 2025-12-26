@@ -420,6 +420,40 @@
             border-radius: 12px;
         }
 
+        /* ✅✅✅ TAMBAHAN: tombol suara video (UI only) */
+        /* ✅ tombol suara: kecil, inline di header kanan (tidak nutup video) */
+        .sound-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.10);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            user-select: none;
+        }
+
+        .sound-btn:active {
+            transform: translateY(1px);
+        }
+
+        .sound-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            opacity: .95;
+        }
+
+        .sound-btn.on {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(22, 163, 74, 0.12));
+            border-color: rgba(22, 163, 74, 0.30);
+        }
+
+
         .video-info {
             flex: 0 0 auto;
             padding: 10px 12px 12px;
@@ -703,10 +737,7 @@
             }
         }
 
-        /* ================== SERVER SETTINGS (kiri bawah) ==================
-           ✅ HANYA PERUBAHAN UI/UX: overlay + animasi + tombol lebih enak dilihat
-           (logika JS/IPC tetap sama)
-           ================================================================= */
+        /* ================== SERVER SETTINGS (kiri bawah) ================== */
 
         .server-overlay {
             position: fixed;
@@ -967,10 +998,20 @@
                     <div class="video-card-title">
                         <span class="live-dot"></span> Informasi & Promo
                     </div>
-                    <div id="videoMeta" class="video-card-meta"></div>
+
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div id="videoMeta" class="video-card-meta"></div>
+
+                        <!-- ✅ ikon kecil saja -->
+                        <button id="toggleVideoSoundBtn" class="sound-btn" type="button"
+                            title="Toggle suara video"></button>
+                    </div>
                 </div>
 
+
                 <div class="video-frame">
+
+
                     <video id="kioskVideo" autoplay loop playsinline preload="auto"
                         controlslist="nodownload noplaybackrate">
                         <source id="kioskVideoSource" src="assets/kiosk-promo.mp4" type="video/mp4" />
@@ -1008,7 +1049,6 @@
     </div>
 
     <!-- =================== SERVER SETTINGS UI =================== -->
-    <!-- ✅ overlay baru (UI only) -->
     <div id="serverOverlay" class="server-overlay"></div>
 
     <div id="serverFab" class="server-fab" title="Pengaturan Server">⚙️</div>
@@ -1173,8 +1213,19 @@
 
             try {
                 videoEl.playsInline = true;
-                videoEl.muted = false;
-                videoEl.volume = 1;
+
+                // ✅✅✅ jangan paksa unmute di sini (biar tombol yang ngatur)
+                if (videoEl.__soundEnabled == null) {
+                    videoEl.__soundEnabled = false; // default: OFF
+                }
+
+                if (videoEl.__soundEnabled) {
+                    videoEl.muted = false;
+                    videoEl.volume = 1;
+                } else {
+                    videoEl.muted = true;
+                    videoEl.volume = 0;
+                }
 
                 const p = videoEl.play?.();
                 if (p && typeof p.catch === "function") {
@@ -1243,6 +1294,59 @@
             videoEl.addEventListener("canplay", forcePlayVideoSafely);
 
             window.addEventListener("focus", () => forcePlayVideoSafely());
+        })();
+
+        /* =========================================================
+           ✅✅✅ TOGGLE SUARA VIDEO KIOSK (tanpa ubah logika lain)
+           - default: OFF (muted)
+           - klik tombol: ON/OFF
+           - tidak ganggu load video / retry / server config
+           ========================================================= */
+        (function setupKioskVideoSoundToggle() {
+            const videoEl = document.getElementById("kioskVideo");
+            const btn = document.getElementById("toggleVideoSoundBtn");
+            if (!videoEl || !btn) return;
+
+            // default OFF
+            if (videoEl.__soundEnabled == null) videoEl.__soundEnabled = false;
+
+            function renderBtn() {
+                if (videoEl.__soundEnabled) {
+                    btn.textContent = "🔊";
+                    btn.classList.add("on");
+                } else {
+                    btn.textContent = "🔇";
+                    btn.classList.remove("on");
+                }
+            }
+
+            function applySound() {
+                if (videoEl.__soundEnabled) {
+                    videoEl.muted = false;
+                    videoEl.volume = 1;
+                } else {
+                    videoEl.muted = true;
+                    videoEl.volume = 0;
+                }
+            }
+
+            // init
+            applySound();
+            renderBtn();
+
+            btn.addEventListener("click", () => {
+                videoEl.__soundEnabled = !videoEl.__soundEnabled;
+                applySound();
+                renderBtn();
+                // jaga-jaga kalau browser nahan play ketika unmute
+                try { videoEl.play?.().catch(() => { }); } catch { }
+            });
+
+            // kalau video reload metadata, jaga state
+            videoEl.addEventListener("loadedmetadata", () => {
+                applySound();
+                renderBtn();
+            });
         })();
 
         function formatNow() {
@@ -1452,10 +1556,9 @@
             const fab = document.getElementById("serverFab");
             const panel = document.getElementById("serverPanel");
             const closeBtn = document.getElementById("serverPanelClose");
-            const info = document.getElementById("serverInfo");
 
-            // ✅ overlay baru (UI only)
             const overlay = document.getElementById("serverOverlay");
+            const info = document.getElementById("serverInfo");
 
             if (!fab || !panel || !closeBtn) return;
 
@@ -1471,7 +1574,6 @@
                 fab.classList.add("show");
                 if (info) info.textContent = `SERVER MODE aktif • API: ${getApiBase()}`;
 
-                // ✅ UI/UX open/close yang lebih enak (logika tetap sama)
                 function openPanel() {
                     panel.classList.add("show");
                     overlay?.classList.add("show");
@@ -1489,7 +1591,6 @@
                 closeBtn.addEventListener("click", closePanel);
                 overlay?.addEventListener("click", closePanel);
 
-                // tutup pakai ESC
                 window.addEventListener("keydown", (e) => {
                     if (e.key === "Escape") closePanel();
                 });

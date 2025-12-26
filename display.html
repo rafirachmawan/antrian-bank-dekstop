@@ -1114,12 +1114,53 @@
             return s;
         }
 
+        // ============================================================
+        // ✅✅✅ VIDEO DUCKING DENGAN FADE (TAMBAHAN, LOGIKA LAIN TETAP)
+        // - normal volume: pakai __baseVol (diset saat video play)
+        // - ketika panggilan: turun ke 10% dari normal (fade)
+        // - selesai: balik normal (fade)
+        // ============================================================
+
+        let __fadeTimer = null;
+
+        function fadeVideoVolume(target, duration = 250) {
+            if (!promoVideoEl) return;
+
+            if (__fadeTimer) {
+                cancelAnimationFrame(__fadeTimer);
+                __fadeTimer = null;
+            }
+
+            const start = promoVideoEl.volume;
+            const diff = target - start;
+            const startTime = performance.now();
+
+            function step(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                promoVideoEl.volume = start + diff * progress;
+
+                if (progress < 1) {
+                    __fadeTimer = requestAnimationFrame(step);
+                } else {
+                    promoVideoEl.volume = target;
+                    __fadeTimer = null;
+                }
+            }
+
+            __fadeTimer = requestAnimationFrame(step);
+        }
+
         function duckPromoVideo(isDuck) {
             if (!promoVideoEl) return;
+
             if (promoVideoEl.__baseVol == null) {
                 promoVideoEl.__baseVol = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 1;
             }
-            promoVideoEl.volume = isDuck ? 0.12 : promoVideoEl.__baseVol;
+
+            const normalVol = promoVideoEl.__baseVol;
+            const duckVol = Math.max(0, Math.min(1, normalVol * 0.10)); // 10% dari normal
+
+            fadeVideoVolume(isDuck ? duckVol : normalVol, 250);
         }
 
         // ============================================================
@@ -1538,8 +1579,11 @@
                 promoVideoEl.playsInline = true;
 
                 promoVideoEl.muted = false;
-                promoVideoEl.volume = 1;
 
+                // ✅ NORMAL VOLUME (ubah ini kalau mau: 0.2 = 20%, 0.5 = 50%)
+                promoVideoEl.volume = 0.1;
+
+                // ✅ simpan sebagai volume normal untuk ducking
                 promoVideoEl.__baseVol = promoVideoEl.volume;
 
                 const p = promoVideoEl.play?.();
