@@ -351,6 +351,7 @@
             min-height: 0;
             padding: 10px;
             gap: 10px;
+            position: relative;
         }
 
         .video-card {
@@ -701,6 +702,139 @@
                 min-width: 140px;
             }
         }
+
+        /* ================== SERVER SETTINGS (kiri bawah) ================== */
+        .server-fab {
+            position: fixed;
+            left: 18px;
+            bottom: 18px;
+            z-index: 999999;
+            width: 52px;
+            height: 52px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
+            box-shadow: 0 16px 34px rgba(11, 86, 179, 0.35);
+            color: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 900;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .server-fab.show {
+            display: flex;
+        }
+
+        .server-panel {
+            position: fixed;
+            left: 18px;
+            bottom: 80px;
+            z-index: 999999;
+            width: 360px;
+            max-width: calc(100vw - 36px);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.18);
+            overflow: hidden;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .server-panel.show {
+            display: block;
+        }
+
+        .server-panel-head {
+            padding: 12px 12px;
+            background: linear-gradient(135deg, rgba(11, 86, 179, 0.12), rgba(79, 195, 255, 0.10));
+            border-bottom: 1px solid rgba(15, 23, 42, 0.10);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .server-panel-title {
+            font-size: 12px;
+            font-weight: 950;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #0f172a;
+        }
+
+        .server-panel-close {
+            border: none;
+            background: rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            color: #0f172a;
+            border-radius: 12px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        .server-panel-body {
+            padding: 12px 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .server-field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 900;
+            color: #0f172a;
+            margin-bottom: 6px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .server-field textarea {
+            width: 100%;
+            min-height: 70px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 10px 10px;
+            font-size: 12px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .server-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .server-row button {
+            padding: 12px 12px;
+            font-size: 12px;
+            border-radius: 12px;
+        }
+
+        .server-btn-primary {
+            background: #0f172a;
+            color: #fff;
+            border: 1px solid #0f172a;
+        }
+
+        .server-btn-ghost {
+            background: #fff;
+            color: #0f172a;
+            border: 1px solid rgba(15, 23, 42, 0.18);
+        }
+
+        .server-help {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
     </style>
 </head>
 
@@ -797,6 +931,42 @@
         </div>
     </div>
 
+    <!-- =================== SERVER SETTINGS UI =================== -->
+    <div id="serverFab" class="server-fab" title="Pengaturan Server">⚙️</div>
+
+    <div id="serverPanel" class="server-panel">
+        <div class="server-panel-head">
+            <div class="server-panel-title">Pengaturan Display & Kiosk</div>
+            <button class="server-panel-close" id="serverPanelClose">✕</button>
+        </div>
+        <div class="server-panel-body">
+            <div class="server-field">
+                <label>Running Text</label>
+                <textarea id="setPromoText" placeholder="Isi teks berjalan..."></textarea>
+                <div class="server-help">Ini akan sinkron ke Display & Kiosk client (yang ambil dari
+                    /api/display/config).</div>
+            </div>
+
+            <div class="server-row">
+                <button class="server-btn-primary" id="btnSavePromo">Simpan Teks</button>
+                <button class="server-btn-ghost" id="btnReloadCfg">Refresh</button>
+            </div>
+
+            <div class="server-row">
+                <button class="server-btn-ghost" id="btnPickVideo">Pilih Video Promo</button>
+                <button class="server-btn-ghost" id="btnClearVideo">Hapus Video</button>
+            </div>
+
+            <div class="server-row">
+                <button class="server-btn-ghost" id="btnPickImages">Tambah Gambar Slider</button>
+                <button class="server-btn-ghost" id="btnClearImages">Kosongkan Slider</button>
+            </div>
+
+            <div class="server-help" id="serverInfo"></div>
+        </div>
+    </div>
+
+    <!-- =================== PRINT PREVIEW MODAL =================== -->
     <div id="receiptModal" class="receipt-modal" onclick="closeReceiptModalOnBackdrop(event)">
         <div class="receipt-modal-card" onclick="event.stopPropagation()">
             <div class="receipt-modal-head">
@@ -814,26 +984,58 @@
     </div>
 
     <script>
-        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
-            ? window.queueConfig.apiBase
-            : "http://localhost:3000";
+        /* =========================================================
+           ✅ FIX UTAMA: queueConfig di-inject SETELAH page load.
+           Jadi kita baca config pakai helper yang bisa berubah,
+           dan init server-panel setelah queueConfig tersedia.
+           ========================================================= */
 
-        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
-            ? window.queueConfig.branchName
-            : "BRI";
+        const FALLBACK_SERVER_IP = "192.168.1.88";
+        const FALLBACK_SERVER_PORT = "3000";
 
-        const branchPill = document.getElementById("branch-pill");
-        if (branchPill) branchPill.textContent = `${BRANCH_NAME}`;
+        function getQueueConfigSafe() {
+            try {
+                return (window.queueConfig && typeof window.queueConfig === "object") ? window.queueConfig : null;
+            } catch {
+                return null;
+            }
+        }
+
+        function getApiBase() {
+            const qc = getQueueConfigSafe();
+            if (qc && qc.apiBase) return String(qc.apiBase);
+            return `http://${FALLBACK_SERVER_IP}:${FALLBACK_SERVER_PORT}`;
+        }
+
+        function getBranchName() {
+            const qc = getQueueConfigSafe();
+            return (qc && qc.branchName) ? qc.branchName : "BRI";
+        }
+
+        function isServerMode() {
+            const qc = getQueueConfigSafe();
+            return !!(qc && qc.isServer);
+        }
+
+        // apply branch text (update lagi setelah config masuk)
+        function applyBranchName() {
+            const branchPill = document.getElementById("branch-pill");
+            if (branchPill) branchPill.textContent = `${getBranchName()}`;
+        }
+        applyBranchName();
+        setTimeout(applyBranchName, 300);
+        setTimeout(applyBranchName, 1200);
 
         const connEl = document.getElementById("conn");
 
         async function pingServer() {
+            const API_BASE = getApiBase();
             try {
                 const res = await fetch(`${API_BASE}/api/state`, { cache: "no-store" });
                 if (!res.ok) throw new Error("HTTP " + res.status);
-                connEl.innerHTML = `Terhubung ke server: <strong>${API_BASE}</strong>`;
+                if (connEl) connEl.innerHTML = `Terhubung ke server: <strong>${API_BASE}</strong>`;
             } catch (e) {
-                connEl.innerHTML = `Tidak terhubung ke server: <strong>${API_BASE}</strong>`;
+                if (connEl) connEl.innerHTML = `Tidak terhubung ke server: <strong>${API_BASE}</strong>`;
             }
         }
         pingServer();
@@ -859,6 +1061,7 @@
         let lastRunningText = "";
 
         async function syncRunningTextFromServer() {
+            const API_BASE = getApiBase();
             try {
                 const res = await fetch(`${API_BASE}/api/display/config`, { cache: "no-store" });
                 if (!res.ok) throw new Error("HTTP " + res.status);
@@ -971,8 +1174,6 @@
         // ✅ STRUK: Logo BRI sendiri di atas, teks BANK BRI - CABANG A lebih kecil, hapus "KIOSK PENGAMBILAN NOMOR"
         function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
             const logoSrc = "assets/logo-astro.png";
-
-            // ✅ selalu pakai format ini (sesuai permintaan kamu)
             const bankTitle = "BANK BRI - CABANG A";
 
             return `
@@ -987,26 +1188,8 @@
     body { width: 80mm; font-family: Arial, sans-serif; color: #000; background:#fff; }
     .wrap { padding: 10px 10px 12px; }
     .center { text-align: center; }
-
-    /* ✅ logo lebih besar */
-    .logo-only {
-      display:block;
-      margin: 2px auto 6px;
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-    }
-
-    /* ✅ tulisan BANK BRI - CABANG A lebih kecil */
-    .bank-title {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .02em;
-      line-height: 1.15;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-
+    .logo-only { display:block; margin: 2px auto 6px; width: 56px; height: 56px; object-fit: contain; }
+    .bank-title { font-size: 12px; font-weight: 800; letter-spacing: .02em; line-height: 1.15; text-transform: uppercase; margin-bottom: 2px; }
     .line { border-top: 1px dashed #000; margin: 10px 0; }
     .ticket { font-size: 42px; font-weight: 800; letter-spacing: 2px; margin: 6px 0; }
     .meta { font-size: 11px; line-height: 1.4; }
@@ -1084,7 +1267,7 @@
         window.printFromReceiptIframe = printFromReceiptIframe;
 
         async function printTicketThermal({ ticket, serviceType, preview = false }) {
-            const branch = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
+            const branch = getBranchName();
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 
@@ -1128,6 +1311,7 @@
         window.lihatLayoutPrint = lihatLayoutPrint;
 
         async function take(serviceType) {
+            const API_BASE = getApiBase();
             try {
                 const res = await fetch(`${API_BASE}/api/take-ticket`, {
                     method: "POST",
@@ -1150,6 +1334,122 @@
         }
 
         window.take = take;
+
+        /* =========================================================
+           ✅ PANEL PENGATURAN: muncul hanya saat mode server
+           FIX: tunggu sampai queueConfig masuk (di-inject)
+           ========================================================= */
+        (function setupServerSettingsUI() {
+            const fab = document.getElementById("serverFab");
+            const panel = document.getElementById("serverPanel");
+            const closeBtn = document.getElementById("serverPanelClose");
+            const info = document.getElementById("serverInfo");
+
+            if (!fab || !panel || !closeBtn) return;
+
+            let inited = false;
+
+            function tryInitOnce() {
+                if (inited) return;
+                if (!isServerMode()) return; // belum server / config belum masuk
+
+                inited = true;
+
+                // show button
+                fab.classList.add("show");
+                if (info) info.textContent = `SERVER MODE aktif • API: ${getApiBase()}`;
+
+                function togglePanel() {
+                    panel.classList.toggle("show");
+                }
+
+                fab.addEventListener("click", togglePanel);
+                closeBtn.addEventListener("click", () => panel.classList.remove("show"));
+
+                let ipcRenderer = null;
+                try { ipcRenderer = require("electron").ipcRenderer; } catch { }
+
+                async function loadCfgToForm() {
+                    if (!ipcRenderer) return;
+                    try {
+                        const cfg = await ipcRenderer.invoke("display:getConfig");
+                        const promoText = (cfg?.promoText || "").toString();
+                        const ta = document.getElementById("setPromoText");
+                        if (ta) ta.value = promoText;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                async function savePromoText() {
+                    if (!ipcRenderer) return;
+                    const ta = document.getElementById("setPromoText");
+                    const promoText = (ta?.value || "").toString();
+                    try {
+                        await ipcRenderer.invoke("display:updatePromo", { promoText });
+                    } catch (e) {
+                        console.error(e);
+                        alert("Gagal simpan teks. Cek console.");
+                    }
+                }
+
+                async function pickVideo() {
+                    if (!ipcRenderer) return;
+                    try {
+                        await ipcRenderer.invoke("display:chooseVideo");
+                    } catch (e) {
+                        // cancelled OK
+                    }
+                }
+
+                async function clearVideo() {
+                    if (!ipcRenderer) return;
+                    try {
+                        await ipcRenderer.invoke("display:clearVideo");
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                async function pickImages() {
+                    if (!ipcRenderer) return;
+                    try {
+                        await ipcRenderer.invoke("display:choosePromoImages");
+                    } catch (e) {
+                        // cancelled OK
+                    }
+                }
+
+                async function clearImages() {
+                    if (!ipcRenderer) return;
+                    try {
+                        await ipcRenderer.invoke("display:updatePromoImages", { promoImages: [] });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                document.getElementById("btnSavePromo")?.addEventListener("click", savePromoText);
+                document.getElementById("btnReloadCfg")?.addEventListener("click", loadCfgToForm);
+                document.getElementById("btnPickVideo")?.addEventListener("click", pickVideo);
+                document.getElementById("btnClearVideo")?.addEventListener("click", clearVideo);
+                document.getElementById("btnPickImages")?.addEventListener("click", pickImages);
+                document.getElementById("btnClearImages")?.addEventListener("click", clearImages);
+
+                // load initial
+                loadCfgToForm();
+            }
+
+            // coba init sekarang + polling sebentar sampai config ter-inject
+            tryInitOnce();
+            let tries = 0;
+            const t = setInterval(() => {
+                tries++;
+                tryInitOnce();
+                applyBranchName();
+                if (inited || tries > 40) clearInterval(t); // max ~8 detik
+            }, 200);
+        })();
     </script>
 </body>
 

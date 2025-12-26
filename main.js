@@ -9,8 +9,6 @@ const fixedUserData = path.join(app.getPath("appData"), "antrian-bank-desktop");
 app.setPath("userData", fixedUserData);
 
 // ✅✅✅ ICON APP (taskbar/window) — pakai icon BRI
-// - untuk Windows paling aman pakai .ico
-// - kamu bilang sudah punya: assets/icon-bri.ico
 const APP_ICON = path.join(__dirname, "assets", "icon-bri.ico");
 
 const {
@@ -20,7 +18,6 @@ const {
   getTodaySummary,
   getTodayCalls,
   clearTodayTickets,
-  // ✅ dari db.js kamu (penting untuk pemanggilan via IPC)
   callNext,
   getState,
 } = require("./db");
@@ -49,14 +46,23 @@ function getAppMode() {
   const exeName = path.basename(process.execPath).toLowerCase();
 
   let autoMode = "";
-  if (exeName.includes("server")) autoMode = "server-admin";
+  if (exeName.includes("server")) autoMode = "server"; // ✅ server kiosk
   else if (exeName.includes("kiosk")) autoMode = "kiosk";
   else if (exeName.includes("operator")) autoMode = "operator";
   else if (exeName.includes("display")) autoMode = "display";
   else if (exeName.includes("admin")) autoMode = "admin";
 
   const mode = envMode || cliMode || autoMode || "kiosk";
-  const allowed = ["server-admin", "kiosk", "operator", "display", "admin"];
+
+  // ✅✅✅ TAMBAH "server"
+  const allowed = [
+    "server",
+    "server-admin",
+    "kiosk",
+    "operator",
+    "display",
+    "admin",
+  ];
   return allowed.includes(mode) ? mode : "kiosk";
 }
 
@@ -111,16 +117,17 @@ function readConfig() {
 }
 
 /**
- * ✅ Inject config ke renderer (tetap)
- * ✅ Tambahan: inject window.kioskPrinter.printTicket() (untuk silent thermal print)
+ * ✅ Inject config ke renderer
+ * ✅ Tambahan: inject isServer + kioskPrinter
  */
-function injectConfig(win, { apiBase, branchName }) {
+function injectConfig(win, { apiBase, branchName, isServer }) {
   if (!win || win.isDestroyed()) return;
 
   const script = `
     window.queueConfig = {
       apiBase: ${JSON.stringify(apiBase)},
-      branchName: ${JSON.stringify(branchName)}
+      branchName: ${JSON.stringify(branchName)},
+      isServer: ${JSON.stringify(!!isServer)}
     };
 
     try {
@@ -140,7 +147,13 @@ function createWindowByMode(mode, cfg) {
   let width = 500;
   let height = 700;
 
-  if (mode === "server-admin") {
+  // ✅✅✅ MODE SERVER = KIOSK UI + SERVER
+  if (mode === "server") {
+    title = "Kiosk Server";
+    file = "kiosk.html";
+    width = 1280;
+    height = 720;
+  } else if (mode === "server-admin") {
     title = "Server + Admin Panel";
     file = "admin.html";
     width = 1100;
@@ -163,23 +176,22 @@ function createWindowByMode(mode, cfg) {
   } else {
     title = "Kiosk Pengambilan Nomor";
     file = "kiosk.html";
+    width = 1280;
+    height = 720;
   }
 
   const win = new BrowserWindow({
     width,
     height,
     title,
-    // ✅✅✅ tambahkan icon (taskbar/window) tanpa mengubah logika lain
     icon: APP_ICON,
     webPreferences: { nodeIntegration: true, contextIsolation: false },
-    autoHideMenuBar: false, // normal: menu bar boleh tampil
+    autoHideMenuBar: false,
   });
 
-  // normal mode
   win.setMenuBarVisibility(true);
   win.setAutoHideMenuBar(false);
 
-  // helper biar rapi
   function hideMenu() {
     win.setMenuBarVisibility(false);
     win.setAutoHideMenuBar(true);
@@ -189,31 +201,22 @@ function createWindowByMode(mode, cfg) {
     win.setAutoHideMenuBar(false);
   }
 
-  // ✅ Fullscreen level window (win.setFullScreen / menu fullscreen)
   win.on("enter-full-screen", hideMenu);
   win.on("leave-full-screen", showMenu);
 
-  // ✅ Fullscreen level webContents (biasanya kepakai saat F11)
   win.webContents.on("enter-html-full-screen", hideMenu);
   win.webContents.on("leave-html-full-screen", showMenu);
 
-  // ✅ normal mode: tampilkan menu bar
-  win.setMenuBarVisibility(true);
-
-  // ✅ opsi 2: saat fullscreen -> sembunyikan menu bar
-  win.on("enter-full-screen", () => {
-    win.setMenuBarVisibility(false);
-    win.setAutoHideMenuBar(true);
-  });
-
-  // ✅ keluar fullscreen -> tampilkan lagi
-  win.on("leave-full-screen", () => {
-    win.setMenuBarVisibility(true);
-    win.setAutoHideMenuBar(false);
-  });
-
   win.loadFile(file);
-  win.webContents.on("did-finish-load", () => injectConfig(win, cfg));
+
+  win.webContents.on("did-finish-load", () => {
+    injectConfig(win, {
+      apiBase: cfg.apiBase,
+      branchName: cfg.branchName,
+      isServer: mode === "server" || mode === "server-admin", // ✅
+    });
+  });
+
   return win;
 }
 
@@ -225,7 +228,6 @@ function openConfigErrorWindow(mode, cfg) {
     width: 820,
     height: 520,
     title: "Config Error",
-    // ✅✅✅ icon juga di window error
     icon: APP_ICON,
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
@@ -244,7 +246,7 @@ function openConfigErrorWindow(mode, cfg) {
         <h3>Format baru (disarankan)</h3>
         <pre style="background:#f4f4f4; padding:12px; border-radius:8px; overflow:auto;">
 {
-  "apiBase": "http://192.168.4.106:3000",
+  "apiBase": "http://192.168.1.56:3000",
   "branchName": "BANK ASTRO - CABANG A"
 }
         </pre>
@@ -341,15 +343,12 @@ function buildThermalReceiptHtml(payload) {
 `;
 }
 
-/** helper: pastikan folder promo-images ada */
 function ensurePromoImagesDir() {
-  // ✅ samakan dengan server.js: userData/media/promo-images
   const dir = path.join(app.getPath("userData"), "media", "promo-images");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
 
-/** helper: copy file image -> userData/promo-images, return filename */
 function copyImageToPromoDir(filePath) {
   const dir = ensurePromoImagesDir();
   const ext = path.extname(filePath).toLowerCase() || ".jpg";
@@ -364,7 +363,6 @@ function copyImageToPromoDir(filePath) {
   return name;
 }
 
-/** ✅ helper: normalisasi bentuk return config agar admin.html/display.html gampang */
 function toRendererDisplayConfig(cfg) {
   return {
     promoText: cfg?.promoText || "",
@@ -374,9 +372,7 @@ function toRendererDisplayConfig(cfg) {
   };
 }
 
-/** ✅ REGISTER IPC (sekali saja) */
 function registerIpcHandlers() {
-  // ===== Display config (promo/video/slider) =====
   ipcMain.handle("display:getConfig", async () => {
     const cfg = await getDisplayConfig();
     return toRendererDisplayConfig(cfg);
@@ -388,7 +384,6 @@ function registerIpcHandlers() {
     return toRendererDisplayConfig(next);
   });
 
-  // ✅ ini dipakai admin.html kamu (pilih video)
   ipcMain.handle("display:chooseVideo", async () => {
     const res = await dialog.showOpenDialog({
       title: "Pilih video promo (MP4)",
@@ -419,8 +414,6 @@ function registerIpcHandlers() {
     return toRendererDisplayConfig(next);
   });
 
-  // ✅✅✅ FIX: admin.html kamu memanggil "display:choosePromoImages"
-  // jadi kita sediakan handler ini (alias) agar tombol gambar pasti respon.
   ipcMain.handle("display:choosePromoImages", async () => {
     const res = await dialog.showOpenDialog({
       title: "Pilih gambar slider (multiple)",
@@ -428,7 +421,6 @@ function registerIpcHandlers() {
       filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png", "webp"] }],
     });
 
-    // kalau cancel: tetap balikin config terbaru
     if (res.canceled || !res.filePaths?.length) {
       const cfg = await getDisplayConfig();
       return toRendererDisplayConfig(cfg);
@@ -449,21 +441,17 @@ function registerIpcHandlers() {
       }
     }
 
-    // gabung tanpa menghapus yg lama
     const merged = [...currentList, ...newNames].filter(Boolean);
-
     const next = await setDisplayConfig({ promo_images: merged });
     return toRendererDisplayConfig(next);
   });
 
-  // ✅ FIX: admin.html kamu memanggil "display:updatePromoImages" saat hapus/clear
   ipcMain.handle("display:updatePromoImages", async (_evt, payload) => {
     const promoImages = payload?.promoImages;
     const next = await setDisplayConfig({ promo_images: promoImages });
     return toRendererDisplayConfig(next);
   });
 
-  // ===== Admin =====
   ipcMain.handle("admin:getTodaySummary", async () => await getTodaySummary());
   ipcMain.handle("admin:getTodayCalls", async () => await getTodayCalls());
   ipcMain.handle("admin:clearTodayTickets", async () => {
@@ -471,22 +459,17 @@ function registerIpcHandlers() {
     return true;
   });
 
-  // ✅✅✅ FIX UTAMA: pemanggilan via IPC (fallback kalau server mati)
   ipcMain.handle("panel:callNext", async (_evt, payload) => {
     const serviceType = (payload?.serviceType || "").toString().toUpperCase();
     const counterName = (payload?.counterName || "").toString();
     const result = await callNext(serviceType, counterName);
-    return result; // bisa null kalau tidak ada WAITING
+    return result;
   });
 
-  // ✅ optional: ambil state via IPC
   ipcMain.handle("state:get", async () => {
     return await getState();
   });
 
-  // =========================================================
-  // ✅ PRINT TICKET (Silent Thermal Print)
-  // =========================================================
   ipcMain.handle("PRINT_TICKET", async (_evt, payload) => {
     try {
       if (!printWin || printWin.isDestroyed()) {
@@ -494,7 +477,6 @@ function registerIpcHandlers() {
           show: false,
           width: 420,
           height: 680,
-          // ✅✅✅ icon juga di hidden print window (tidak mengubah logika print)
           icon: APP_ICON,
           webPreferences: { nodeIntegration: false, contextIsolation: true },
         });
@@ -549,16 +531,12 @@ app.whenReady().then(() => {
   registerIpcHandlers();
 
   const mode = getAppMode();
-
-  if (mode === "server-admin") {
-    console.log("🌐 LAN IP:", getLocalIPv4());
-  }
-
   const cfg = readConfig();
 
-  // ===== SERVER + ADMIN =====
-  if (mode === "server-admin") {
-    // ✅ Tambahan aman: kirim userDataPath ke server agar media dir konsisten
+  // ✅✅✅ server mode: start server (server + server-admin)
+  if (mode === "server" || mode === "server-admin") {
+    console.log("🌐 LAN IP:", getLocalIPv4());
+
     serverRef = createServer({
       port: cfg.serverPort,
       host: "0.0.0.0",
@@ -572,6 +550,7 @@ app.whenReady().then(() => {
     console.log("✅ SERVER LOCAL:", serverApiBase);
     console.log("✅ SERVER LAN  :", `http://${ip}:${cfg.serverPort}`);
 
+    // ✅ inject apiBase=localhost (biar UI server tidak bergantung IP)
     mainWin = createWindowByMode(mode, { ...cfg, apiBase: serverApiBase });
     return;
   }

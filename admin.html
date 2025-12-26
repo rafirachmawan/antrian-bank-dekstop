@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Panel - Antrian Bank Astro</title>
 
-    <!-- ✅ Font lebih profesional (tanpa mengubah logika JS) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900;950&display=swap"
@@ -22,18 +21,13 @@
         body {
             height: 100%;
             overflow: hidden;
-            /* ✅ supaya gak ada scroll body, scroll-nya pindah ke panel */
         }
 
-        /* =========================
-       THEME: BRI BLUE (seperti gambar)
-       ========================= */
         :root {
             --bri-blue: #0b56b3;
             --bri-blue-2: #0a4ea2;
             --bri-blue-3: #0a63c7;
 
-            /* ✅ biru muda (samakan dengan kiosk) */
             --bri-light: #4fc3ff;
             --bri-light-2: #2aa8ff;
 
@@ -42,7 +36,6 @@
             --muted: #64748b;
             --line: #e5e7eb;
 
-            /* ✅ kontrol header brand biar konsisten */
             --brand-logo-size: 62px;
             --brand-logo-gap: 14px;
         }
@@ -71,7 +64,6 @@
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             border-radius: 18px;
 
-            /* ✅ dibuat “sekelas” display/kiosk */
             padding: 18px 24px;
             min-height: 92px;
 
@@ -93,7 +85,6 @@
             pointer-events: none;
         }
 
-        /* ✅ brand kiri: baris LOGO+BRI, lalu tagline di bawah (seperti gambar kamu) */
         .brand-left {
             display: flex;
             flex-direction: column;
@@ -133,7 +124,6 @@
             opacity: .98;
         }
 
-        /* ✅ tulisan BRI dibesarkan agar sebanding tinggi logo */
         .brand-name {
             font-size: 52px;
             font-weight: 950;
@@ -147,7 +137,6 @@
             text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
         }
 
-        /* ✅ tagline: posisinya “di bawah tulisan BRI”, jadi geser ke kanan setara lebar logo+gap */
         .brand-tagline {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.92);
@@ -157,7 +146,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 640px;
-
             padding-left: 0px;
             margin-top: 2px;
         }
@@ -189,11 +177,11 @@
             line-height: 1.02;
         }
 
-        /* ================= LAYOUT GRID ================= */
+        /* ================= LAYOUT ================= */
         .main-grid {
             flex: 1 1 auto;
             display: grid;
-            grid-template-columns: 3fr 2fr;
+            grid-template-columns: 1fr;
             gap: 10px;
             min-height: 0;
         }
@@ -247,9 +235,9 @@
             border-radius: 999px;
             border: 1px solid #d1d5db;
             background: #ffffff;
-            padding: 6px 12px;
-            font-size: 11px;
-            font-weight: 700;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 900;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -271,8 +259,7 @@
             background: #fecaca;
         }
 
-        /* ================= LEFT PANEL ================= */
-
+        /* ================= BODY ================= */
         .left-body {
             display: flex;
             flex-direction: column;
@@ -576,163 +563,10 @@
             font-weight: 600;
         }
 
-        /* ================= RIGHT PANEL ================= */
-        .promo-textarea {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid #d1d5db;
-            padding: 10px 12px;
-            resize: vertical;
-            min-height: 72px;
-            font-size: 13px;
-            background: #f9fafb;
-            color: #111827;
-            font-weight: 500;
-        }
-
-        .promo-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-primary {
-            border-radius: 999px;
-            border: none;
-            padding: 8px 14px;
-            font-size: 12px;
-            font-weight: 900;
-            cursor: pointer;
-            background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
-            color: #eef2ff;
-            box-shadow: 0 10px 22px rgba(11, 86, 179, 0.35);
-            white-space: nowrap;
-        }
-
-        .btn-secondary {
-            border-radius: 999px;
-            border: 1px solid #d1d5db;
-            padding: 8px 14px;
-            font-size: 12px;
-            font-weight: 800;
-            cursor: pointer;
-            background: #ffffff;
-            color: #111827;
-            white-space: nowrap;
-        }
-
-        .video-path {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 6px;
-            word-break: break-all;
-            font-weight: 600;
-        }
-
-        .img-list {
-            margin-top: 10px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            background: #fff;
-            overflow: hidden;
-        }
-
-        .img-row {
-            display: grid;
-            grid-template-columns: 1fr 90px;
-            gap: 10px;
-            align-items: center;
-            padding: 10px 12px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .img-row:last-child {
-            border-bottom: none;
-        }
-
-        .img-name {
-            color: #0f172a;
-            font-weight: 800;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .img-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 6px;
-        }
-
-        .img-btn {
-            border-radius: 999px;
-            border: 1px solid #d1d5db;
-            background: #fff;
-            padding: 6px 10px;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .img-btn:hover {
-            background: #eef2ff;
-        }
-
-        .img-btn.danger {
-            background: #fee2e2;
-            border-color: #fecaca;
-            color: #b91c1c;
-        }
-
-        .img-btn.danger:hover {
-            background: #fecaca;
-        }
-
-        .note-panel {
-            margin-top: 12px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            padding: 10px 12px;
-            font-size: 11px;
-            line-height: 1.6;
-            color: #4b5563;
-            box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
-            font-weight: 500;
-        }
-
-        .note-title {
-            font-weight: 900;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: #1f2937;
-        }
-
-        /* ================= FOOTER ================= */
-        .footer {
-            display: none !important;
-            /* ✅ footer bawah dihapus total (tanggal pindah ke header) */
-        }
-
-        .status-row,
-        .status-dot {
-            display: none !important;
-        }
-
         /* ================= RESPONSIVE ================= */
         @media (max-width: 1100px) {
             body {
                 padding: 10px 10px;
-            }
-
-            .main-grid {
-                grid-template-columns: 1fr;
             }
 
             .call-grid {
@@ -775,18 +609,14 @@
 </head>
 
 <body>
-    <!-- TOP BAR -->
     <div class="top-bar">
         <div class="brand-left">
-            <!-- ✅ baris atas: LOGO + BRI -->
             <div class="brand-title-row">
                 <div class="brand-logo-box">
                     <img src="assets/logo-astro.png" alt="Logo">
                 </div>
                 <div id="brand-name" class="brand-name">BRI</div>
             </div>
-
-            <!-- ✅ tagline di bawah tulisan BRI (seperti contoh kamu) -->
             <div class="brand-tagline">SATU BANK UNTUK SEMUA</div>
         </div>
 
@@ -797,7 +627,6 @@
     </div>
 
     <div class="main-grid">
-        <!-- LEFT PANEL -->
         <div class="panel">
             <div class="panel-header-row">
                 <div>
@@ -805,7 +634,6 @@
                     <div class="panel-subtitle">Panggil nomor berikutnya langsung dari Admin Panel.</div>
                 </div>
                 <div>
-                    <!-- ✅ REFRESH BUTTON DIHAPUS -->
                     <button class="btn-small btn-danger" onclick="resetToday()">✕ Reset Antrian Hari Ini</button>
                 </div>
             </div>
@@ -824,7 +652,6 @@
 
                         <div class="form-row">
                             <label for="tellerCounterSel">Loket</label>
-                            <!-- ✅✅✅ GANTI: Teller 1/2/3/4 -> Counter 1/2/3/4 -->
                             <select id="tellerCounterSel">
                                 <option value="Counter 1">Counter 1</option>
                                 <option value="Counter 2">Counter 2</option>
@@ -858,7 +685,6 @@
 
                         <div class="form-row">
                             <label for="csCounterSel">Loket</label>
-                            <!-- ✅✅✅ GANTI: CS 1/2/3 -> Counter 1/2/3 -->
                             <select id="csCounterSel">
                                 <option value="Counter 1">Counter 1</option>
                                 <option value="Counter 2">Counter 2</option>
@@ -891,103 +717,27 @@
                 </div>
             </div>
         </div>
-
-        <!-- RIGHT PANEL -->
-        <div class="panel">
-            <div class="panel-header-row">
-                <div>
-                    <div class="panel-title">Pengaturan Promo &amp; Video</div>
-                    <div class="panel-subtitle" style="margin-top:4px">Teks, video, dan gambar slider akan tampil di
-                        Display.
-                    </div>
-                </div>
-            </div>
-
-            <div class="panel-body">
-                <!-- PROMO TEXT -->
-                <div>
-                    <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Teks Promo Hari Ini
-                    </div>
-                    <textarea id="promo-input" class="promo-textarea"
-                        placeholder="Tulis teks promo yang akan tampil di layar Display..."></textarea>
-
-                    <div class="promo-actions">
-                        <button class="btn-primary" onclick="savePromoText()">💾 Simpan Teks Promo</button>
-                    </div>
-                </div>
-
-                <!-- VIDEO -->
-                <div style="margin-top:6px;">
-                    <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Video Promo</div>
-                    <div class="promo-actions" style="margin-top:0;">
-                        <button class="btn-secondary" onclick="choosePromoVideo()">📂 Pilih Video Promo...</button>
-                    </div>
-                    <div id="video-file-label" class="video-path">Tidak ada video terpilih.</div>
-                </div>
-
-                <!-- SLIDER IMAGES -->
-                <div style="margin-top:14px;">
-                    <div style="font-size:12px; font-weight:800; color:#334155; margin-bottom:6px;">Gambar Slider Promo
-                        (Multiple)
-                    </div>
-
-                    <div class="promo-actions" style="margin-top:0;">
-                        <button class="btn-secondary" onclick="choosePromoImages()">🖼️ Pilih Gambar Slider...</button>
-                        <button class="btn-secondary" onclick="clearPromoImages()"
-                            style="border-color:#fecaca;color:#b91c1c;background:#fee2e2;">🗑️ Hapus Semua</button>
-                    </div>
-
-                    <div style="font-size:11px;color:#6b7280;margin-top:-6px;font-weight:600;">
-                        Disarankan JPG/PNG. Display akan otomatis slide tiap 5 detik.
-                    </div>
-
-                    <div id="imgList" class="img-list" style="margin-top:10px;">
-                        <div class="img-row">
-                            <div class="img-name" style="color:#6b7280;font-weight:700;">Belum ada gambar slider.</div>
-                            <div></div>
-                        </div>
-                    </div>
-
-                    <!-- input file (browser mode) -->
-                    <input id="imgPicker" type="file" accept="image/*" multiple style="display:none" />
-                    <input id="videoPicker" type="file" accept="video/*" style="display:none" />
-                </div>
-
-                <div class="note-panel">
-                    <div class="note-title">Catatan</div>
-                    <ul style="margin:0 0 0 16px; padding:0;">
-                        <li>Reset antrian hanya akan menghapus tiket <strong>hari ini</strong>.</li>
-                        <li>Promo &amp; media yang diubah akan tampil realtime di <strong>Display Antrian</strong>.</li>
-                        <li>Jika Admin dijalankan dari Electron, upload slider disarankan via IPC (lebih stabil).</li>
-                        <li>Jika via browser, server perlu endpoint upload <code>/api/display/upload-images</code>.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ✅ Footer bawah dihapus (tanggal sudah digabung di header) -->
-    <div class="footer">
-        <div id="footer-date">Hari ini:</div>
     </div>
 
     <script>
         // =====================
-        // Electron optional
+        // Electron optional (fallback server-local)
         // =====================
         let ipcRenderer = null;
         try { ipcRenderer = require("electron").ipcRenderer; } catch { /* browser mode */ }
 
-        // ====== KONFIG SERVER CABANG ======
-        const API_BASE = (window.queueConfig && window.queueConfig.apiBase)
-            ? window.queueConfig.apiBase
-            : "http://192.168.4.106:3000";
+        // ==========================================================
+        // ✅ SET SERVER IP DI SINI (ubah kalau pindah jaringan)
+        // ==========================================================
+        const SERVER_IP = "192.168.4.106";
+        const SERVER_PORT = "3000";
+        const API_BASE = `http://${SERVER_IP}:${SERVER_PORT}`;
 
-        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName) ? window.queueConfig.branchName : "BRI";
+        const BRANCH_NAME = (window.queueConfig && window.queueConfig.branchName)
+            ? window.queueConfig.branchName
+            : "BRI";
 
-        // ✅✅✅ PEMBETULAN: deteksi apakah ini SERVER lokal (boleh fallback IPC) atau CLIENT (jangan pernah fallback IPC)
-        // - mode server-admin di main.js memakai apiBase = http://localhost:PORT
-        // - mode client (PC teller) apiBase = http://IP-SATPAM:PORT
+        // ✅ server-local detection (kalau admin ini dijalankan di mesin server)
         const IS_SERVER_LOCAL =
             /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(API_BASE || "").trim());
 
@@ -995,26 +745,7 @@
         const brandNameEl = document.getElementById("brand-name");
         if (brandNameEl) brandNameEl.textContent = BRANCH_NAME || "BRI";
 
-        // ✅ pillText dihapus, jadi tidak ada update pillText lagi
-
-        const statusEl = document.getElementById("connection-status");
-        const dotEl = document.getElementById("dot");
-
-        function setOnline(text) {
-            if (dotEl) dotEl.classList.remove("offline");
-            if (statusEl) statusEl.textContent = text || `Terhubung ke server cabang: ${API_BASE}`;
-        }
-        function setOffline(text) {
-            if (dotEl) dotEl.classList.add("offline");
-            if (statusEl) statusEl.textContent = text || "Server cabang tidak aktif.";
-        }
-
         // ====== TANGGAL & JAM ======
-        function formatTanggalPanjang(date) {
-            const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            return `${hari[date.getDay()]}, ${String(date.getDate()).padStart(2, "0")} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
-        }
         function formatTanggalPendek(date) {
             const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             const bulanPendek = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
@@ -1026,12 +757,9 @@
 
         function updateClock() {
             const now = new Date();
-            document.getElementById("hdr-time").textContent = now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
+            document.getElementById("hdr-time").textContent =
+                now.toLocaleTimeString("id-ID", { hour12: false }).slice(0, 8);
             document.getElementById("hdr-date").textContent = formatTanggalPendek(now);
-
-            // footer tetap diupdate (walau disembunyikan) biar aman gak ubah logika lama
-            const footerDateEl = document.getElementById("footer-date");
-            if (footerDateEl) footerDateEl.textContent = `Hari ini: ${formatTanggalPanjang(now)}`;
         }
         updateClock();
         setInterval(updateClock, 1000);
@@ -1073,10 +801,8 @@
 
                 csLastEl.textContent = cTicket || "-";
                 csLastCounterEl.textContent = `Loket: ${cCounter || "-"}`;
-
-                setOnline(`Terhubung ke server cabang: ${API_BASE}`);
             } catch (e) {
-                setOffline("Server cabang tidak aktif.");
+                // kalau offline, biarin tampilan terakhir tetap ada
             }
         }
 
@@ -1168,7 +894,6 @@
         // PEMANGGILAN
         // ==========================
         function getCounterName(serviceType) {
-            // ✅✅✅ default fallback juga diganti ke Counter (biar konsisten)
             if (serviceType === "TELLER") return document.getElementById("tellerCounterSel")?.value || "Counter 1";
             return document.getElementById("csCounterSel")?.value || "Counter 1";
         }
@@ -1215,14 +940,14 @@
                 }
                 return;
             } catch (e) {
-                // ✅✅✅ PEMBETULAN: PC CLIENT (teller) JANGAN jatuh ke IPC (karena itu DB lokal, pasti kosong)
+                // ✅ PC client jangan fallback IPC
                 if (!IS_SERVER_LOCAL) {
                     console.error("Gagal panggil via server (client mode):", e);
-                    alert("Gagal memanggil nomor. Pastikan PC ini terhubung ke server pusat (Satpam).");
+                    alert("Gagal memanggil nomor. Pastikan PC ini terhubung ke server pusat (Kiosk/Satpam).");
                     return;
                 }
 
-                // fallback IPC tetap dipertahankan untuk server-local (tanpa ubah logika besar)
+                // fallback IPC hanya untuk server-local
                 try {
                     if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
                     const result = await ipcRenderer.invoke("panel:callNext", { serviceType, counterName });
@@ -1237,7 +962,10 @@
                             counterName,
                         });
                     } else {
-                        const boxTicket = (serviceType === "TELLER") ? (tellerLastEl?.textContent || "-") : (csLastEl?.textContent || "-");
+                        const boxTicket = (serviceType === "TELLER")
+                            ? (tellerLastEl?.textContent || "-")
+                            : (csLastEl?.textContent || "-");
+
                         if (boxTicket && boxTicket !== "-" && boxTicket !== beforeTicket) {
                             pushRealtimeLog({ serviceType: serviceType === "CS" ? "CS" : "TELLER", ticket: boxTicket, counterName });
                         } else {
@@ -1257,37 +985,31 @@
         // RESET HARI INI
         // ==========================
         async function resetToday() {
-            // ✅ POPUP KONFIRMASI (lebih jelas)
             const ok = confirm("Apakah Anda yakin ingin reset antrian hari ini?\n\nSemua tiket hari ini akan dihapus dan tidak bisa dikembalikan.");
             if (!ok) return;
 
             try {
                 await fetchJson("/api/admin/clear-today", { method: "POST", body: JSON.stringify({}) });
-                setOnline(`Terhubung ke server cabang: ${API_BASE}`);
                 clearRealtimeLog();
-                await loadData();
-                alert("Antrian hari ini sudah direset (server cabang).");
+                await loadNowFromState();
+                alert("Antrian hari ini sudah direset (server).");
                 return;
             } catch (e) {
-                // ✅✅✅ PEMBETULAN: PC CLIENT jangan reset lokal (karena itu bukan DB pusat)
                 if (!IS_SERVER_LOCAL) {
                     console.error("Reset gagal via server (client mode):", e);
-                    setOffline("Reset gagal. Pastikan terhubung ke server pusat.");
-                    alert("Gagal mereset antrian hari ini. Pastikan PC ini terhubung ke server pusat (Satpam).");
+                    alert("Gagal mereset antrian. Pastikan PC ini terhubung ke server pusat (Kiosk/Satpam).");
                     return;
                 }
 
-                // fallback IPC tetap dipertahankan untuk server-local
+                // fallback IPC hanya server-local
                 try {
                     if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
                     await ipcRenderer.invoke("admin:clearTodayTickets");
-                    setOnline("Fallback: reset berhasil di database lokal (SQLite).");
                     clearRealtimeLog();
-                    await loadData();
+                    await loadNowFromState();
                     alert("Antrian hari ini sudah direset (lokal).");
                 } catch (e2) {
                     console.error("Gagal reset:", e2);
-                    setOffline("Reset gagal. Server dan lokal tidak bisa diakses.");
                     alert("Gagal mereset antrian hari ini.");
                 }
             }
@@ -1295,286 +1017,13 @@
         window.resetToday = resetToday;
 
         // ==========================
-        // ✅ CONFIG PROMO / VIDEO / SLIDER IMAGES
-        // ==========================
-        let currentDisplayConfig = null;
-
-        function getPromoImagesFromConfig(cfg) {
-            const arr = cfg?.promo_images || cfg?.promoImages || cfg?.slider_images || cfg?.sliderImages || cfg?.images || [];
-            return Array.isArray(arr) ? arr.filter(Boolean).map(String) : [];
-        }
-
-        const imgListEl = document.getElementById("imgList");
-        function renderPromoImagesList(images) {
-            const list = Array.isArray(images) ? images : [];
-            if (!imgListEl) return;
-
-            if (!list.length) {
-                imgListEl.innerHTML = `
-          <div class="img-row">
-            <div class="img-name" style="color:#6b7280;font-weight:700;">Belum ada gambar slider.</div>
-            <div></div>
-          </div>
-        `;
-                return;
-            }
-
-            imgListEl.innerHTML = list.map((x, i) => {
-                const name = (x || "").toString();
-                return `
-          <div class="img-row">
-            <div class="img-name" title="${name.replace(/"/g, "&quot;")}">${name}</div>
-            <div class="img-actions">
-              <button class="img-btn danger" onclick="removePromoImage(${i})">Hapus</button>
-            </div>
-          </div>
-        `;
-            }).join("");
-        }
-
-        let promoIsEditing = false;
-        let promoIsDirty = false;
-
-        const promoInputEl = document.getElementById("promo-input");
-        if (promoInputEl) {
-            promoInputEl.addEventListener("focus", () => { promoIsEditing = true; });
-            promoInputEl.addEventListener("blur", () => { promoIsEditing = false; });
-            promoInputEl.addEventListener("input", () => { promoIsDirty = true; });
-        }
-
-        async function loadDisplayConfig() {
-            try {
-                const json = await fetchJson("/api/display/config");
-                const cfg = json?.config ? json.config : json;
-                currentDisplayConfig = cfg;
-
-                const promoTextEl = document.getElementById("promo-input");
-                if (promoTextEl) {
-                    if (!promoIsEditing && !promoIsDirty) {
-                        promoTextEl.value = (cfg.promo_text || cfg.promoText || "").toString();
-                    }
-                }
-
-                const labelEl = document.getElementById("video-file-label");
-                const videoPath = cfg.video_path || cfg.videoPath || null;
-                if (labelEl) labelEl.textContent = videoPath ? `File: ${videoPath}` : "Tidak ada video terpilih.";
-
-                renderPromoImagesList(getPromoImagesFromConfig(cfg));
-                return;
-            } catch (e) { }
-
-            try {
-                if (!ipcRenderer) return;
-                const cfg = await ipcRenderer.invoke("display:getConfig");
-                currentDisplayConfig = cfg;
-
-                const promoTextEl = document.getElementById("promo-input");
-                if (promoTextEl) promoTextEl.value = (cfg.promoText || "").toString();
-
-                const labelEl = document.getElementById("video-file-label");
-                if (labelEl) labelEl.textContent = cfg.videoPath ? `File: ${cfg.videoPath}` : "Tidak ada video terpilih.";
-
-                renderPromoImagesList(getPromoImagesFromConfig(cfg));
-            } catch (e) {
-                console.error("Gagal load config display:", e);
-            }
-        }
-
-        async function savePromoText() {
-            const promoText = (document.getElementById("promo-input")?.value || "").trim();
-
-            try {
-                const res = await fetch(`${API_BASE}/api/display/config`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ promo_text: promoText }),
-                });
-                if (!res.ok) throw new Error("HTTP " + res.status);
-                const json = await res.json();
-                currentDisplayConfig = json?.config ? json.config : json;
-                promoIsDirty = false;
-                promoIsEditing = false;
-
-                alert("Teks promo berhasil disimpan (server).");
-                return;
-            } catch (e) {
-                try {
-                    if (!ipcRenderer) { alert("Gagal simpan ke server, dan IPC tidak tersedia."); return; }
-                    const next = await ipcRenderer.invoke("display:updatePromo", { promoText });
-                    currentDisplayConfig = next;
-                    alert("Teks promo berhasil disimpan (lokal).");
-                } catch (e2) {
-                    console.error("Gagal simpan promo:", e, e2);
-                    alert("Gagal menyimpan teks promo.");
-                }
-            }
-        }
-        window.savePromoText = savePromoText;
-
-        const videoPickerEl = document.getElementById("videoPicker");
-
-        async function uploadVideoToServer(file) {
-            const fd = new FormData();
-            fd.append("file", file);
-            const res = await fetch(`${API_BASE}/api/display/upload-video`, { method: "POST", body: fd });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            return await res.json();
-        }
-
-        async function choosePromoVideo() {
-            if (!videoPickerEl) return;
-            videoPickerEl.value = "";
-            videoPickerEl.click();
-        }
-
-        if (videoPickerEl) {
-            videoPickerEl.addEventListener("change", async () => {
-                const file = videoPickerEl.files?.[0];
-                if (!file) return;
-
-                try {
-                    await uploadVideoToServer(file);
-                    await loadDisplayConfig();
-                    alert("Video promo berhasil diupload & disimpan (server).");
-                } catch (e) {
-                    console.error(e);
-                    alert("Gagal upload video. Pastikan server hidup & endpoint /api/display/upload-video ada.");
-                }
-            });
-        }
-        window.choosePromoVideo = choosePromoVideo;
-
-        // ==========================
-        // ✅ PILIH GAMBAR SLIDER
-        // ==========================
-        const imgPickerEl = document.getElementById("imgPicker");
-
-        async function savePromoImagesToServer(images) {
-            const res = await fetch(`${API_BASE}/api/display/config`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ promo_images: images }),
-            });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            return await res.json();
-        }
-
-        async function uploadImagesToServer(files) {
-            const fd = new FormData();
-            for (const f of files) fd.append("files", f);
-
-            const res = await fetch(`${API_BASE}/api/display/upload-images`, {
-                method: "POST",
-                body: fd,
-            });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-
-            const json = await res.json();
-            return json?.config ? json.config : json;
-        }
-
-        async function choosePromoImages() {
-            if (ipcRenderer) {
-                try {
-                    // ✅ FIX: samakan dengan main.js kamu (handler yang ada: display:choosePromoImages)
-                    const next = await ipcRenderer.invoke("display:choosePromoImages");
-                    let imgs = [];
-                    if (next && Array.isArray(next.files)) imgs = next.files;
-                    else imgs = getPromoImagesFromConfig(next);
-
-                    currentDisplayConfig = next || currentDisplayConfig;
-                    if (imgs.length) {
-                        currentDisplayConfig = { ...(currentDisplayConfig || {}), promoImages: imgs, promo_images: imgs };
-                    }
-
-                    renderPromoImagesList(getPromoImagesFromConfig(currentDisplayConfig));
-                    alert("Gambar slider berhasil diperbarui (IPC).");
-                    return;
-                } catch (e) {
-                    console.warn("IPC choosePromoImages gagal, coba browser upload...", e);
-                }
-            }
-
-            if (!imgPickerEl) return;
-            imgPickerEl.value = "";
-            imgPickerEl.click();
-        }
-        window.choosePromoImages = choosePromoImages;
-
-        if (imgPickerEl) {
-            imgPickerEl.addEventListener("change", async () => {
-                const files = Array.from(imgPickerEl.files || []);
-                if (!files.length) return;
-
-                try {
-                    const cfg = await uploadImagesToServer(files);
-                    currentDisplayConfig = cfg;
-
-                    renderPromoImagesList(getPromoImagesFromConfig(currentDisplayConfig));
-                    alert("Gambar slider berhasil diupload & disimpan (server).");
-                } catch (e) {
-                    console.error(e);
-                    alert("Gagal upload gambar. Pastikan server hidup & endpoint /api/display/upload-images ada.");
-                }
-            });
-        }
-
-        async function removePromoImage(idx) {
-            const current = getPromoImagesFromConfig(currentDisplayConfig);
-            if (idx < 0 || idx >= current.length) return;
-            const nextArr = current.filter((_, i) => i !== idx);
-
-            try {
-                const saved = await savePromoImagesToServer(nextArr);
-                currentDisplayConfig = saved?.config ? saved.config : saved;
-                renderPromoImagesList(getPromoImagesFromConfig(currentDisplayConfig));
-                return;
-            } catch { }
-
-            try {
-                if (!ipcRenderer) throw new Error("IPC tidak tersedia");
-                const saved = await ipcRenderer.invoke("display:updatePromoImages", { promoImages: nextArr });
-                currentDisplayConfig = saved;
-                renderPromoImagesList(getPromoImagesFromConfig(saved));
-            } catch (e) {
-                console.error(e);
-                alert("Gagal menghapus gambar (pastikan ada endpoint server atau IPC update list).");
-            }
-        }
-        window.removePromoImage = removePromoImage;
-
-        async function clearPromoImages() {
-            if (!confirm("Hapus semua gambar slider?")) return;
-
-            // ✅ NOTE: Tidak pakai IPC clear karena di main.js kamu belum ada handler "display:clearSliderImages"
-            // Jadi clear dilakukan via server (agar tidak ubah logika besar).
-
-            const nextArr = [];
-            try {
-                const saved = await savePromoImagesToServer(nextArr);
-                currentDisplayConfig = saved?.config ? saved.config : saved;
-                renderPromoImagesList(getPromoImagesFromConfig(currentDisplayConfig));
-            } catch (e) {
-                console.error(e);
-                alert("Gagal menghapus semua gambar. Pastikan server/IPC tersedia.");
-            }
-        }
-        window.clearPromoImages = clearPromoImages;
-
-        // ==========================
         // INIT
         // ==========================
-        async function loadData() {
-            await Promise.all([loadNowFromState(), loadDisplayConfig()]);
-        }
-        window.loadData = loadData;
-
         loadRealtimeLogFromStorage();
         renderRealtimeLog();
 
-        loadData();
+        loadNowFromState();
         setInterval(() => { loadNowFromState(); }, 2000);
-        setInterval(() => { loadDisplayConfig(); }, 2000);
     </script>
 </body>
 

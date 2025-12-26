@@ -166,7 +166,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   let resetInFlight = null;
 
   async function ensureDailyReset() {
-    // kalau ada reset yang sedang berjalan, tunggu saja
     if (resetInFlight) return resetInFlight;
 
     const today = ymdNow();
@@ -175,7 +174,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
     if (last === today) return;
 
-    // jalankan reset sekali saja
     resetInFlight = (async () => {
       try {
         await clearTodayTickets();
@@ -208,6 +206,9 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
   });
 
+  // =========================
+  // ✅ HEALTH CHECK
+  // =========================
   app.get("/health", (_req, res) => {
     res.json({
       ok: true,
@@ -276,7 +277,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
       res.setHeader("Content-Length", String(audioBuf.length));
       res.status(200).end(audioBuf);
     } catch (e) {
-      // kalau python belum siap, akan masuk sini
       res.status(500).json({
         ok: false,
         error: String(e?.message || e),
@@ -388,7 +388,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
 
   app.post("/api/admin/clear-today", async (_req, res) => {
     try {
-      // clear manual tetap sama, tapi meta juga ikut di-set hari ini
       await clearTodayTickets();
       writeJsonSafe(dailyResetMetaPath, {
         lastResetYMD: ymdNow(),
