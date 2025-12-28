@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Display Antrian Nasabah</title>
 
-    <!-- ✅ Samakan font dengan Admin Panel & Kiosk -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900;950&display=swap"
@@ -23,7 +22,6 @@
             --bri-blue-2: #0a4ea2;
             --bri-blue-3: #0a63c7;
 
-            /* ✅ ambil persis dari KIOSK (btn-cs) */
             --bri-light: #7dd3fc;
             --bri-light-2: #38bdf8;
 
@@ -33,12 +31,10 @@
 
             --text: #0f172a;
             --muted: #64748b;
-            --line: #e5e7eb;
 
             --panel-bg: rgba(255, 255, 255, 0.92);
             --panel-border: rgba(229, 231, 235, 0.95);
 
-            /* ✅✅✅ CONTROL ukuran "selanjutnya" (DEFAULT: windowed) */
             --next-pad: 12px;
             --next-min-h: 74px;
             --next-label: 10px;
@@ -46,7 +42,6 @@
             --next-arrow: 22px;
             --next-gap: 10px;
 
-            /* ✅✅✅ CONTROL komponen vertikal */
             --body-pad-y: 12px;
             --body-pad-x: 14px;
             --body-gap: 10px;
@@ -59,7 +54,6 @@
             --top-time: 34px;
 
             --current-number: 42px;
-
             --queues-gap: 12px;
 
             --fill-min-h: 74px;
@@ -67,21 +61,15 @@
             --footer-font: 11px;
             --running-pad: 10px;
             --running-font: 13px;
+
+            /* kolom kanan lebih besar (kayak yang kamu mau) */
+            --left-col: 1.8fr;
+            --right-col: 2.0fr;
+
+            /* biar kanan tidak gepeng */
+            --media-aspect: 16 / 9;
         }
 
-        /* ✅ fullscreen / layar tinggi: naik sedikit */
-        @media (min-height: 900px) {
-            :root {
-                --next-pad: 14px;
-                --next-min-h: 86px;
-                --next-label: 11px;
-                --next-num: 26px;
-                --next-arrow: 26px;
-                --next-gap: 12px;
-            }
-        }
-
-        /* ✅✅✅ WINDOWED (sering kepotong) - tahap 1 */
         @media (max-height: 860px) {
             :root {
                 --body-pad-y: 10px;
@@ -98,66 +86,11 @@
                 --current-number: 38px;
 
                 --queues-gap: 10px;
-
                 --fill-min-h: 64px;
 
                 --footer-font: 10px;
                 --running-pad: 8px;
                 --running-font: 12px;
-            }
-        }
-
-        /* ✅✅✅ WINDOWED kecil - tahap 2 */
-        @media (max-height: 780px) {
-            :root {
-                --topbar-min-h: 74px;
-                --brand-name: 42px;
-                --top-time: 28px;
-
-                --current-number: 34px;
-
-                --next-min-h: 66px;
-                --next-num: 20px;
-
-                --fill-min-h: 60px;
-                --running-font: 11px;
-            }
-
-            .brand-logo-box {
-                width: 56px !important;
-                height: 56px !important;
-            }
-        }
-
-        /* ✅✅✅ WINDOWED sangat kecil - tahap 3 (anti ketutup total) */
-        @media (max-height: 720px) {
-            :root {
-                --topbar-pad-y: 12px;
-                --topbar-pad-x: 16px;
-
-                --brand-name: 38px;
-                --top-time: 26px;
-
-                --current-number: 32px;
-
-                --next-pad: 10px;
-                --next-min-h: 60px;
-                --next-num: 18px;
-
-                --fill-min-h: 56px;
-
-                --running-pad: 7px;
-            }
-
-            .queue-fill {
-                gap: 8px !important;
-                margin-top: 8px !important;
-                padding-top: 8px !important;
-            }
-
-            .current-wrapper {
-                gap: 8px !important;
-                margin-bottom: 8px !important;
             }
         }
 
@@ -268,7 +201,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 560px;
-            padding-left: 0;
             margin-top: 2px;
         }
 
@@ -303,7 +235,7 @@
         .main-grid {
             flex: 1;
             display: grid;
-            grid-template-columns: 3fr 2fr;
+            grid-template-columns: var(--left-col) var(--right-col);
             gap: 12px;
             min-height: 0;
             overflow: hidden;
@@ -327,7 +259,7 @@
             min-height: 0;
             gap: 12px;
             padding: 12px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.10));
+            background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.40);
         }
 
@@ -562,22 +494,25 @@
             background: rgba(255, 255, 255, 0.65);
         }
 
-        /* ================= MEDIA ================= */
+        /* ================= MEDIA (INI YANG PENTING) ================= */
         .media-card {
             position: relative;
             border-radius: 16px;
             overflow: hidden;
-            background: #0b1220;
-            border: 1px solid rgba(255, 255, 255, 0.55);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+            background: #ffffff;
+            /* ✅ putih, bukan hitam, bukan blur */
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .media-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.00) 40%);
-            pointer-events: none;
+        .video-box.media-card,
+        .promo-box.media-card {
+            aspect-ratio: var(--media-aspect);
         }
 
         .video-box,
@@ -586,12 +521,16 @@
             display: flex;
         }
 
+        /* ✅✅✅ FULL KELIATAN, TIDAK KEPOTONG */
         #promoVideo {
             width: 100%;
             height: 100%;
             display: block;
-            object-fit: cover;
-            background: #0b1220;
+            object-fit: contain;
+            /* ✅ tidak kepotong */
+            object-position: center;
+            background: #ffffff;
+            /* ✅ area sisa putih */
         }
 
         .promo-slider {
@@ -600,7 +539,7 @@
             height: 100%;
             flex: 1;
             min-height: 0;
-            background: #0b1220;
+            background: #ffffff;
         }
 
         .promo-slide {
@@ -608,11 +547,14 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            /* ✅ tidak kepotong */
+            object-position: center;
             opacity: 0;
             transition: opacity 600ms ease;
             display: block;
-            background: #0b1220;
+            background: #ffffff;
+            /* ✅ area sisa putih */
         }
 
         .promo-slide.active {
@@ -627,12 +569,10 @@
             justify-content: center;
             text-align: center;
             padding: 18px;
-            color: rgba(255, 255, 255, 0.75);
+            color: rgba(15, 23, 42, 0.70);
             font-weight: 900;
             letter-spacing: 0.08em;
-            background:
-                radial-gradient(800px 380px at 20% 0%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 60%),
-                linear-gradient(180deg, rgba(37, 99, 235, 0.18), rgba(15, 23, 42, 0.92));
+            background: #ffffff;
         }
 
         /* ================= FOOTER ================= */
@@ -693,121 +633,6 @@
             }
         }
 
-        /* ================= SETTINGS (LOGIKA TETAP) ================= */
-        .settings-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.55);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-
-        .settings-overlay.hidden {
-            display: none;
-        }
-
-        .settings-panel {
-            width: 430px;
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 14px 16px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 22px 70px rgba(15, 23, 42, 0.45);
-            color: #111827;
-            font-size: 13px;
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .settings-header h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 900;
-        }
-
-        .close-settings {
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .settings-label {
-            font-size: 12px;
-            color: #1d4ed8;
-            margin-bottom: 4px;
-            display: block;
-            font-weight: 800;
-        }
-
-        .settings-textarea {
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            color: #111827;
-            padding: 10px;
-            resize: vertical;
-            min-height: 70px;
-            outline: none;
-        }
-
-        .settings-save-btn,
-        .settings-upload-btn {
-            margin-top: 10px;
-            border-radius: 999px;
-            padding: 9px 14px;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 900;
-            letter-spacing: .04em;
-        }
-
-        .settings-save-btn {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #eef2ff;
-            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.20);
-        }
-
-        .settings-upload-btn {
-            background: #e5e7eb;
-            color: #111827;
-        }
-
-        .settings-divider {
-            margin: 12px 0;
-            border: 0;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .settings-file-label {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-
-        .settings-note {
-            margin-top: 6px;
-            font-size: 11px;
-            color: #6b7280;
-        }
-
         /* ================= INFO CARDS ================= */
         .queue-fill {
             margin-top: 10px;
@@ -834,18 +659,6 @@
             position: relative;
         }
 
-        .fill-card::after {
-            content: "";
-            position: absolute;
-            right: -22px;
-            top: -22px;
-            width: 90px;
-            height: 90px;
-            border-radius: 999px;
-            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.16), rgba(37, 99, 235, 0) 70%);
-            pointer-events: none;
-        }
-
         .fill-label {
             font-size: 10px;
             letter-spacing: 0.14em;
@@ -867,31 +680,6 @@
             color: #64748b;
             line-height: 1.2;
         }
-
-        @media (max-width: 1100px) {
-            .queue-fill {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 560px) {
-            .brand-left {
-                min-width: 0;
-            }
-
-            .brand-logo-box {
-                width: 54px;
-                height: 54px;
-            }
-
-            .brand-tagline {
-                font-size: 12px;
-            }
-
-            .top-right {
-                min-width: 150px;
-            }
-        }
     </style>
 </head>
 
@@ -904,7 +692,6 @@
                 </div>
                 <div id="brand-name" class="brand-name">BRI</div>
             </div>
-
             <div class="brand-tagline">SATU BANK UNTUK SEMUA</div>
         </div>
 
@@ -1018,34 +805,7 @@
         <span id="runningText">SELAMAT DATANG DI BRI — SIAP MELAYANI DENGAN SEPENUH HATI</span>
     </div>
 
-    <div id="settings-overlay" class="settings-overlay hidden">
-        <div class="settings-panel">
-            <div class="settings-header">
-                <h3>Pengaturan Display Promo</h3>
-                <button class="close-settings" onclick="toggleSettingsPanel()">✕</button>
-            </div>
-
-            <label class="settings-label">Teks Promo Hari Ini</label>
-            <textarea id="promo-input" class="settings-textarea"></textarea>
-
-            <button class="settings-save-btn" onclick="savePromoText()">Simpan Teks Promo</button>
-
-            <hr class="settings-divider" />
-
-            <div class="settings-row">
-                <div>
-                    <div class="settings-label">Video Promo</div>
-                    <div id="video-file-label" class="settings-file-label">Tidak ada video terpilih.</div>
-                </div>
-                <button class="settings-upload-btn" onclick="choosePromoVideo()">Pilih Video…</button>
-            </div>
-
-            <div class="settings-note">
-                Video disajikan dari server cabang (<code>/media/promo</code>). Gunakan MP4 (H.264/AAC) untuk hasil
-                terbaik.
-            </div>
-        </div>
-    </div>
+    <div id="settings-overlay" class="settings-overlay hidden"></div>
 
     <!-- =================== SCRIPT ASLI KAMU (LOGIKA TETAP) =================== -->
     <script>
@@ -1100,60 +860,16 @@
 
         function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        // ✅✅✅ FIX TAMPILAN NOMOR: hilangkan spasi "A - 001" => "A-001"
-        // Tidak mengubah logika antrian, cuma display text.
         function normalizeTicketCode(code) {
             let s = String(code || "").trim();
             if (!s) return "";
-            // hapus spasi di sekitar dash dan rapikan
             s = s.replace(/\s+/g, "");
-            // kalau format A001/B001 => jadikan A-001/B-001
             s = s.replace(/^([A-Z])(\d{3,})$/i, "$1-$2");
-            // kalau sudah ada dash tapi berantakan => rapikan
             s = s.replace(/-+/g, "-");
             return s;
         }
 
-        // ============================================================
-        // ✅✅✅ VIDEO DUCKING DENGAN FADE (TAMBAHAN, LOGIKA LAIN TETAP)
-        // - normal volume: pakai __baseVol (diset saat video play)
-        // - ketika panggilan: turun ke 10% dari normal (fade)
-        // - selesai: balik normal (fade)
-        // ============================================================
-
-        let __fadeTimer = null;
-
-        function fadeVideoVolume(target, duration = 250) {
-            if (!promoVideoEl) return;
-
-            if (__fadeTimer) {
-                cancelAnimationFrame(__fadeTimer);
-                __fadeTimer = null;
-            }
-
-            const start = promoVideoEl.volume;
-            const diff = target - start;
-            const startTime = performance.now();
-
-            function step(now) {
-                const progress = Math.min((now - startTime) / duration, 1);
-                promoVideoEl.volume = start + diff * progress;
-
-                if (progress < 1) {
-                    __fadeTimer = requestAnimationFrame(step);
-                } else {
-                    promoVideoEl.volume = target;
-                    __fadeTimer = null;
-                }
-            }
-
-            __fadeTimer = requestAnimationFrame(step);
-        }
-
-        // ✅ Fade ducking video: saat panggilan -> turun pelan ke 10%
-        // lalu setelah selesai -> naik pelan ke volume normal
         let __duckAnimId = null;
-
         function __clamp01(v) {
             v = Number(v);
             if (!Number.isFinite(v)) return 1;
@@ -1162,64 +878,41 @@
 
         function duckPromoVideo(isDuck) {
             if (!promoVideoEl) return;
-
-            // simpan base volume sekali (volume normal)
             if (promoVideoEl.__baseVol == null) {
                 promoVideoEl.__baseVol = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 1;
             }
-
             const base = __clamp01(promoVideoEl.__baseVol);
-            const target = isDuck ? Math.max(0, Math.min(1, base * 0.10)) : base; // ✅ 10%
+            const target = isDuck ? Math.max(0, Math.min(1, base * 0.10)) : base;
 
-            // kalau sudah di target (beda tipis), gak usah animasi
             if (Math.abs((promoVideoEl.volume || 0) - target) < 0.01) {
                 promoVideoEl.volume = target;
                 return;
             }
 
-            // stop animasi lama biar gak “nabrak”
             if (__duckAnimId) {
                 cancelAnimationFrame(__duckAnimId);
                 __duckAnimId = null;
             }
 
             const startVol = __clamp01(promoVideoEl.volume);
-            const duration = isDuck ? 260 : 420; // turun lebih cepat, naik lebih halus
+            const duration = isDuck ? 260 : 420;
             const startT = performance.now();
 
             const step = (now) => {
                 const t = Math.min(1, (now - startT) / duration);
-                // easing halus
                 const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-
                 promoVideoEl.volume = startVol + (target - startVol) * ease;
 
-                if (t < 1) {
-                    __duckAnimId = requestAnimationFrame(step);
-                } else {
+                if (t < 1) __duckAnimId = requestAnimationFrame(step);
+                else {
                     promoVideoEl.volume = target;
                     __duckAnimId = null;
                 }
             };
-
             __duckAnimId = requestAnimationFrame(step);
         }
 
-
-
-
-
-        // ============================================================
-        // ✅✅✅ SUARA (Sesuai request kamu):
-        // 1) A001 => "nomor antrian" + "A" + "satu_end" + "silahkan menuju ke counter" + "satu_end"
-        // 2) 014 => "empat" + "belas_end"
-        // 3) 020 => "dua" + "puluh_end"
-        // 4) 021 => "dua" + "puluh" + "satu_end"
-        // 5) 100 => "seratus_end"
-        // ============================================================
-
         const AUDIO_BASE = `${API_BASE}/media/audio`;
-
         const PAUSE_AFTER_BELL_MS = 240;
         const WORD_GAP_MS = 40;
         const BETWEEN_REPEAT_MS = 480;
@@ -1317,7 +1010,6 @@
         const RATUS = "RATUS.wav";
         const RATUS_END = "RATUS_END.wav";
 
-        // ✅ khusus 100 / 101-199 agar "seratus" (bukan "satu ratus")
         const SERATUS = "SERATUS.wav";
         const SERATUS_END = "SERATUS_END.wav";
 
@@ -1330,7 +1022,6 @@
 
         const NOMOR_ANTRIAN_FILE = "NOMOR_ANTRIAN.wav";
 
-        // ✅ huruf prefix tiket (A/B/...)
         function ticketPrefixLetter(ticketCode) {
             const raw = String(ticketCode || "").trim().toUpperCase();
             const m = raw.match(/^([A-Z])/);
@@ -1339,7 +1030,6 @@
         function letterFile(letter) {
             const L = String(letter || "").trim().toUpperCase();
             if (!L) return "";
-            // asumsi file huruf ada: A.wav, B.wav, dst.
             return `${L}.wav`;
         }
 
@@ -1353,7 +1043,7 @@
         function ticketNumberValue(ticketCode) {
             const raw = String(ticketCode || "").toUpperCase();
             const digits = raw.replace(/\D/g, "");
-            const n = parseInt(digits || "0", 10); // ✅ leading zero otomatis hilang (014 => 14)
+            const n = parseInt(digits || "0", 10);
             return Number.isFinite(n) ? n : 0;
         }
 
@@ -1369,7 +1059,6 @@
 
             if (!Number.isFinite(n) || n < 0) n = 0;
 
-            // fallback kalau >999: baca digit per digit (last pakai _END)
             if (n > 999) {
                 const s = String(n);
                 for (let i = 0; i < s.length; i++) {
@@ -1401,7 +1090,7 @@
                 const ones = n % 10;
                 const onesDigit = String(ones);
                 if (DIGIT[onesDigit]) tokens.push(DIGIT[onesDigit]);
-                tokens.push(useEnd ? BELAS_END : BELAS); // ✅ belas_end di akhir
+                tokens.push(useEnd ? BELAS_END : BELAS);
                 return tokens;
             }
 
@@ -1413,7 +1102,7 @@
                 if (DIGIT[tensDigit]) tokens.push(DIGIT[tensDigit]);
 
                 if (ones === 0) {
-                    tokens.push(useEnd ? PULUH_END : PULUH); // ✅ 020 => dua + puluh_end
+                    tokens.push(useEnd ? PULUH_END : PULUH);
                 } else {
                     tokens.push(PULUH);
                     const onesDigit = String(ones);
@@ -1422,24 +1111,20 @@
                 return tokens;
             }
 
-            // ✅ 100-199 => SERATUS
             if (n >= 100 && n < 200) {
                 const rest = n % 100;
 
                 if (rest === 0) {
-                    // 100 => seratus_end
                     tokens.push(useEnd ? SERATUS_END : SERATUS);
                     return tokens;
                 }
 
-                // 1xx => seratus + (rest...)
                 tokens.push(SERATUS);
                 const restTokens = buildNumberTokens(rest, useEnd ? "end" : "mid");
                 tokens.push(...restTokens);
                 return tokens;
             }
 
-            // 200-999
             const hundreds = Math.floor(n / 100);
             const rest = n % 100;
 
@@ -1459,28 +1144,21 @@
             return tokens;
         }
 
-        // ✅ urutan setelah intro: [HURUF?] + [ANGKA] + kalimat + counter + angka_end
         function buildSequenceAfterIntro(ticketCode, counterName) {
             const seq = [];
-
-            // huruf prefix tiket: A/B/... (A001 => "A")
             const letter = ticketPrefixLetter(ticketCode);
             const lf = letterFile(letter);
             if (lf) seq.push(lf);
 
-            // angka tiket: parseInt (014=>14) dan token akhir akan *_END hanya untuk angka terakhir
             const ticketN = ticketNumberValue(ticketCode);
-            const ticketTokens = buildNumberTokens(ticketN, "end"); // ✅ “a1” => satu_end
+            const ticketTokens = buildNumberTokens(ticketN, "end");
             ticketTokens.forEach(f => seq.push(f));
 
-            // kalimat tujuan
             seq.push("SILAHKAN.wav");
             seq.push("MENUJU.wav");
             seq.push("KE.wav");
-
             seq.push("COUNTER.wav");
 
-            // counter: harus end
             const cN = counterNumberValue(counterName);
             const counterTokens = buildNumberTokens(cN, "end");
             counterTokens.forEach(f => seq.push(f));
@@ -1553,7 +1231,6 @@
 
                 const num = document.createElement("div");
                 num.className = "queue-item-number";
-                // ✅ hanya display formatting (anti "A - 001")
                 num.textContent = normalizeTicketCode(ticket);
 
                 left.appendChild(lbl);
@@ -1578,7 +1255,6 @@
             const csTicket = csNow?.ticket_code || csNow?.ticketCode || null;
             const csCounter = csNow?.counter_name || csNow?.counterName || null;
 
-            // ✅ hanya display formatting (anti "A - 001")
             tellerNowEl.textContent = tellerTicket ? normalizeTicketCode(tellerTicket) : "-";
             tellerCounterEl.textContent = "Loket: " + (tellerCounter || "-");
 
@@ -1614,7 +1290,6 @@
         fetchStateFromServer();
         setInterval(fetchStateFromServer, 1000);
 
-        // ================= PROMO & VIDEO (REALTIME VIA SERVER) =================
         let currentDisplayConfig = null;
         let lastVideoKey = "";
         let lastPromoImagesKey = "";
@@ -1623,13 +1298,9 @@
             if (!promoVideoEl) return;
             try {
                 promoVideoEl.playsInline = true;
-
                 promoVideoEl.muted = false;
 
-                // ✅ NORMAL VOLUME (ubah ini kalau mau: 0.2 = 20%, 0.5 = 50%)
                 promoVideoEl.volume = 0.1;
-
-                // ✅ simpan sebagai volume normal untuk ducking
                 promoVideoEl.__baseVol = promoVideoEl.volume;
 
                 const p = promoVideoEl.play?.();
