@@ -207,13 +207,22 @@ function createWindowByMode(mode, cfg) {
   win.webContents.on("enter-html-full-screen", hideMenu);
   win.webContents.on("leave-html-full-screen", showMenu);
 
-  win.loadFile(file);
+  // ✅ kirim via query (dipakai HTML sebelum script jalan)
+  win.loadFile(file, {
+    query: {
+      apiBase: cfg.apiBase || "",
+      branchName: cfg.branchName || "",
+      isServer: mode === "server" || mode === "server-admin" ? "1" : "0",
+    },
+  });
 
-  win.webContents.on("did-finish-load", () => {
+  // (opsional) injectConfig tetap boleh buat backward compatibility,
+  // tapi pakai dom-ready biar lebih awal
+  win.webContents.on("dom-ready", () => {
     injectConfig(win, {
       apiBase: cfg.apiBase,
       branchName: cfg.branchName,
-      isServer: mode === "server" || mode === "server-admin", // ✅
+      isServer: mode === "server" || mode === "server-admin",
     });
   });
 
