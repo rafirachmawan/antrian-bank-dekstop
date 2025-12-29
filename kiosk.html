@@ -735,7 +735,6 @@
         }
 
         /* ================== SERVER SETTINGS (kiri bawah) ================== */
-
         .server-overlay {
             position: fixed;
             inset: 0;
@@ -980,6 +979,7 @@
 
                 <div class="info-pill">Tekan tombol sesuai kebutuhan layanan Anda.</div>
 
+                <!-- tetap ada (tidak ubah logika UI) -->
                 <button class="btn-print" onclick="window.print()">Cetak Ulang Halaman</button>
                 <button class="btn-print" onclick="testPrintThermal()">🧾 Test Print Thermal (Preview)</button>
                 <button class="btn-preview" onclick="lihatLayoutPrint()">👀 Lihat Layout Print (Tanpa Print)</button>
@@ -1121,6 +1121,13 @@
         function isServerMode() {
             const qc = getQueueConfigSafe();
             return !!(qc && qc.isServer);
+        }
+
+        // ✅ FIX: sebelumnya kamu panggil getPrinterName() tapi belum ada,
+        // itu bikin error lalu masuk fallback (preview).
+        // Sekarang aman: kosong = pakai default printer Windows.
+        function getPrinterName() {
+            return "";
         }
 
         function applyBranchName() {
@@ -1343,14 +1350,8 @@
             return s;
         }
 
-        /* =========================================================
-           ✅✅✅ STRUK BARU:
-           - Logo BRI
-           - Di bawah logo: "BRI" lalu "UNIT BUNGURASIH"
-           - Ukuran thermal: 58mm (umum)
-           ========================================================= */
         function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
-            const logoSrc = "assets/logo-bri.png"; // ✅ pastikan file ini ada
+            const logoSrc = "assets/logo-bri.png";
             const title1 = "BRI";
             const title2 = "UNIT BUNGURASIH";
 
@@ -1366,34 +1367,15 @@
     @page { size: 58mm auto; margin: 0; }
     html, body { margin: 0; padding: 0; }
     body { width: 58mm; font-family: Arial, sans-serif; color: #000; background:#fff; }
-
     .wrap { padding: 8px 8px 10px; }
     .center { text-align: center; }
-
-    .logo-only {
-      display:block;
-      margin: 2px auto 6px;
-      width: 46px;
-      height: 46px;
-      object-fit: contain;
-    }
-
+    .logo-only { display:block; margin: 2px auto 6px; width: 46px; height: 46px; object-fit: contain; }
     .t1 { font-size: 13px; font-weight: 800; letter-spacing: .02em; margin: 0; }
     .t2 { font-size: 11px; font-weight: 800; letter-spacing: .02em; margin: 2px 0 0; }
-
     .line { border-top: 1px dashed #000; margin: 10px 0; }
-
     .meta { font-size: 10.5px; line-height: 1.35; }
     .ticketLabel { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
-
-    .ticket {
-      font-family: "Courier New", monospace;
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      margin: 6px 0 4px;
-    }
-
+    .ticket { font-family: "Courier New", monospace; font-size: 38px; font-weight: 900; letter-spacing: 1.5px; margin: 6px 0 4px; }
     .small { font-size: 9.8px; line-height: 1.35; }
   </style>
 </head>
@@ -1469,36 +1451,53 @@
         window.printFromReceiptIframe = printFromReceiptIframe;
 
         /* =========================================================
-           ✅✅✅ FIX UTAMA PRINT:
-           Paksa semua print dari HTML (biar hasil print = sama preview)
-           TANPA ubah logika lain.
+           ✅ FIX UTAMA: AUTO PRINT TANPA PREVIEW / TANPA DIALOG
+           - preview hanya jika preview===true (tombol lihat layout / test preview)
            ========================================================= */
         async function printTicketThermal({ ticket, serviceType, preview = false }) {
             const branch = getBranchName();
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 
-            // ✅ PAKSA: jangan pakai window.kioskPrinter template lama
+            // HTML struk hanya dipakai untuk preview manual
             const receiptHtml = buildReceiptHtml({ branch, layanan, ticket, waktu });
-            openReceiptModal(receiptHtml);
 
-            if (preview !== true) {
-                setTimeout(() => {
-                    try {
-                        printFromReceiptIframe();
-                        setTimeout(() => {
-                            try { closeReceiptModal(); } catch { }
-                        }, 800);
-                    } catch (e) {
-                        console.error(e);
+            // ✅ preview-only: tampilkan modal, tanpa print
+            if (preview === true) {
+                openReceiptModal(receiptHtml);
+                return;
+            }
+
+            // ✅ AUTO PRINT silent via IPC (tanpa modal / tanpa dialog)
+            try {
+                if (window.kioskPrinter && typeof window.kioskPrinter.printTicket === "function") {
+                    const res = await window.kioskPrinter.printTicket({
+                        branch,
+                        layanan,
+                        ticket,
+                        waktu,
+                        deviceName: getPrinterName(), // kosong = default printer
+                    });
+
+                    // ❌ jangan tampilkan preview otomatis (user maunya NO PREVIEW)
+                    if (!res || res.ok !== true) {
+                        console.error("Silent print gagal:", res);
+                        alert("Print thermal gagal. Cek default printer / driver / koneksi printer.");
                     }
-                }, 250);
+                    return;
+                }
+
+                alert("Auto print belum aktif (kioskPrinter tidak ditemukan).");
+            } catch (e) {
+                console.error("Silent print error:", e);
+                alert("Print thermal error. Cek console.");
             }
         }
 
+        // tombol ini memang labelnya "(Preview)" → kita set preview true
         function testPrintThermal() {
             const dummyTicket = normalizeTicketCode("A001");
-            printTicketThermal({ ticket: dummyTicket, serviceType: "TELLER" });
+            printTicketThermal({ ticket: dummyTicket, serviceType: "TELLER", preview: true });
         }
         window.testPrintThermal = testPrintThermal;
 
@@ -1527,7 +1526,8 @@
                 const shownTicket = ticket ? normalizeTicketCode(ticket) : "-";
                 document.getElementById("ticket-number").textContent = shownTicket || "-";
 
-                if (ticket) printTicketThermal({ ticket: shownTicket, serviceType });
+                // ✅ AUTO PRINT silent (tanpa preview)
+                if (ticket) printTicketThermal({ ticket: shownTicket, serviceType, preview: false });
 
             } catch (e) {
                 alert("Gagal mengambil nomor antrian. Pastikan server cabang sudah menyala.");
@@ -1608,34 +1608,22 @@
 
                 async function pickVideo() {
                     if (!ipcRenderer) return;
-                    try {
-                        await ipcRenderer.invoke("display:chooseVideo");
-                    } catch (e) { }
+                    try { await ipcRenderer.invoke("display:chooseVideo"); } catch (e) { }
                 }
 
                 async function clearVideo() {
                     if (!ipcRenderer) return;
-                    try {
-                        await ipcRenderer.invoke("display:clearVideo");
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    try { await ipcRenderer.invoke("display:clearVideo"); } catch (e) { console.error(e); }
                 }
 
                 async function pickImages() {
                     if (!ipcRenderer) return;
-                    try {
-                        await ipcRenderer.invoke("display:choosePromoImages");
-                    } catch (e) { }
+                    try { await ipcRenderer.invoke("display:choosePromoImages"); } catch (e) { }
                 }
 
                 async function clearImages() {
                     if (!ipcRenderer) return;
-                    try {
-                        await ipcRenderer.invoke("display:updatePromoImages", { promoImages: [] });
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    try { await ipcRenderer.invoke("display:updatePromoImages", { promoImages: [] }); } catch (e) { console.error(e); }
                 }
 
                 document.getElementById("btnSavePromo")?.addEventListener("click", savePromoText);
