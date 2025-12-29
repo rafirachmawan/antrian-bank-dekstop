@@ -17,6 +17,12 @@
             font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         :root {
             --bri-blue: #0b56b3;
             --bri-blue-2: #0a4ea2;
@@ -39,50 +45,47 @@
             --next-arrow: 22px;
             --next-gap: 10px;
 
-            --body-pad-y: 12px;
-            --body-pad-x: 14px;
-            --body-gap: 10px;
+            --body-pad-y: 10px;
+            --body-pad-x: 12px;
+            --body-gap: 8px;
 
-            --topbar-pad-y: 18px;
-            --topbar-pad-x: 24px;
-            --topbar-min-h: 92px;
+            /* ✅ header disesuaikan agar logo bisa segede jam */
+            --topbar-pad-y: 10px;
+            --topbar-pad-x: 20px;
+            --topbar-min-h: 88px;
+            /* sebelumnya 68px */
 
-            --brand-name: 52px;
-            --top-time: 34px;
+            --brand-name: 0px;
+            --top-time: 36px;
 
-            --current-number: 42px;
+            --current-number: 44px;
 
             --footer-font: 11px;
             --running-pad: 10px;
             --running-font: 13px;
 
-            /* kolom kanan lebih besar */
             --left-col: 2.8fr;
             --right-col: 4.5fr;
 
-            /* ✅ promo min height (tapi nanti bisa grow) */
             --promo-strip-min-h: 180px;
-
-            /* ✅ tinggi area queues dibuat “lebih pendek” biar promo makin gede */
             --queues-max-h: 220px;
         }
 
         @media (max-height: 860px) {
             :root {
-                --body-pad-y: 10px;
-                --body-pad-x: 12px;
-                --body-gap: 8px;
+                --body-pad-y: 8px;
+                --body-pad-x: 10px;
+                --body-gap: 7px;
 
-                --topbar-pad-y: 14px;
-                --topbar-pad-x: 18px;
-                --topbar-min-h: 80px;
+                /* ✅ ikut menyesuaikan supaya tetap proporsional */
+                --topbar-pad-y: 10px;
+                --topbar-pad-x: 16px;
+                --topbar-min-h: 82px;
 
-                --brand-name: 46px;
-                --top-time: 30px;
+                --top-time: 32px;
 
-                --current-number: 38px;
+                --current-number: 40px;
 
-                --footer-font: 10px;
                 --running-pad: 8px;
                 --running-font: 12px;
 
@@ -138,67 +141,55 @@
         }
 
         .brand-left {
+            /* ✅ gap sebelumnya tidak ngefek kalau bukan flex */
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            position: relative;
-            z-index: 1;
-            min-width: 320px;
+            gap: 2px;
+            min-width: 260px;
+            padding-left: 10px;
+            padding-top: 80px;
+            /* sesuaikan dengan tinggi logo */
         }
 
         .brand-title-row {
             display: flex;
             align-items: center;
-            gap: 14px;
-            min-width: 0;
+            gap: 0px;
         }
 
+        /* ✅ Logo pakai PNG */
         .brand-logo-box {
-            width: 62px;
-            height: 62px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex: 0 0 auto;
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.20);
+            position: absolute;
+            /* 🔥 KUNCI */
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
         }
+
 
         .brand-logo-box img {
-            width: 90%;
-            height: 90%;
+            height: 150px;
+            /* bebas gede */
+            width: auto;
             object-fit: contain;
-            display: block;
-            filter: brightness(0) invert(1);
-            opacity: .98;
         }
 
         .brand-name {
-            font-size: var(--brand-name);
-            font-weight: 950;
-            letter-spacing: 0.06em;
-            color: #ffffff;
-            line-height: 1;
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
+            display: none !important;
         }
 
         .brand-tagline {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.92);
-            font-weight: 700;
+            font-weight: 900;
             line-height: 1.1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 560px;
-            margin-top: 2px;
+            margin-top: 0;
+            letter-spacing: 0.02em;
         }
 
         .top-right {
@@ -250,7 +241,6 @@
             overflow: hidden;
         }
 
-        /* kanan: hanya video */
         .right-panel {
             display: flex;
             flex-direction: column;
@@ -326,15 +316,6 @@
             z-index: 1;
         }
 
-        .current-label-top {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.13em;
-            color: rgba(255, 255, 255, 0.92);
-            opacity: 0.95;
-            font-weight: 800;
-        }
-
         .current-service-name {
             font-size: 13px;
             font-weight: 900;
@@ -391,7 +372,7 @@
             color: rgba(15, 23, 42, 0.22);
         }
 
-        /* ================= QUEUE (✅ jadi sampingan) ================= */
+        /* ================= QUEUE ================= */
         .queues-wrap {
             flex: 0 0 auto;
             min-height: 0;
@@ -400,11 +381,9 @@
             gap: 12px;
             overflow: hidden;
             max-height: var(--queues-max-h);
-            /* ✅ biar tidak makan tinggi */
             margin-bottom: 10px;
         }
 
-        /* ✅ QUEUE HEADER LURUS (kiri & kanan sama tinggi) */
         .queue-section {
             display: flex;
             flex-direction: column;
@@ -412,14 +391,11 @@
             overflow: hidden;
         }
 
-        /* bikin judul punya tinggi tetap biar sejajar */
         .queue-title {
             margin: 0 0 8px 0;
             height: 34px;
-            /* ✅ kunci tinggi header */
             display: flex;
             align-items: flex-end;
-            /* teks turun ke bawah biar rapih */
             line-height: 1.15;
             font-size: 11px;
             letter-spacing: 0.16em;
@@ -427,25 +403,12 @@
             color: #334155;
             font-weight: 950;
             white-space: normal;
-            /* boleh 2 baris */
-        }
-
-        /* (opsional) paksa jadi 2 baris max, biar konsisten */
-        .queue-title {
             display: -webkit-box;
             -webkit-line-clamp: 2;
-            /* max 2 baris */
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        /* pastikan isi list mulai dari posisi sama */
-        .queue-list {
-            align-content: start !important;
-        }
-
-
-        /* ✅ di dalam masing-masing queue: bikin 1 kolom (karena sudah 2 panel samping) */
         #teller-queue.queue-list,
         #cs-queue.queue-list,
         .queue-list {
@@ -527,7 +490,6 @@
             display: flex;
         }
 
-        /* ✅ video aman fullscreen */
         #promoVideo {
             width: 100%;
             height: 100%;
@@ -539,11 +501,9 @@
             min-height: 0;
         }
 
-        /* ✅ PROMO IMAGE: sekarang dibuat “grow” supaya gede */
         .promo-strip {
             flex: 1 1 auto;
-            /* ✅ grow ngisi sisa ruang */
-            min-height: var(--promo-strip-min-h);
+            min-height: 180px;
             margin-top: 0;
         }
 
@@ -589,29 +549,7 @@
 
         /* ================= FOOTER ================= */
         .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: var(--footer-font);
-            color: #334155;
-            padding: 0 6px;
-            gap: 12px;
-            flex: 0 0 auto;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 800;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: #22c55e;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+            display: none !important;
         }
 
         .running-text {
@@ -619,13 +557,14 @@
             color: #ffffff;
             border-radius: 999px;
             overflow: hidden;
-            padding: var(--running-pad) 0;
-            font-size: var(--running-font);
+            padding: 10px 0;
+            font-size: 13px;
             font-weight: 900;
             letter-spacing: 0.10em;
             box-shadow: 0 12px 28px rgba(11, 86, 179, 0.22);
             border: 1px solid rgba(255, 255, 255, 0.18);
             flex: 0 0 auto;
+            margin-top: 6px;
         }
 
         .running-text span {
@@ -652,7 +591,8 @@
         <div class="brand-left">
             <div class="brand-title-row">
                 <div class="brand-logo-box">
-                    <img src="assets/logo-astro.png" alt="Logo BRI">
+                    <!-- ✅ GANTI: pakai PNG -->
+                    <img src="assets/logobri4.png" alt="Logo BRI">
                 </div>
                 <div id="brand-name" class="brand-name">BRI</div>
             </div>
@@ -674,7 +614,6 @@
                 <div class="current-card">
                     <div class="current-header">
                         <div class="current-label-block">
-                            <div class="current-label-top">Layanan</div>
                             <div class="current-service-name">Teller</div>
                         </div>
                         <div class="current-badge">TELLER</div>
@@ -692,7 +631,6 @@
                 <div class="current-card">
                     <div class="current-header">
                         <div class="current-label-block">
-                            <div class="current-label-top">Layanan</div>
                             <div class="current-service-name">Customer Service</div>
                         </div>
                         <div class="current-badge">CS</div>
@@ -708,7 +646,6 @@
                 </div>
             </div>
 
-            <!-- ✅ QUEUES SEKARANG SAMPINGAN -->
             <div class="queues-wrap">
                 <div class="queue-section">
                     <div class="queue-title">Antrian Teller Berikutnya</div>
@@ -721,7 +658,6 @@
                 </div>
             </div>
 
-            <!-- ✅ PROMO IMAGE JADI LEBIH GEDE (grow) -->
             <div class="promo-strip media-card">
                 <div id="promo-slider" class="promo-slider">
                     <div id="promo-placeholder" class="promo-placeholder">
@@ -746,7 +682,7 @@
             <div class="status-dot"></div>
             <span id="statusText">Sistem antrian aktif</span>
         </div>
-        <div>Silakan menunggu nomor antrian Anda dipanggil.</div>
+        <div></div>
     </div>
 
     <div class="running-text">
@@ -1164,7 +1100,7 @@
                 return;
             }
 
-            const list = items.slice(0, 2);
+            const list = items.slice(0, 1);
 
             list.forEach((ticket) => {
                 const row = document.createElement("div");
