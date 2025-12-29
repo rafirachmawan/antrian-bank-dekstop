@@ -51,7 +51,6 @@
             --top-time: 34px;
 
             --current-number: 42px;
-            --queues-gap: 12px;
 
             --footer-font: 11px;
             --running-pad: 10px;
@@ -61,8 +60,11 @@
             --left-col: 2.8fr;
             --right-col: 4.5fr;
 
-            /* tinggi strip promo di bawah kiri */
-            --promo-strip-h: 132px;
+            /* ✅ promo min height (tapi nanti bisa grow) */
+            --promo-strip-min-h: 180px;
+
+            /* ✅ tinggi area queues dibuat “lebih pendek” biar promo makin gede */
+            --queues-max-h: 220px;
         }
 
         @media (max-height: 860px) {
@@ -80,13 +82,12 @@
 
                 --current-number: 38px;
 
-                --queues-gap: 10px;
-
                 --footer-font: 10px;
                 --running-pad: 8px;
                 --running-font: 12px;
 
-                --promo-strip-h: 130px;
+                --promo-strip-min-h: 150px;
+                --queues-max-h: 190px;
             }
         }
 
@@ -390,52 +391,71 @@
             color: rgba(15, 23, 42, 0.22);
         }
 
-        /* ================= QUEUE ================= */
+        /* ================= QUEUE (✅ jadi sampingan) ================= */
         .queues-wrap {
-            flex: 1;
+            flex: 0 0 auto;
             min-height: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            overflow: hidden;
+            max-height: var(--queues-max-h);
+            /* ✅ biar tidak makan tinggi */
+            margin-bottom: 10px;
+        }
+
+        /* ✅ QUEUE HEADER LURUS (kiri & kanan sama tinggi) */
+        .queue-section {
             display: flex;
             flex-direction: column;
-            gap: var(--queues-gap);
+            min-height: 0;
             overflow: hidden;
         }
 
-        .queue-section {
-            flex: 1 1 0;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
+        /* bikin judul punya tinggi tetap biar sejajar */
         .queue-title {
+            margin: 0 0 8px 0;
+            height: 34px;
+            /* ✅ kunci tinggi header */
+            display: flex;
+            align-items: flex-end;
+            /* teks turun ke bawah biar rapih */
+            line-height: 1.15;
             font-size: 11px;
             letter-spacing: 0.16em;
             text-transform: uppercase;
             color: #334155;
-            margin-bottom: 8px;
             font-weight: 950;
-            flex: 0 0 auto;
+            white-space: normal;
+            /* boleh 2 baris */
         }
 
+        /* (opsional) paksa jadi 2 baris max, biar konsisten */
+        .queue-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            /* max 2 baris */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* pastikan isi list mulai dari posisi sama */
+        .queue-list {
+            align-content: start !important;
+        }
+
+
+        /* ✅ di dalam masing-masing queue: bikin 1 kolom (karena sudah 2 panel samping) */
         #teller-queue.queue-list,
-        #cs-queue.queue-list {
+        #cs-queue.queue-list,
+        .queue-list {
             flex: 1 1 auto !important;
             min-height: 0 !important;
             display: grid !important;
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            grid-template-columns: 1fr !important;
             gap: var(--next-gap) !important;
             overflow: hidden !important;
-            align-content: stretch !important;
-        }
-
-        .queue-list {
-            flex: 1 1 auto;
-            min-height: 0;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: var(--next-gap);
-            overflow: hidden;
-            align-content: stretch;
+            align-content: start !important;
         }
 
         .queue-item {
@@ -474,7 +494,6 @@
         }
 
         .empty {
-            grid-column: 1 / -1;
             min-height: var(--next-min-h);
             display: flex;
             align-items: center;
@@ -485,6 +504,7 @@
             border: 1px dashed rgba(148, 163, 184, 0.55);
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.65);
+            padding: 12px;
         }
 
         /* ================= MEDIA ================= */
@@ -498,8 +518,6 @@
             width: 100%;
             height: 100%;
             display: flex;
-
-            /* ✅ biar video benar-benar ngisi container */
             align-items: stretch;
             justify-content: stretch;
         }
@@ -509,29 +527,24 @@
             display: flex;
         }
 
-        /* ✅✅ FIX UTAMA: fullscreen tidak kepotong */
+        /* ✅ video aman fullscreen */
         #promoVideo {
             width: 100%;
             height: 100%;
             display: block;
-
-            /* pakai contain supaya tidak crop saat fullscreen */
             object-fit: contain;
             object-position: center;
-
-            /* biar area sisa rapi */
             background: #ffffff;
-
-            /* amanin flex overflow */
             min-width: 0;
             min-height: 0;
         }
 
-        /* PROMO SLIDER di bawah kiri */
+        /* ✅ PROMO IMAGE: sekarang dibuat “grow” supaya gede */
         .promo-strip {
-            flex: 0 0 auto;
-            height: var(--promo-strip-h);
-            margin-top: 10px;
+            flex: 1 1 auto;
+            /* ✅ grow ngisi sisa ruang */
+            min-height: var(--promo-strip-min-h);
+            margin-top: 0;
         }
 
         .promo-slider {
@@ -695,6 +708,7 @@
                 </div>
             </div>
 
+            <!-- ✅ QUEUES SEKARANG SAMPINGAN -->
             <div class="queues-wrap">
                 <div class="queue-section">
                     <div class="queue-title">Antrian Teller Berikutnya</div>
@@ -707,7 +721,7 @@
                 </div>
             </div>
 
-            <!-- PROMO IMAGE di bawah kiri -->
+            <!-- ✅ PROMO IMAGE JADI LEBIH GEDE (grow) -->
             <div class="promo-strip media-card">
                 <div id="promo-slider" class="promo-slider">
                     <div id="promo-placeholder" class="promo-placeholder">
