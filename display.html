@@ -29,9 +29,6 @@
             --bg-2: #cfe7ff;
             --bg-3: #b8dcff;
 
-            --text: #0f172a;
-            --muted: #64748b;
-
             --panel-bg: rgba(255, 255, 255, 0.92);
             --panel-border: rgba(229, 231, 235, 0.95);
 
@@ -56,18 +53,16 @@
             --current-number: 42px;
             --queues-gap: 12px;
 
-            --fill-min-h: 74px;
-
             --footer-font: 11px;
             --running-pad: 10px;
             --running-font: 13px;
 
-            /* kolom kanan lebih besar (kayak yang kamu mau) */
-            --left-col: 1.8fr;
-            --right-col: 2.0fr;
+            /* kolom kanan lebih besar */
+            --left-col: 2.8fr;
+            --right-col: 4.5fr;
 
-            /* biar kanan tidak gepeng */
-            --media-aspect: 16 / 9;
+            /* tinggi strip promo di bawah kiri */
+            --promo-strip-h: 132px;
         }
 
         @media (max-height: 860px) {
@@ -86,11 +81,12 @@
                 --current-number: 38px;
 
                 --queues-gap: 10px;
-                --fill-min-h: 64px;
 
                 --footer-font: 10px;
                 --running-pad: 8px;
                 --running-font: 12px;
+
+                --promo-strip-h: 130px;
             }
         }
 
@@ -253,20 +249,21 @@
             overflow: hidden;
         }
 
+        /* kanan: hanya video */
         .right-panel {
             display: flex;
             flex-direction: column;
-            min-height: 0;
             gap: 12px;
             padding: 12px;
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.40);
+            min-height: 0;
         }
 
-        .right-panel .video-box,
-        .right-panel .promo-box {
-            flex: 1;
+        .right-panel .video-box {
             min-height: 0;
+            height: 100%;
+            flex: 1;
         }
 
         .section-title {
@@ -380,10 +377,6 @@
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
         }
 
-        .current-number.cs {
-            color: #ffffff;
-        }
-
         .current-counter-box {
             margin-top: 6px;
             font-size: 12px;
@@ -494,43 +487,51 @@
             background: rgba(255, 255, 255, 0.65);
         }
 
-        /* ================= MEDIA (INI YANG PENTING) ================= */
+        /* ================= MEDIA ================= */
         .media-card {
             position: relative;
             border-radius: 16px;
             overflow: hidden;
             background: #ffffff;
-            /* ✅ putih, bukan hitam, bukan blur */
             border: 1px solid rgba(15, 23, 42, 0.10);
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: center;
-            justify-content: center;
+
+            /* ✅ biar video benar-benar ngisi container */
+            align-items: stretch;
+            justify-content: stretch;
         }
 
-        .video-box.media-card,
-        .promo-box.media-card {
-            aspect-ratio: var(--media-aspect);
-        }
-
-        .video-box,
-        .promo-box {
+        .video-box {
             min-height: 0;
             display: flex;
         }
 
-        /* ✅✅✅ FULL KELIATAN, TIDAK KEPOTONG */
+        /* ✅✅ FIX UTAMA: fullscreen tidak kepotong */
         #promoVideo {
             width: 100%;
             height: 100%;
             display: block;
+
+            /* pakai contain supaya tidak crop saat fullscreen */
             object-fit: contain;
-            /* ✅ tidak kepotong */
             object-position: center;
+
+            /* biar area sisa rapi */
             background: #ffffff;
-            /* ✅ area sisa putih */
+
+            /* amanin flex overflow */
+            min-width: 0;
+            min-height: 0;
+        }
+
+        /* PROMO SLIDER di bawah kiri */
+        .promo-strip {
+            flex: 0 0 auto;
+            height: var(--promo-strip-h);
+            margin-top: 10px;
         }
 
         .promo-slider {
@@ -548,13 +549,11 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            /* ✅ tidak kepotong */
             object-position: center;
             opacity: 0;
             transition: opacity 600ms ease;
             display: block;
             background: #ffffff;
-            /* ✅ area sisa putih */
         }
 
         .promo-slide.active {
@@ -632,54 +631,6 @@
                 transform: translateX(-100%);
             }
         }
-
-        /* ================= INFO CARDS ================= */
-        .queue-fill {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed rgba(148, 163, 184, 0.55);
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            flex: 0 0 auto;
-        }
-
-        .fill-card {
-            border-radius: 14px;
-            border: 1px solid rgba(11, 86, 179, 0.16);
-            background: linear-gradient(135deg, rgba(11, 86, 179, 0.08), rgba(255, 255, 255, 0.90));
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
-            padding: 10px 12px;
-            min-height: var(--fill-min-h);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 6px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .fill-label {
-            font-size: 10px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            font-weight: 950;
-            color: #0b56b3;
-            opacity: 0.95;
-        }
-
-        .fill-value {
-            font-size: 14px;
-            font-weight: 950;
-            color: #0f172a;
-            line-height: 1.2;
-        }
-
-        .fill-sub {
-            font-size: 11px;
-            color: #64748b;
-            line-height: 1.2;
-        }
     </style>
 </head>
 
@@ -702,6 +653,7 @@
     </div>
 
     <div class="main-grid">
+        <!-- LEFT -->
         <div class="panel">
             <h2 class="section-title">Sedang Dilayani</h2>
 
@@ -755,40 +707,22 @@
                 </div>
             </div>
 
-            <div class="queue-fill">
-                <div class="fill-card">
-                    <div class="fill-label">Jam Operasional</div>
-                    <div class="fill-value">08.00 – 15.00</div>
-                    <div class="fill-sub">Senin – Jumat (WIB)</div>
-                </div>
-
-                <div class="fill-card">
-                    <div class="fill-label">Info Layanan</div>
-                    <div class="fill-value">Teller • Customer Service</div>
-                    <div class="fill-sub">Pastikan dokumen Anda sudah siap sebelum dipanggil.</div>
-                </div>
-
-                <div class="fill-card">
-                    <div class="fill-label">Info Keamanan</div>
-                    <div class="fill-value">Waspada Penipuan</div>
-                    <div class="fill-sub">Jangan berikan PIN/OTP kepada siapa pun.</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel right-panel">
-            <div class="video-box media-card">
-                <video id="promoVideo" autoplay loop playsinline>
-                    Browser tidak mendukung video.
-                </video>
-            </div>
-
-            <div class="promo-box media-card">
+            <!-- PROMO IMAGE di bawah kiri -->
+            <div class="promo-strip media-card">
                 <div id="promo-slider" class="promo-slider">
                     <div id="promo-placeholder" class="promo-placeholder">
                         PROMO IMAGE BELUM DISET<br />Silakan upload dari Admin Panel
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="panel right-panel">
+            <div class="video-box media-card">
+                <video id="promoVideo" autoplay loop playsinline>
+                    Browser tidak mendukung video.
+                </video>
             </div>
         </div>
     </div>
@@ -1462,75 +1396,6 @@
 
         loadDisplayConfig();
         setInterval(loadDisplayConfig, 2000);
-
-        async function savePromoText() {
-            const inputEl = document.getElementById("promo-input");
-            if (!inputEl) return;
-
-            const promoText = inputEl.value.trim();
-
-            try {
-                const res = await fetch(`${API_BASE}/api/display/config`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ promo_text: promoText }),
-                });
-
-                if (!res.ok) throw new Error("HTTP " + res.status);
-                const json = await res.json();
-                const cfg = json?.config || json;
-
-                currentDisplayConfig = cfg;
-                applyPromoAndVideo(cfg);
-
-                alert("Teks promo berhasil disimpan (server).");
-            } catch (e) {
-                console.error("Gagal simpan promo ke server:", e);
-                try {
-                    if (ipcRenderer) {
-                        const next = await ipcRenderer.invoke("display:updatePromo", { promoText });
-                        currentDisplayConfig = next;
-                        applyPromoAndVideo(next);
-                        alert("Teks promo berhasil disimpan (lokal).");
-                        return;
-                    }
-                } catch { }
-                alert("Gagal menyimpan teks promo.");
-            }
-        }
-
-        async function choosePromoVideo() {
-            try {
-                if (!ipcRenderer) {
-                    alert("Pilih video hanya bisa dari PC server (admin/server-admin).");
-                    return;
-                }
-                const next = await ipcRenderer.invoke("display:chooseVideo");
-                currentDisplayConfig = next;
-                lastVideoKey = "";
-                await loadDisplayConfig();
-                alert("Video promo berhasil diperbarui.");
-            } catch (e) {
-                console.error("Gagal memilih video promo:", e);
-                alert("Gagal memilih video promo.");
-            }
-        }
-
-        function toggleSettingsPanel() {
-            const overlay = document.getElementById("settings-overlay");
-            if (!overlay) return;
-            overlay.classList.toggle("hidden");
-
-            if (!overlay.classList.contains("hidden") && currentDisplayConfig) {
-                const inputEl = document.getElementById("promo-input");
-                const promoText = currentDisplayConfig.promo_text || currentDisplayConfig.promoText || "";
-                if (inputEl) inputEl.value = promoText;
-            }
-        }
-
-        window.addEventListener("keydown", (e) => {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "p") toggleSettingsPanel();
-        });
 
         promoVideoEl?.addEventListener("error", () => {
             console.error("❌ Video error. Cek format MP4 (H.264/AAC) atau endpoint /media/promo.");
