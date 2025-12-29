@@ -49,11 +49,10 @@
             --body-pad-x: 12px;
             --body-gap: 8px;
 
-            /* ✅ header disesuaikan agar logo bisa segede jam */
+            /* header */
             --topbar-pad-y: 10px;
             --topbar-pad-x: 20px;
             --topbar-min-h: 88px;
-            /* sebelumnya 68px */
 
             --brand-name: 0px;
             --top-time: 36px;
@@ -67,8 +66,18 @@
             --left-col: 2.8fr;
             --right-col: 4.5fr;
 
-            --promo-strip-min-h: 180px;
+            /* ✅ promo lebih besar */
+            --promo-strip-min-h: 245px;
+
             --queues-max-h: 220px;
+
+            /* ✅ kontrol “pepet & overlap” */
+            --queue-title-drop: 10px;
+            /* tulisan "antrian berikutnya" turun */
+            --queue-list-lift: -12px;
+            /* list box naik mepet ke title */
+            --promo-lift: -8px;
+            /* promo naik ke atas */
         }
 
         @media (max-height: 860px) {
@@ -77,7 +86,6 @@
                 --body-pad-x: 10px;
                 --body-gap: 7px;
 
-                /* ✅ ikut menyesuaikan supaya tetap proporsional */
                 --topbar-pad-y: 10px;
                 --topbar-pad-x: 16px;
                 --topbar-min-h: 82px;
@@ -89,8 +97,13 @@
                 --running-pad: 8px;
                 --running-font: 12px;
 
-                --promo-strip-min-h: 150px;
+                /* ✅ tetap lebih besar di layar pendek */
+                --promo-strip-min-h: 210px;
                 --queues-max-h: 190px;
+
+                --queue-title-drop: 8px;
+                --queue-list-lift: -10px;
+                --promo-lift: -6px;
             }
         }
 
@@ -141,14 +154,12 @@
         }
 
         .brand-left {
-            /* ✅ gap sebelumnya tidak ngefek kalau bukan flex */
             display: flex;
             flex-direction: column;
             gap: 2px;
             min-width: 260px;
             padding-left: 10px;
             padding-top: 80px;
-            /* sesuaikan dengan tinggi logo */
         }
 
         .brand-title-row {
@@ -157,20 +168,16 @@
             gap: 0px;
         }
 
-        /* ✅ Logo pakai PNG */
         .brand-logo-box {
             position: absolute;
-            /* 🔥 KUNCI */
             left: -20px;
             top: 50%;
             transform: translateY(-50%);
             pointer-events: none;
         }
 
-
         .brand-logo-box img {
             height: 150px;
-            /* bebas gede */
             width: auto;
             object-fit: contain;
         }
@@ -284,7 +291,8 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
+            /* ✅ sedikit rapat */
             flex: 0 0 auto;
         }
 
@@ -381,7 +389,8 @@
             gap: 12px;
             overflow: hidden;
             max-height: var(--queues-max-h);
-            margin-bottom: 10px;
+            margin-bottom: 6px;
+            /* ✅ kasih ruang lebih buat promo */
         }
 
         .queue-section {
@@ -389,10 +398,13 @@
             flex-direction: column;
             min-height: 0;
             overflow: hidden;
+            position: relative;
         }
 
+        /* ✅ title turun dikit biar "ketindih" */
         .queue-title {
-            margin: 0 0 8px 0;
+            margin: 0;
+            padding: 0;
             height: 34px;
             display: flex;
             align-items: flex-end;
@@ -402,6 +414,11 @@
             text-transform: uppercase;
             color: #334155;
             font-weight: 950;
+
+            position: relative;
+            top: var(--queue-title-drop);
+            z-index: 2;
+
             white-space: normal;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -419,6 +436,10 @@
             gap: var(--next-gap) !important;
             overflow: hidden !important;
             align-content: start !important;
+
+            /* ✅ LIST naik mepet ke title (jadi title kayak ketindih) */
+            margin-top: var(--queue-list-lift) !important;
+            z-index: 1;
         }
 
         .queue-item {
@@ -501,10 +522,11 @@
             min-height: 0;
         }
 
+        /* ✅ promo naik + lebih besar */
         .promo-strip {
             flex: 1 1 auto;
-            min-height: 180px;
-            margin-top: 0;
+            min-height: var(--promo-strip-min-h);
+            margin-top: var(--promo-lift);
         }
 
         .promo-slider {
@@ -591,7 +613,6 @@
         <div class="brand-left">
             <div class="brand-title-row">
                 <div class="brand-logo-box">
-                    <!-- ✅ GANTI: pakai PNG -->
                     <img src="assets/logobri4.png" alt="Logo BRI">
                 </div>
                 <div id="brand-name" class="brand-name">BRI</div>
