@@ -141,6 +141,36 @@ function injectConfig(win, { apiBase, branchName, isServer }) {
   win.webContents.executeJavaScript(script).catch(() => {});
 }
 
+/* =========================================================
+   ✅ FIX TITLE WINDOW: title jangan kalah sama <title> HTML
+   (tanpa mengubah logika lain)
+   ========================================================= */
+function getWindowTitleByMode(mode) {
+  if (mode === "server") return "Kiosk Server";
+  if (mode === "server-admin") return "Server + Admin Panel";
+  if (mode === "admin") return "Admin Panel";
+  if (mode === "operator") return "Panel Teller & CS";
+  if (mode === "display") return "Display Antrian";
+  return "Kiosk Pengambilan Nomor";
+}
+
+function syncWindowTitle(win, mode) {
+  if (!win || win.isDestroyed()) return;
+  const nextTitle = getWindowTitleByMode(mode);
+
+  // 1) native window title
+  try {
+    win.setTitle(nextTitle);
+  } catch {}
+
+  // 2) paksa document.title supaya tidak di-override oleh <title> di HTML
+  try {
+    win.webContents
+      .executeJavaScript(`document.title = ${JSON.stringify(nextTitle)};`, true)
+      .catch(() => {});
+  } catch {}
+}
+
 function createWindowByMode(mode, cfg) {
   let title = "Antrian";
   let file = "kiosk.html";
@@ -214,6 +244,17 @@ function createWindowByMode(mode, cfg) {
       branchName: cfg.branchName || "",
       isServer: mode === "server" || mode === "server-admin" ? "1" : "0",
     },
+  });
+
+  // ✅ FIX: setelah halaman load, paksa title sesuai mode
+  win.webContents.on("did-finish-load", () => {
+    syncWindowTitle(win, mode);
+  });
+
+  // ✅ backup: kalau page update title, kita tahan supaya sesuai mode
+  win.on("page-title-updated", (e) => {
+    e.preventDefault();
+    syncWindowTitle(win, mode);
   });
 
   // (opsional) injectConfig tetap boleh buat backward compatibility,
@@ -366,7 +407,7 @@ function buildThermalReceiptHtml(payload) {
     <div class="center">
       <img class="logo" src="${logoFileUrl}" alt="Logo BRI" />
       <div class="title1">BRI</div>
-      <div class="title2">UNIT BUNGURASIH</div>
+      <div class="title2">SATU BANK UNTUK SEMUA</div>
     </div>
 
     <div class="line"></div>
