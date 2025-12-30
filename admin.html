@@ -36,8 +36,11 @@
             --muted: #64748b;
             --line: #e5e7eb;
 
-            --brand-logo-size: 62px;
-            --brand-logo-gap: 14px;
+            /* ✅ HEADER LOGO ala DISPLAY (absolute, besar, lebih kiri & atas) */
+            --admin-logo-h: 160px;
+            --admin-logo-left: -50px;
+            --admin-logo-top: -110px;
+            --admin-brand-pad-top: 78px;
         }
 
         body {
@@ -65,7 +68,7 @@
             border-radius: 18px;
 
             padding: 18px 24px;
-            min-height: 92px;
+            min-height: 120px;
 
             box-shadow: 0 18px 38px rgba(11, 86, 179, 0.30);
             border: 1px solid rgba(255, 255, 255, 0.20);
@@ -92,49 +95,46 @@
             position: relative;
             z-index: 1;
             min-width: 360px;
+
+            /* ✅ kasih ruang buat logo besar seperti display */
+            padding-top: var(--admin-brand-pad-top);
         }
 
         .brand-title-row {
             display: flex;
             align-items: center;
-            gap: var(--brand-logo-gap);
+            gap: 0px;
             min-width: 0;
+            position: relative;
         }
 
+        /* ✅ LOGO DISPLAY STYLE (absolute, besar, tidak di box, tidak invert) */
         .brand-logo-box {
-            width: var(--brand-logo-size);
-            height: var(--brand-logo-size);
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex: 0 0 auto;
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.20);
+            position: absolute;
+            left: var(--admin-logo-left);
+            top: var(--admin-logo-top);
+            pointer-events: none;
+            width: auto;
+            height: auto;
+            border-radius: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            overflow: visible;
         }
 
         .brand-logo-box img {
-            width: 90%;
-            height: 90%;
+            height: var(--admin-logo-h);
+            width: auto;
             object-fit: contain;
             display: block;
-            filter: brightness(0) invert(1);
-            opacity: .98;
+            filter: none;
+            opacity: 1;
         }
 
+        /* ✅ HAPUS TEKS BRI (karena sudah ada di PNG) */
         .brand-name {
-            font-size: 52px;
-            font-weight: 950;
-            letter-spacing: 0.06em;
-            color: #ffffff;
-            line-height: 1;
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
+            display: none;
         }
 
         .brand-tagline {
@@ -584,12 +584,10 @@
 
         @media (max-width: 560px) {
             :root {
-                --brand-logo-size: 54px;
-                --brand-logo-gap: 12px;
-            }
-
-            .brand-name {
-                font-size: 42px;
+                --admin-logo-h: 140px;
+                --admin-logo-left: -44px;
+                --admin-logo-top: -16px;
+                --admin-brand-pad-top: 72px;
             }
 
             .brand-tagline {
@@ -612,9 +610,12 @@
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-title-row">
+                <!-- ✅ logo samakan seperti display -->
                 <div class="brand-logo-box">
-                    <img src="assets/logo-astro.png" alt="Logo">
+                    <img src="assets/logobri4.png" alt="Logo BRI">
                 </div>
+
+                <!-- ✅ tetap ada (biar JS gak error), tapi disembunyikan via CSS -->
                 <div id="brand-name" class="brand-name">BRI</div>
             </div>
             <div class="brand-tagline">SATU BANK UNTUK SEMUA</div>

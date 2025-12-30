@@ -30,9 +30,10 @@
             --line: #e5e7eb;
             --panel-bg: rgba(255, 255, 255, 0.94);
 
-            /* ✅ header logo ala display */
-            --kiosk-logo-h: 150px;
-            --kiosk-logo-left: -20px;
+            /* ✅ HEADER LOGO (FIX: tidak tenggelam + lebih kiri + lebih atas) */
+            --kiosk-logo-h: 170px;
+            --kiosk-logo-left: -42px;
+            --kiosk-logo-top: -42px;
         }
 
         body {
@@ -58,8 +59,9 @@
             background: linear-gradient(135deg, var(--bri-blue-3), var(--bri-blue-2));
             border-radius: 18px;
 
+            /* ✅ FIX: header dibuat lebih tinggi agar logo tidak kepotong */
             padding: 18px 24px;
-            min-height: 92px;
+            min-height: 132px;
 
             box-shadow: 0 18px 38px rgba(11, 86, 179, 0.30);
             border: 1px solid rgba(255, 255, 255, 0.20);
@@ -87,9 +89,9 @@
             z-index: 1;
             min-width: 320px;
 
-            /* ✅ sama kayak display: kasih ruang buat logo besar */
+            /* ✅ FIX: beri ruang vertical untuk logo besar (lebih nyaman) */
             padding-left: 10px;
-            padding-top: 80px;
+            padding-top: 78px;
         }
 
         .brand-title-row {
@@ -99,12 +101,12 @@
             min-width: 0;
         }
 
-        /* ✅ LOGO: samakan gaya display (absolute, besar, bukan di box) */
+        /* ✅ LOGO */
         .brand-logo-box {
             position: absolute;
             left: var(--kiosk-logo-left);
-            top: 50%;
-            transform: translateY(-50%);
+            top: var(--kiosk-logo-top);
+            transform: none;
             pointer-events: none;
             width: auto;
             height: auto;
@@ -121,7 +123,6 @@
             object-fit: contain;
             display: block;
             filter: none;
-            /* ✅ jangan invert */
             opacity: 1;
         }
 
@@ -605,8 +606,13 @@
             }
 
             :root {
-                --kiosk-logo-h: 130px;
-                --kiosk-logo-left: -14px;
+                --kiosk-logo-h: 155px;
+                --kiosk-logo-left: -36px;
+                --kiosk-logo-top: -8px;
+            }
+
+            .top-bar {
+                min-height: 122px;
             }
 
             .top-time {
@@ -951,11 +957,9 @@
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-title-row">
-                <!-- ✅ logo samakan dengan display -->
                 <div class="brand-logo-box">
                     <img src="assets/logobri4.png" alt="Logo BRI">
                 </div>
-                <!-- tetap ada untuk logika JS (branch name), tapi disembunyikan via CSS -->
                 <div id="branch-pill" class="brand-name">BRI</div>
             </div>
             <div class="brand-tagline">SATU BANK UNTUK SEMUA</div>
@@ -987,7 +991,6 @@
 
                 <div class="info-pill">Tekan tombol sesuai kebutuhan layanan Anda.</div>
 
-                <!-- tetap ada (tidak ubah logika UI) -->
                 <button class="btn-print" onclick="window.print()">Cetak Ulang Halaman</button>
                 <button class="btn-print" onclick="testPrintThermal()">🧾 Test Print Thermal (Preview)</button>
                 <button class="btn-preview" onclick="lihatLayoutPrint()">👀 Lihat Layout Print (Tanpa Print)</button>
@@ -1006,7 +1009,6 @@
 
                     <div style="display:flex; align-items:center; gap:10px;">
                         <div id="videoMeta" class="video-card-meta"></div>
-
                         <button id="toggleVideoSoundBtn" class="sound-btn" type="button"
                             title="Toggle suara video"></button>
                     </div>
@@ -1049,9 +1051,7 @@
         </div>
     </div>
 
-    <!-- =================== SERVER SETTINGS UI =================== -->
     <div id="serverOverlay" class="server-overlay"></div>
-
     <div id="serverFab" class="server-fab" title="Pengaturan Server">⚙️</div>
 
     <div id="serverPanel" class="server-panel">
@@ -1086,7 +1086,6 @@
         </div>
     </div>
 
-    <!-- =================== PRINT PREVIEW MODAL =================== -->
     <div id="receiptModal" class="receipt-modal" onclick="closeReceiptModalOnBackdrop(event)">
         <div class="receipt-modal-card" onclick="event.stopPropagation()">
             <div class="receipt-modal-head">
@@ -1131,9 +1130,6 @@
             return !!(qc && qc.isServer);
         }
 
-        // ✅ FIX: sebelumnya kamu panggil getPrinterName() tapi belum ada,
-        // itu bikin error lalu masuk fallback (preview).
-        // Sekarang aman: kosong = pakai default printer Windows.
         function getPrinterName() {
             return "";
         }
@@ -1358,13 +1354,6 @@
             return s;
         }
 
-        /* =========================================================
-           ✅ STRUK: perbaiki center untuk MiniPOS U80 (80mm)
-           - @page jadi 80mm
-           - body 80mm
-           - konten dibuat "72mm" dan di-center (margin auto)
-           - ticket pakai flex center biar benar-benar tengah
-           ========================================================= */
         function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
             const logoSrc = "assets/logo-bri.png";
             const title1 = "BRI";
@@ -1389,14 +1378,11 @@
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-
-    /* ✅ 72mm (umum printable area 80mm) lalu center */
     .wrap {
       width: 72mm;
       margin: 0 auto;
       padding: 8px 0 10px;
     }
-
     .center { text-align: center; }
     .logo-only {
       display:block;
@@ -1405,16 +1391,11 @@
       height: 46px;
       object-fit: contain;
     }
-
     .t1 { font-size: 13px; font-weight: 800; letter-spacing: .02em; margin: 0; }
     .t2 { font-size: 11px; font-weight: 800; letter-spacing: .02em; margin: 2px 0 0; }
-
     .line { border-top: 1px dashed #000; margin: 10px 0; }
-
     .meta { font-size: 10.5px; line-height: 1.35; }
     .ticketLabel { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
-
-    /* ✅ ticket benar-benar center */
     .ticketRow { display:flex; justify-content:center; }
     .ticket {
       font-family: "Courier New", monospace;
@@ -1425,7 +1406,6 @@
       text-align:center;
       white-space: nowrap;
     }
-
     .small { font-size: 9.8px; line-height: 1.35; }
   </style>
 </head>
@@ -1481,9 +1461,7 @@
             if (frame) frame.srcdoc = "";
         }
 
-        function closeReceiptModalOnBackdrop(e) {
-            closeReceiptModal();
-        }
+        function closeReceiptModalOnBackdrop(e) { closeReceiptModal(); }
 
         function printFromReceiptIframe() {
             const frame = document.getElementById("receiptFrame");
@@ -1500,25 +1478,18 @@
         window.closeReceiptModalOnBackdrop = closeReceiptModalOnBackdrop;
         window.printFromReceiptIframe = printFromReceiptIframe;
 
-        /* =========================================================
-           ✅ FIX UTAMA: AUTO PRINT TANPA PREVIEW / TANPA DIALOG
-           - preview hanya jika preview===true (tombol lihat layout / test preview)
-           ========================================================= */
         async function printTicketThermal({ ticket, serviceType, preview = false }) {
             const branch = getBranchName();
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 
-            // HTML struk hanya dipakai untuk preview manual
             const receiptHtml = buildReceiptHtml({ branch, layanan, ticket, waktu });
 
-            // ✅ preview-only: tampilkan modal, tanpa print
             if (preview === true) {
                 openReceiptModal(receiptHtml);
                 return;
             }
 
-            // ✅ AUTO PRINT silent via IPC (tanpa modal / tanpa dialog)
             try {
                 if (window.kioskPrinter && typeof window.kioskPrinter.printTicket === "function") {
                     const res = await window.kioskPrinter.printTicket({
@@ -1526,7 +1497,7 @@
                         layanan,
                         ticket,
                         waktu,
-                        deviceName: getPrinterName(), // kosong = default printer
+                        deviceName: getPrinterName(),
                     });
 
                     if (!res || res.ok !== true) {
@@ -1543,7 +1514,6 @@
             }
         }
 
-        // tombol ini memang labelnya "(Preview)" → kita set preview true
         function testPrintThermal() {
             const dummyTicket = normalizeTicketCode("A001");
             printTicketThermal({ ticket: dummyTicket, serviceType: "TELLER", preview: true });
@@ -1575,7 +1545,6 @@
                 const shownTicket = ticket ? normalizeTicketCode(ticket) : "-";
                 document.getElementById("ticket-number").textContent = shownTicket || "-";
 
-                // ✅ AUTO PRINT silent (tanpa preview)
                 if (ticket) printTicketThermal({ ticket: shownTicket, serviceType, preview: false });
 
             } catch (e) {
