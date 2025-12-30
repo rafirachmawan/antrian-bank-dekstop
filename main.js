@@ -327,15 +327,38 @@ function openConfigErrorWindow(mode, cfg) {
 
 /* =========================================================
    ✅ Tambahan: thermal print window (hidden) + helper HTML
+   ✅ FIX: logo pakai base64 + tunggu ready sebelum print (silent)
    ========================================================= */
 let printWin = null;
+let __cachedLogoDataUrl = null;
+
+function getLogoDataUrl() {
+  if (__cachedLogoDataUrl) return __cachedLogoDataUrl;
+
+  const candidates = [
+    path.join(__dirname, "assets", "logobri4.png"),
+    path.join(__dirname, "assets", "logo-bri.png"),
+  ];
+
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        const buf = fs.readFileSync(p);
+        const b64 = buf.toString("base64");
+        __cachedLogoDataUrl = `data:image/png;base64,${b64}`;
+        return __cachedLogoDataUrl;
+      }
+    } catch (e) {
+      console.error("❌ read logo failed:", p, e);
+    }
+  }
+
+  // fallback: kalau file tidak ketemu
+  __cachedLogoDataUrl = "";
+  return __cachedLogoDataUrl;
+}
 
 function buildThermalReceiptHtml(payload) {
-  const branch = (
-    payload?.branch ||
-    payload?.branchName ||
-    DEFAULT_BRANCH
-  ).toString();
   const layanan = (payload?.layanan || payload?.serviceType || "").toString();
   const ticket = (payload?.ticket || payload?.ticketCode || "").toString();
   const waktu = (payload?.waktu || "").toString();
@@ -348,10 +371,10 @@ function buildThermalReceiptHtml(payload) {
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
 
-  const logoPath = path.join(__dirname, "assets", "logobri4.png");
-  const logoFileUrl = "file:///" + logoPath.replace(/\\/g, "/");
+  const logoSrc = getLogoDataUrl(); // ✅ base64
 
-  const OFFSET_MM = 0;
+  // ✅ Geser kiri dikit (negatif = ke kiri)
+  const SHIFT_X_MM = -1.2; // tuning kalau perlu: -0.8 / -1.6 dst
 
   return `
 <!doctype html>
@@ -374,7 +397,7 @@ function buildThermalReceiptHtml(payload) {
       width: 72mm;
       margin: 0 auto;
       padding: 8px 0 10px;
-      transform: translateX(${OFFSET_MM}mm);
+      transform: translateX(${SHIFT_X_MM}mm);
     }
     .center { text-align: center; }
     .logo {
@@ -405,7 +428,11 @@ function buildThermalReceiptHtml(payload) {
 <body>
   <div class="wrap">
     <div class="center">
-      <img class="logo" src="${logoFileUrl}" alt="Logo BRI" />
+      ${
+        logoSrc
+          ? `<img class="logo" src="${logoSrc}" alt="Logo BRI" />`
+          : `<div style="height:46px"></div>`
+      }
       <div class="title1">BRI</div>
       <div class="title2">SATU BANK UNTUK SEMUA</div>
     </div>
@@ -435,9 +462,37 @@ function buildThermalReceiptHtml(payload) {
       <br/>Terima kasih.
     </div>
   </div>
+
+  <!-- ✅ tandai READY setelah logo/layout siap -->
+  <script>
+    (function () {
+      function ready(){ try{ window.__PRINT_READY__ = true; }catch(e){} }
+      const img = document.querySelector("img.logo");
+      if (!img) return ready();
+      if (img.complete) return ready();
+      img.addEventListener("load", ready);
+      img.addEventListener("error", ready);
+      setTimeout(ready, 1200);
+    })();
+  </script>
 </body>
 </html>
 `;
+}
+
+async function waitPrintReady(webContents, timeoutMs = 2500) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const ok = await webContents.executeJavaScript(
+        "Boolean(window.__PRINT_READY__ === true)",
+        true
+      );
+      if (ok) return true;
+    } catch {}
+    await new Promise((r) => setTimeout(r, 80));
+  }
+  return false;
 }
 
 function ensurePromoImagesDir() {
@@ -567,6 +622,7 @@ function registerIpcHandlers() {
     return await getState();
   });
 
+  // ✅✅✅ SILENT PRINT TICKET (AUTO PRINT)
   ipcMain.handle("PRINT_TICKET", async (_evt, payload) => {
     try {
       if (!printWin || printWin.isDestroyed()) {
@@ -589,18 +645,10 @@ function registerIpcHandlers() {
         "data:text/html;charset=utf-8," + encodeURIComponent(html)
       );
 
-      await new Promise((resolve) => {
-        const wc = printWin.webContents;
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          resolve();
-        };
-        wc.once("did-finish-load", finish);
-        setTimeout(finish, 200);
-      });
+      // ✅ tunggu logo benar2 siap (biar gak hilang di auto print)
+      await waitPrintReady(printWin.webContents, 2800);
 
+      // ✅ buffer sedikit untuk stabil layout/driver
       await new Promise((r) => setTimeout(r, 120));
 
       const deviceName =
