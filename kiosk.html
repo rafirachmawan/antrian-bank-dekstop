@@ -953,8 +953,6 @@
 
         /* =========================================================
            ✅ BEDAKAN UI: SERVER MODE vs KIOSK MODE (UI saja)
-           - Server mode: hanya video/promo + gear (tanpa tombol ambil antrian)
-           - Logika JS tetap sama, hanya CSS yang menyembunyikan panel kiri
         ========================================================= */
         body.server-ui .page-body {
             grid-template-columns: 1fr !important;
@@ -972,13 +970,9 @@
             height: 100%;
         }
 
-        /* kalau mau lebih “full”, paksa video memenuhi ruang */
         body.server-ui .video-frame {
             padding: 10px;
         }
-
-        /* optional: info box tetap tampil (biar rapi), tapi kalau mau dihilangkan juga, tinggal aktifkan ini */
-        /* body.server-ui .video-info { display:none !important; } */
     </style>
 </head>
 
@@ -1179,7 +1173,6 @@
             } catch { }
         }
         applyServerUIMode();
-        // jaga-jaga kalau queueConfig di-inject setelah halaman render
         setTimeout(applyServerUIMode, 200);
         setTimeout(applyServerUIMode, 800);
         setInterval(applyServerUIMode, 2000);
@@ -1396,8 +1389,48 @@
             return s;
         }
 
-        function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
-            const logoSrc = "assets/logo-bri.png";
+        /* =========================
+           ✅ FIX LOGO STRUK:
+           - srcdoc iframe sering gagal load relative assets/*
+           - kita embed logo jadi dataURL (base64) biar pasti muncul
+        ========================= */
+        let __cachedLogoDataUrl = null;
+
+        async function loadLogoAsDataUrl() {
+            if (__cachedLogoDataUrl) return __cachedLogoDataUrl;
+
+            const candidates = [
+                "assets/logo-bri.png",
+                "assets/logobri4.png",
+            ];
+
+            for (const p of candidates) {
+                try {
+                    const res = await fetch(p, { cache: "force-cache" });
+                    if (!res.ok) continue;
+
+                    const blob = await res.blob();
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const r = new FileReader();
+                        r.onload = () => resolve(String(r.result || ""));
+                        r.onerror = reject;
+                        r.readAsDataURL(blob);
+                    });
+
+                    if (dataUrl && dataUrl.startsWith("data:image/")) {
+                        __cachedLogoDataUrl = dataUrl;
+                        return __cachedLogoDataUrl;
+                    }
+                } catch (e) { }
+            }
+
+            // fallback terakhir (kalau base64 gagal)
+            __cachedLogoDataUrl = "assets/logo-bri.png";
+            return __cachedLogoDataUrl;
+        }
+
+        function buildReceiptHtml({ branch, layanan, ticket, waktu, logoDataUrl }) {
+            const logoSrc = logoDataUrl || "assets/logo-bri.png";
             const title1 = "BRI";
             const title2 = "SATU BANK UNTUK SEMUA";
 
@@ -1410,7 +1443,9 @@
   <meta charset="UTF-8" />
   <title>Struk Antrian</title>
   <style>
+    /* ✅ ukuran thermal 80mm, margin 0 (printer tetap punya margin fisik) */
     @page { size: 80mm auto; margin: 0; }
+
     html, body { margin: 0; padding: 0; }
     body {
       width: 80mm;
@@ -1420,68 +1455,96 @@
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    .wrap {
-      width: 72mm;
-      margin: 0 auto;
-      padding: 8px 0 10px;
+
+    /* ✅ SHIFT untuk ngatasi hasil print kurang kiri/atas.
+       kamu bisa tuning mm ini kalau beda printer:
+       - makin negatif: makin ke kiri/atas
+       - makin positif: makin ke kanan/bawah */
+    :root{
+      --shift-x: -1.6mm;  /* << geser kiri sedikit */
+      --shift-y: -1.8mm;  /* << geser atas sedikit */
     }
+
+    .page {
+      width: 80mm;
+      transform: translate(var(--shift-x), var(--shift-y));
+    }
+
+    /* ✅ Lebihin lebar konten biar benar2 “tengah”, tapi tetap aman */
+    .wrap {
+      width: 74mm;
+      margin: 0 auto;
+      padding: 4mm 0 3mm;
+    }
+
     .center { text-align: center; }
+
+    /* ✅ logo lebih pasti tampil + ukuran pas seperti contoh struk kamu */
     .logo-only {
       display:block;
-      margin: 2px auto 6px;
-      width: 46px;
-      height: 46px;
+      margin: 0 auto 2mm;
+      width: 14mm;
+      height: 14mm;
       object-fit: contain;
     }
-    .t1 { font-size: 13px; font-weight: 800; letter-spacing: .02em; margin: 0; }
-    .t2 { font-size: 11px; font-weight: 800; letter-spacing: .02em; margin: 2px 0 0; }
-    .line { border-top: 1px dashed #000; margin: 10px 0; }
+
+    .t1 { font-size: 12.5px; font-weight: 800; letter-spacing: .02em; margin: 0; }
+    .t2 { font-size: 11px; font-weight: 800; letter-spacing: .02em; margin: 1.5mm 0 0; }
+
+    .line { border-top: 1px dashed #000; margin: 3.5mm 0; }
+
     .meta { font-size: 10.5px; line-height: 1.35; }
-    .ticketLabel { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
-    .ticketRow { display:flex; justify-content:center; }
+    .ticketLabel { font-size: 10.5px; font-weight: 800; margin-top: 3mm; }
+
     .ticket {
       font-family: "Courier New", monospace;
       font-size: 38px;
       font-weight: 900;
       letter-spacing: 1.5px;
-      margin: 6px 0 4px;
+      margin: 2mm 0 1mm;
       text-align:center;
       white-space: nowrap;
     }
-    .small { font-size: 9.8px; line-height: 1.35; }
+
+    .small { font-size: 9.6px; line-height: 1.35; }
+
+    /* ✅ kalau printer kamu “nge-zoom”, ini bantu stabil */
+    * { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="center">
-      <img class="logo-only" src="${logoSrc}" alt="Logo BRI" />
-      <div class="t1">${title1}</div>
-      <div class="t2">${title2}</div>
-    </div>
+  <div class="page">
+    <div class="wrap">
+      <div class="center">
+        <img class="logo-only" src="${logoSrc}" alt="Logo BRI" />
+        <div class="t1">${title1}</div>
+        <div class="t2">${title2}</div>
+      </div>
 
-    <div class="line"></div>
+      <div class="line"></div>
 
-    <div class="center meta">
-      <div><b>LAYANAN</b></div>
-      <div>${layanan}</div>
-    </div>
+      <div class="center meta">
+        <div><b>LAYANAN</b></div>
+        <div>${layanan}</div>
+      </div>
 
-    <div class="center">
-      <div class="ticketLabel">NOMOR ANTRIAN</div>
-      <div class="ticketRow"><div class="ticket">${shownTicket}</div></div>
-    </div>
+      <div class="center">
+        <div class="ticketLabel">NOMOR ANTRIAN</div>
+        <div class="ticket">${shownTicket}</div>
+      </div>
 
-    <div class="line"></div>
+      <div class="line"></div>
 
-    <div class="meta">
-      <div><b>Waktu:</b> ${waktu}</div>
-    </div>
+      <div class="meta">
+        <div><b>Waktu:</b> ${waktu}</div>
+      </div>
 
-    <div style="height:8px;"></div>
+      <div style="height:2mm;"></div>
 
-    <div class="center small">
-      Simpan struk ini. Nomor dipanggil sesuai urutan pada layar.
-      <br/>Terima kasih.
+      <div class="center small">
+        Simpan struk ini. Nomor dipanggil sesuai urutan pada layar.
+        <br/>Terima kasih.
+      </div>
     </div>
   </div>
 </body>
@@ -1525,7 +1588,10 @@
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 
-            const receiptHtml = buildReceiptHtml({ branch, layanan, ticket, waktu });
+            // ✅ ambil logo dataURL supaya pasti muncul di srcdoc
+            const logoDataUrl = await loadLogoAsDataUrl();
+
+            const receiptHtml = buildReceiptHtml({ branch, layanan, ticket, waktu, logoDataUrl });
 
             if (preview === true) {
                 openReceiptModal(receiptHtml);
