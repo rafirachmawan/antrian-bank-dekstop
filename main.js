@@ -267,6 +267,18 @@ function createWindowByMode(mode, cfg) {
     });
   });
 
+  // =========================================================
+  // ✅✅✅ AUTO FULLSCREEN KHUSUS DISPLAY (tanpa ubah logika lain)
+  // - display langsung fullscreen ketika dibuka
+  // =========================================================
+  if (mode === "display") {
+    win.once("ready-to-show", () => {
+      try {
+        win.setFullScreen(true);
+      } catch {}
+    });
+  }
+
   return win;
 }
 
@@ -336,13 +348,10 @@ function buildThermalReceiptHtml(payload) {
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
 
-  // ✅ PENTING: data URL gak bisa resolve "assets/xxx.png" secara relatif.
-  // Jadi kita pakai file:// absolute path supaya logo selalu kebaca.
-  const logoPath = path.join(__dirname, "assets", "logobri4.png"); // samakan dengan display kamu
+  const logoPath = path.join(__dirname, "assets", "logobri4.png");
   const logoFileUrl = "file:///" + logoPath.replace(/\\/g, "/");
 
-  // ✅ KALIBRASI CENTER (kalau masih geser, tinggal ubah mm)
-  const OFFSET_MM = 0; // contoh: 2 atau -2 jika printer driver offset
+  const OFFSET_MM = 0;
 
   return `
 <!doctype html>
@@ -361,17 +370,13 @@ function buildThermalReceiptHtml(payload) {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-
-    /* ✅ bikin area cetak 72mm dan center (paling aman untuk 80mm) */
     .wrap {
       width: 72mm;
       margin: 0 auto;
       padding: 8px 0 10px;
       transform: translateX(${OFFSET_MM}mm);
     }
-
     .center { text-align: center; }
-
     .logo {
       display: block;
       width: 46px;
@@ -379,15 +384,11 @@ function buildThermalReceiptHtml(payload) {
       margin: 2px auto 6px;
       object-fit: contain;
     }
-
     .title1 { font-size: 13px; font-weight: 800; margin: 0; letter-spacing: .02em; }
     .title2 { font-size: 11px; font-weight: 800; margin: 2px 0 0; letter-spacing: .02em; }
-
     .line { border-top: 1px dashed #000; margin: 10px 0; }
     .meta { font-size: 10.5px; line-height: 1.35; }
     .label { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
-
-    /* ✅ nomor benar-benar center */
     .ticketRow { display: flex; justify-content: center; }
     .ticket {
       font-family: "Courier New", monospace;
@@ -398,7 +399,6 @@ function buildThermalReceiptHtml(payload) {
       text-align: center;
       white-space: nowrap;
     }
-
     .small { font-size: 9.8px; line-height: 1.35; }
   </style>
 </head>
@@ -585,7 +585,6 @@ function registerIpcHandlers() {
 
       const html = buildThermalReceiptHtml(payload);
 
-      // ✅ tunggu bener-bener load (lebih stabil daripada setTimeout doang)
       await printWin.loadURL(
         "data:text/html;charset=utf-8," + encodeURIComponent(html)
       );
@@ -599,10 +598,9 @@ function registerIpcHandlers() {
           resolve();
         };
         wc.once("did-finish-load", finish);
-        setTimeout(finish, 200); // fallback
+        setTimeout(finish, 200);
       });
 
-      // ✅ micro delay biar layout settle
       await new Promise((r) => setTimeout(r, 120));
 
       const deviceName =
@@ -618,7 +616,7 @@ function registerIpcHandlers() {
             silent: true,
             printBackground: true,
             deviceName: deviceName || undefined,
-            marginsType: 1, // ✅ NO MARGIN (biar gak geser)
+            marginsType: 1,
           },
           (success, errorType) => {
             if (!success)
