@@ -29,6 +29,10 @@
             --muted: #64748b;
             --line: #e5e7eb;
             --panel-bg: rgba(255, 255, 255, 0.94);
+
+            /* ✅ header logo ala display */
+            --kiosk-logo-h: 150px;
+            --kiosk-logo-left: -20px;
         }
 
         body {
@@ -82,62 +86,62 @@
             position: relative;
             z-index: 1;
             min-width: 320px;
+
+            /* ✅ sama kayak display: kasih ruang buat logo besar */
+            padding-left: 10px;
+            padding-top: 80px;
         }
 
         .brand-title-row {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 0px;
             min-width: 0;
         }
 
+        /* ✅ LOGO: samakan gaya display (absolute, besar, bukan di box) */
         .brand-logo-box {
-            width: 62px;
-            height: 62px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex: 0 0 auto;
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.20);
+            position: absolute;
+            left: var(--kiosk-logo-left);
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            width: auto;
+            height: auto;
+            border-radius: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            overflow: visible;
         }
 
         .brand-logo-box img {
-            width: 90%;
-            height: 90%;
+            height: var(--kiosk-logo-h);
+            width: auto;
             object-fit: contain;
             display: block;
-            filter: brightness(0) invert(1);
-            opacity: .98;
+            filter: none;
+            /* ✅ jangan invert */
+            opacity: 1;
         }
 
+        /* ✅ tulisan BRI di header disembunyikan (sama seperti display) */
         .brand-name {
-            font-size: 52px;
-            font-weight: 950;
-            letter-spacing: 0.06em;
-            color: #ffffff;
-            line-height: 1;
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
+            display: none !important;
         }
 
         .brand-tagline {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.92);
-            font-weight: 800;
+            font-weight: 900;
             line-height: 1.1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 560px;
-            margin-top: 2px;
+            margin-top: 0;
             padding-left: 0;
+            letter-spacing: 0.02em;
         }
 
         .top-right {
@@ -597,10 +601,12 @@
         @media (max-width: 560px) {
             .brand-left {
                 min-width: 0;
+                padding-top: 70px;
             }
 
-            .brand-name {
-                font-size: 42px;
+            :root {
+                --kiosk-logo-h: 130px;
+                --kiosk-logo-left: -14px;
             }
 
             .top-time {
@@ -945,9 +951,11 @@
     <div class="top-bar">
         <div class="brand-left">
             <div class="brand-title-row">
+                <!-- ✅ logo samakan dengan display -->
                 <div class="brand-logo-box">
-                    <img src="assets/logo-astro.png" alt="Logo">
+                    <img src="assets/logobri4.png" alt="Logo BRI">
                 </div>
+                <!-- tetap ada untuk logika JS (branch name), tapi disembunyikan via CSS -->
                 <div id="branch-pill" class="brand-name">BRI</div>
             </div>
             <div class="brand-tagline">SATU BANK UNTUK SEMUA</div>
@@ -1350,6 +1358,13 @@
             return s;
         }
 
+        /* =========================================================
+           ✅ STRUK: perbaiki center untuk MiniPOS U80 (80mm)
+           - @page jadi 80mm
+           - body 80mm
+           - konten dibuat "72mm" dan di-center (margin auto)
+           - ticket pakai flex center biar benar-benar tengah
+           ========================================================= */
         function buildReceiptHtml({ branch, layanan, ticket, waktu }) {
             const logoSrc = "assets/logo-bri.png";
             const title1 = "BRI";
@@ -1364,18 +1379,53 @@
   <meta charset="UTF-8" />
   <title>Struk Antrian</title>
   <style>
-    @page { size: 58mm auto; margin: 0; }
+    @page { size: 80mm auto; margin: 0; }
     html, body { margin: 0; padding: 0; }
-    body { width: 58mm; font-family: Arial, sans-serif; color: #000; background:#fff; }
-    .wrap { padding: 8px 8px 10px; }
+    body {
+      width: 80mm;
+      font-family: Arial, sans-serif;
+      color: #000;
+      background:#fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ✅ 72mm (umum printable area 80mm) lalu center */
+    .wrap {
+      width: 72mm;
+      margin: 0 auto;
+      padding: 8px 0 10px;
+    }
+
     .center { text-align: center; }
-    .logo-only { display:block; margin: 2px auto 6px; width: 46px; height: 46px; object-fit: contain; }
+    .logo-only {
+      display:block;
+      margin: 2px auto 6px;
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+    }
+
     .t1 { font-size: 13px; font-weight: 800; letter-spacing: .02em; margin: 0; }
     .t2 { font-size: 11px; font-weight: 800; letter-spacing: .02em; margin: 2px 0 0; }
+
     .line { border-top: 1px dashed #000; margin: 10px 0; }
+
     .meta { font-size: 10.5px; line-height: 1.35; }
     .ticketLabel { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
-    .ticket { font-family: "Courier New", monospace; font-size: 38px; font-weight: 900; letter-spacing: 1.5px; margin: 6px 0 4px; }
+
+    /* ✅ ticket benar-benar center */
+    .ticketRow { display:flex; justify-content:center; }
+    .ticket {
+      font-family: "Courier New", monospace;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      margin: 6px 0 4px;
+      text-align:center;
+      white-space: nowrap;
+    }
+
     .small { font-size: 9.8px; line-height: 1.35; }
   </style>
 </head>
@@ -1396,7 +1446,7 @@
 
     <div class="center">
       <div class="ticketLabel">NOMOR ANTRIAN</div>
-      <div class="ticket">${shownTicket}</div>
+      <div class="ticketRow"><div class="ticket">${shownTicket}</div></div>
     </div>
 
     <div class="line"></div>
@@ -1479,7 +1529,6 @@
                         deviceName: getPrinterName(), // kosong = default printer
                     });
 
-                    // ❌ jangan tampilkan preview otomatis (user maunya NO PREVIEW)
                     if (!res || res.ok !== true) {
                         console.error("Silent print gagal:", res);
                         alert("Print thermal gagal. Cek default printer / driver / koneksi printer.");

@@ -295,6 +295,14 @@ function buildThermalReceiptHtml(payload) {
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
 
+  // ✅ PENTING: data URL gak bisa resolve "assets/xxx.png" secara relatif.
+  // Jadi kita pakai file:// absolute path supaya logo selalu kebaca.
+  const logoPath = path.join(__dirname, "assets", "logobri4.png"); // samakan dengan display kamu
+  const logoFileUrl = "file:///" + logoPath.replace(/\\/g, "/");
+
+  // ✅ KALIBRASI CENTER (kalau masih geser, tinggal ubah mm)
+  const OFFSET_MM = 0; // contoh: 2 atau -2 jika printer driver offset
+
   return `
 <!doctype html>
 <html>
@@ -304,22 +312,61 @@ function buildThermalReceiptHtml(payload) {
   <style>
     @page { size: 80mm auto; margin: 0; }
     html, body { margin: 0; padding: 0; }
-    body { width: 80mm; font-family: Arial, sans-serif; color: #000; }
-    .wrap { padding: 10px 10px 12px; }
+    body {
+      width: 80mm;
+      font-family: Arial, sans-serif;
+      color: #000;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ✅ bikin area cetak 72mm dan center (paling aman untuk 80mm) */
+    .wrap {
+      width: 72mm;
+      margin: 0 auto;
+      padding: 8px 0 10px;
+      transform: translateX(${OFFSET_MM}mm);
+    }
+
     .center { text-align: center; }
-    .title { font-size: 14px; font-weight: 700; }
-    .sub { font-size: 11px; margin-top: 2px; }
+
+    .logo {
+      display: block;
+      width: 46px;
+      height: 46px;
+      margin: 2px auto 6px;
+      object-fit: contain;
+    }
+
+    .title1 { font-size: 13px; font-weight: 800; margin: 0; letter-spacing: .02em; }
+    .title2 { font-size: 11px; font-weight: 800; margin: 2px 0 0; letter-spacing: .02em; }
+
     .line { border-top: 1px dashed #000; margin: 10px 0; }
-    .ticket { font-size: 42px; font-weight: 800; letter-spacing: 2px; margin: 6px 0; }
-    .meta { font-size: 11px; line-height: 1.4; }
-    .small { font-size: 10px; line-height: 1.4; }
+    .meta { font-size: 10.5px; line-height: 1.35; }
+    .label { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
+
+    /* ✅ nomor benar-benar center */
+    .ticketRow { display: flex; justify-content: center; }
+    .ticket {
+      font-family: "Courier New", monospace;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      margin: 6px 0 4px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .small { font-size: 9.8px; line-height: 1.35; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="center">
-      <div class="title">${safe(branch)}</div>
-      <div class="sub">KIOSK PENGAMBILAN NOMOR</div>
+      <img class="logo" src="${logoFileUrl}" alt="Logo BRI" />
+      <div class="title1">BRI</div>
+      <div class="title2">UNIT BUNGURASIH</div>
     </div>
 
     <div class="line"></div>
@@ -330,8 +377,8 @@ function buildThermalReceiptHtml(payload) {
     </div>
 
     <div class="center">
-      <div class="sub" style="margin-top:10px;">NOMOR ANTRIAN</div>
-      <div class="ticket">${safe(ticket)}</div>
+      <div class="label">NOMOR ANTRIAN</div>
+      <div class="ticketRow"><div class="ticket">${safe(ticket)}</div></div>
     </div>
 
     <div class="line"></div>
@@ -340,7 +387,7 @@ function buildThermalReceiptHtml(payload) {
       <div><b>Waktu:</b> ${safe(waktu)}</div>
     </div>
 
-    <div style="height:10px;"></div>
+    <div style="height:8px;"></div>
 
     <div class="center small">
       Simpan struk ini. Nomor dipanggil sesuai urutan pada layar.
@@ -496,10 +543,26 @@ function registerIpcHandlers() {
       }
 
       const html = buildThermalReceiptHtml(payload);
+
+      // ✅ tunggu bener-bener load (lebih stabil daripada setTimeout doang)
       await printWin.loadURL(
         "data:text/html;charset=utf-8," + encodeURIComponent(html)
       );
-      await new Promise((r) => setTimeout(r, 250));
+
+      await new Promise((resolve) => {
+        const wc = printWin.webContents;
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          resolve();
+        };
+        wc.once("did-finish-load", finish);
+        setTimeout(finish, 200); // fallback
+      });
+
+      // ✅ micro delay biar layout settle
+      await new Promise((r) => setTimeout(r, 120));
 
       const deviceName =
         payload &&
@@ -510,7 +573,12 @@ function registerIpcHandlers() {
 
       return await new Promise((resolve) => {
         printWin.webContents.print(
-          { silent: true, printBackground: true, deviceName },
+          {
+            silent: true,
+            printBackground: true,
+            deviceName: deviceName || undefined,
+            marginsType: 1, // ✅ NO MARGIN (biar gak geser)
+          },
           (success, errorType) => {
             if (!success)
               return resolve({ ok: false, error: errorType || "print_failed" });
