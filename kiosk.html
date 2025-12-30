@@ -950,6 +950,35 @@
             padding: 10px 10px;
             border-radius: 14px;
         }
+
+        /* =========================================================
+           ✅ BEDAKAN UI: SERVER MODE vs KIOSK MODE (UI saja)
+           - Server mode: hanya video/promo + gear (tanpa tombol ambil antrian)
+           - Logika JS tetap sama, hanya CSS yang menyembunyikan panel kiri
+        ========================================================= */
+        body.server-ui .page-body {
+            grid-template-columns: 1fr !important;
+        }
+
+        body.server-ui .kiosk-panel {
+            display: none !important;
+        }
+
+        body.server-ui .video-panel {
+            padding: 10px !important;
+        }
+
+        body.server-ui .video-card {
+            height: 100%;
+        }
+
+        /* kalau mau lebih “full”, paksa video memenuhi ruang */
+        body.server-ui .video-frame {
+            padding: 10px;
+        }
+
+        /* optional: info box tetap tampil (biar rapi), tapi kalau mau dihilangkan juga, tinggal aktifkan ini */
+        /* body.server-ui .video-info { display:none !important; } */
     </style>
 </head>
 
@@ -1141,6 +1170,19 @@
         applyBranchName();
         setTimeout(applyBranchName, 300);
         setTimeout(applyBranchName, 1200);
+
+        /* ✅ UI mode switch (SERVER vs KIOSK) - tidak ubah logika lain */
+        function applyServerUIMode() {
+            try {
+                if (isServerMode()) document.body.classList.add("server-ui");
+                else document.body.classList.remove("server-ui");
+            } catch { }
+        }
+        applyServerUIMode();
+        // jaga-jaga kalau queueConfig di-inject setelah halaman render
+        setTimeout(applyServerUIMode, 200);
+        setTimeout(applyServerUIMode, 800);
+        setInterval(applyServerUIMode, 2000);
 
         const connEl = document.getElementById("conn");
 
