@@ -215,7 +215,13 @@ function createWindowByMode(mode, cfg) {
     height,
     title,
     icon: APP_ICON,
-    webPreferences: { nodeIntegration: true, contextIsolation: false },
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+
+      // ✅ FIX SUARA PEMANGGILAN: izinkan autoplay audio tanpa user gesture
+      autoplayPolicy: "no-user-gesture-required",
+    },
     autoHideMenuBar: false,
   });
 
@@ -291,7 +297,13 @@ function openConfigErrorWindow(mode, cfg) {
     height: 520,
     title: "Config Error",
     icon: APP_ICON,
-    webPreferences: { nodeIntegration: true, contextIsolation: false },
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+
+      // ✅ biar konsisten
+      autoplayPolicy: "no-user-gesture-required",
+    },
   });
 
   const html = `
@@ -631,7 +643,13 @@ function registerIpcHandlers() {
           width: 420,
           height: 680,
           icon: APP_ICON,
-          webPreferences: { nodeIntegration: false, contextIsolation: true },
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+
+            // ✅ biar konsisten (walau print window gak butuh audio)
+            autoplayPolicy: "no-user-gesture-required",
+          },
         });
 
         printWin.on("closed", () => {
@@ -683,8 +701,13 @@ function registerIpcHandlers() {
 let mainWin = null;
 let serverRef = null;
 
+// ✅ flags kamu
 app.commandLine.appendSwitch("disable-gpu");
 app.commandLine.appendSwitch("disable-software-rasterizer");
+
+// ✅ FIX SUARA PEMANGGILAN HILANG (autoplay audio)
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+
 app.commandLine.appendSwitch(
   "disk-cache-dir",
   path.join(app.getPath("userData"), "cache")

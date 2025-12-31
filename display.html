@@ -714,6 +714,53 @@
 
     <!-- =================== SCRIPT ASLI KAMU (LOGIKA TETAP) =================== -->
     <script>
+        /* =========================================================
+           ✅ AUDIO UNLOCK (WAJIB BIAR PEMANGGILAN BUNYI)
+           - Tidak mengubah logika antrian / urutan audio
+           - Hanya membuka izin autoplay audio di Electron/Chromium
+           ========================================================= */
+        let __AUDIO_UNLOCKED__ = false;
+
+        async function unlockAudioOnce() {
+            if (__AUDIO_UNLOCKED__) return true;
+
+            // Cara 1: silent muted audio (paling stabil di Electron)
+            try {
+                const a = new Audio();
+                a.muted = true;
+                a.src =
+                    "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+                await a.play().catch(() => { });
+                a.pause();
+                __AUDIO_UNLOCKED__ = true;
+                return true;
+            } catch (e) {
+                // Cara 2: WebAudio fallback
+                try {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (!AC) return false;
+                    const ctx = new AC();
+                    await ctx.resume().catch(() => { });
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    gain.gain.value = 0.00001;
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.01);
+                    __AUDIO_UNLOCKED__ = true;
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+        }
+
+        // unlock otomatis saat load + fallback saat ada interaksi
+        window.addEventListener("load", () => { unlockAudioOnce(); });
+        window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
+        window.addEventListener("keydown", unlockAudioOnce, { once: true });
+
         let ipcRenderer = null;
         try { ipcRenderer = require("electron").ipcRenderer; } catch { }
 
@@ -1101,6 +1148,8 @@
             if (!ticketCode) return;
 
             announceQueue = announceQueue.then(async () => {
+                await unlockAudioOnce(); // ✅ TAMBAHAN INI SAJA (BIAR BUNYI)
+
                 duckPromoVideo(true);
                 if (statusTextEl) statusTextEl.textContent = "Memanggil antrian...";
 
