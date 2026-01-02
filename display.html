@@ -830,37 +830,53 @@
 
         function duckPromoVideo(isDuck) {
             if (!promoVideoEl) return;
+
+            // ✅ kalau sedang putar Indonesia Raya, jangan dimute oleh pemanggilan
+            if (window.__SPECIAL_VIDEO_PLAYING__) return;
+
+            // simpan kondisi awal sekali saja
             if (promoVideoEl.__baseVol == null) {
                 promoVideoEl.__baseVol = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 1;
             }
-            const base = __clamp01(promoVideoEl.__baseVol);
-            const target = isDuck ? Math.max(0, Math.min(1, base * 0.10)) : base;
-
-            if (Math.abs((promoVideoEl.volume || 0) - target) < 0.01) {
-                promoVideoEl.volume = target;
-                return;
+            if (promoVideoEl.__baseMuted == null) {
+                promoVideoEl.__baseMuted = !!promoVideoEl.muted;
             }
 
+            // target: saat panggilan => MUTE TOTAL
+            const targetMuted = !!isDuck;
+            const targetVol = isDuck ? 0 : __clamp01(promoVideoEl.__baseVol);
+
+            // hentikan anim sebelumnya
             if (__duckAnimId) {
                 cancelAnimationFrame(__duckAnimId);
                 __duckAnimId = null;
             }
 
+            // mute/unmute langsung biar benar-benar diam
+            promoVideoEl.muted = targetMuted;
+
+            // fade volume (biar transisinya halus saat balik)
             const startVol = __clamp01(promoVideoEl.volume);
-            const duration = isDuck ? 260 : 420;
+            const duration = isDuck ? 150 : 350;
             const startT = performance.now();
 
             const step = (now) => {
                 const t = Math.min(1, (now - startT) / duration);
                 const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-                promoVideoEl.volume = startVol + (target - startVol) * ease;
+                promoVideoEl.volume = startVol + (targetVol - startVol) * ease;
 
                 if (t < 1) __duckAnimId = requestAnimationFrame(step);
                 else {
-                    promoVideoEl.volume = target;
+                    promoVideoEl.volume = targetVol;
                     __duckAnimId = null;
+
+                    // saat balik normal, restore muted awal (kalau dulunya mute)
+                    if (!isDuck) {
+                        promoVideoEl.muted = !!promoVideoEl.__baseMuted;
+                    }
                 }
             };
+
             __duckAnimId = requestAnimationFrame(step);
         }
 
@@ -894,12 +910,33 @@
         function playBell() {
             try {
                 const a = ensureBellAudio();
+
+                // ✅ pastikan src selalu fresh (hindari cache/readyState nyangkut)
+                a.src = `${AUDIO_BASE}/BELL.wav?v=${Date.now()}`;
+                a.preload = "auto";
+
                 a.pause();
                 a.currentTime = 0;
-                const p = a.play();
-                if (p && typeof p.catch === "function") p.catch(() => { });
+
+                const tryPlay = () => {
+                    try {
+                        const p = a.play();
+                        if (p && typeof p.catch === "function") p.catch(() => { });
+                    } catch { }
+                };
+
+                // ✅ kalau belum siap, tunggu canplay dulu
+                if (a.readyState >= 2) {
+                    tryPlay();
+                } else {
+                    a.load();
+                    a.addEventListener("canplaythrough", tryPlay, { once: true });
+                    // fallback kalau event nggak kepanggil
+                    setTimeout(tryPlay, 200);
+                }
             } catch { }
         }
+
 
         function playOne(url) {
             return new Promise((resolve) => {
@@ -1153,7 +1190,7 @@
                 duckPromoVideo(true);
                 if (statusTextEl) statusTextEl.textContent = "Memanggil antrian...";
 
-                await playAnnouncementTwice(ticketCode, counterName || "-");
+                await playAnnouncementOnce(ticketCode, counterName || "-");
 
                 duckPromoVideo(false);
                 if (statusTextEl) statusTextEl.textContent = "Sistem antrian aktif";
@@ -1247,6 +1284,97 @@
         let currentDisplayConfig = null;
         let lastVideoKey = "";
         let lastPromoImagesKey = "";
+
+        /* =========================================================
+           ✅ INDONESIA RAYA SCHEDULE (JAM 10:00)
+           - Video diganti sekali per hari jam 10:00
+           - Saat Indonesia Raya berjalan, applyPromoAndVideo tidak override video
+           ========================================================= */
+        window.__SPECIAL_VIDEO_PLAYING__ = false;
+        let __SPECIAL_VIDEO_LAST_DATE__ = ""; // YYYY-MM-DD
+        let __SPECIAL_PREV_SRC__ = "";
+        let __SPECIAL_PREV_LOOP__ = true;
+        let __SPECIAL_PREV_MUTED__ = false;
+        let __SPECIAL_PREV_VOL__ = 0.1;
+
+        function __ymd(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        }
+
+        function __startIndonesiaRaya() {
+            if (!promoVideoEl) return;
+            if (window.__SPECIAL_VIDEO_PLAYING__) return;
+
+            // simpan kondisi video normal
+            __SPECIAL_PREV_SRC__ = promoVideoEl.currentSrc || promoVideoEl.src || "";
+            __SPECIAL_PREV_LOOP__ = !!promoVideoEl.loop;
+            __SPECIAL_PREV_MUTED__ = !!promoVideoEl.muted;
+            __SPECIAL_PREV_VOL__ = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 0.1;
+
+            window.__SPECIAL_VIDEO_PLAYING__ = true;
+
+            // Indonesia Raya: putar sekali, suara ON
+            promoVideoEl.loop = false;
+            promoVideoEl.muted = false;
+            promoVideoEl.volume = 1;
+
+            const indoSrc = "assets/indonesia-raya.mp4";
+
+            const restore = () => {
+                promoVideoEl.removeEventListener("ended", restore);
+                promoVideoEl.removeEventListener("error", restore);
+
+                window.__SPECIAL_VIDEO_PLAYING__ = false;
+
+                // restore setting video normal
+                promoVideoEl.loop = __SPECIAL_PREV_LOOP__;
+                promoVideoEl.muted = __SPECIAL_PREV_MUTED__;
+                promoVideoEl.volume = __SPECIAL_PREV_VOL__;
+
+                // balik ke video normal (kalau ada)
+                if (__SPECIAL_PREV_SRC__) {
+                    try {
+                        promoVideoEl.src = __SPECIAL_PREV_SRC__ + (String(__SPECIAL_PREV_SRC__).includes("?") ? "&" : "?") + "v=" + Date.now();
+                        promoVideoEl.load();
+                        promoVideoEl.play?.().catch(() => { });
+                    } catch { }
+                }
+
+                // paksa applyPromoAndVideo boleh set lagi normal
+                lastVideoKey = "";
+            };
+
+            promoVideoEl.addEventListener("ended", restore, { once: true });
+            promoVideoEl.addEventListener("error", restore, { once: true });
+
+            try {
+                promoVideoEl.src = indoSrc + `?v=${Date.now()}`;
+                promoVideoEl.load();
+                promoVideoEl.play?.().catch(() => { });
+            } catch {
+                restore();
+            }
+        }
+
+        function __checkIndonesiaRayaAt10() {
+            const now = new Date();
+            const today = __ymd(now);
+
+            // jam 10:00 (rentang 10:00:00 - 10:00:59)
+            if (now.getHours() !== 10 || now.getMinutes() !== 0) return;
+
+            // sekali per hari
+            if (__SPECIAL_VIDEO_LAST_DATE__ === today) return;
+            __SPECIAL_VIDEO_LAST_DATE__ = today;
+
+            __startIndonesiaRaya();
+        }
+
+        // cek tiap 1 detik biar pas jam 10
+        setInterval(__checkIndonesiaRayaAt10, 1000);
 
         function forcePlayVideoSafely() {
             if (!promoVideoEl) return;
@@ -1369,6 +1497,17 @@
 
             const labelEl = document.getElementById("video-file-label");
             if (labelEl) labelEl.textContent = videoPath ? `File: ${videoPath}` : "Tidak ada video terpilih.";
+
+            // ✅ kalau sedang putar Indonesia Raya, jangan override video dari config
+            if (window.__SPECIAL_VIDEO_PLAYING__) {
+                const imgs = getPromoImagesFromConfig(cfg);
+                const key = JSON.stringify(imgs);
+                if (key !== lastPromoImagesKey) {
+                    lastPromoImagesKey = key;
+                    buildPromoSlides(imgs);
+                }
+                return;
+            }
 
             if (videoKey !== lastVideoKey) {
                 lastVideoKey = videoKey;

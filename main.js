@@ -388,6 +388,9 @@ function buildThermalReceiptHtml(payload) {
   // ✅ Geser kiri dikit (negatif = ke kiri)
   const SHIFT_X_MM = -1.2; // tuning kalau perlu: -0.8 / -1.6 dst
 
+  // ✅✅✅ UNIT TEXT (sesuai request)
+  const UNIT_NAME = "UNIT BUNGURASIH";
+
   return `
 <!doctype html>
 <html>
@@ -419,8 +422,12 @@ function buildThermalReceiptHtml(payload) {
       margin: 2px auto 6px;
       object-fit: contain;
     }
-    .title1 { font-size: 13px; font-weight: 800; margin: 0; letter-spacing: .02em; }
+
+    /* ✅✅✅ BRI DIBESARKAN + ada UNIT BUNGURASIH */
+    .title1 { font-size: 22px; font-weight: 900; margin: 0; letter-spacing: .02em; line-height: 1.05; }
+    .unit   { font-size: 12px; font-weight: 900; margin: 2px 0 0; letter-spacing: .10em; line-height: 1.1; text-transform: uppercase; }
     .title2 { font-size: 11px; font-weight: 800; margin: 2px 0 0; letter-spacing: .02em; }
+
     .line { border-top: 1px dashed #000; margin: 10px 0; }
     .meta { font-size: 10.5px; line-height: 1.35; }
     .label { font-size: 10.5px; font-weight: 700; margin-top: 10px; }
@@ -446,6 +453,7 @@ function buildThermalReceiptHtml(payload) {
           : `<div style="height:46px"></div>`
       }
       <div class="title1">BRI</div>
+      <div class="unit">${UNIT_NAME}</div>
       <div class="title2">SATU BANK UNTUK SEMUA</div>
     </div>
 
@@ -657,7 +665,12 @@ function registerIpcHandlers() {
         });
       }
 
-      const html = buildThermalReceiptHtml(payload);
+      const html =
+        payload &&
+        typeof payload.receiptHtml === "string" &&
+        payload.receiptHtml.trim()
+          ? payload.receiptHtml
+          : buildThermalReceiptHtml(payload);
 
       await printWin.loadURL(
         "data:text/html;charset=utf-8," + encodeURIComponent(html)

@@ -439,6 +439,24 @@
             box-shadow: 0 14px 32px rgba(79, 195, 255, 0.35);
         }
 
+        /* ✅ tombol pemanggilan ulang (secondary) */
+        .call-btn.secondary {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            color: #0f172a;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+
+        .call-btn.secondary:hover {
+            background: #f8fafc;
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
         .hint {
             font-size: 11px;
             color: #94a3b8;
@@ -503,7 +521,7 @@
 
         .mini-item {
             display: grid;
-            grid-template-columns: 90px 1fr 140px 90px;
+            grid-template-columns: 90px 1fr 140px 110px;
             gap: 8px;
             padding: 10px 12px;
             border-bottom: 1px solid #f1f5f9;
@@ -537,6 +555,24 @@
             border-color: rgba(79, 195, 255, 0.65);
             background: rgba(79, 195, 255, 0.16);
             color: #0a4ea2;
+        }
+
+        /* ✅ badge untuk "ULANG" (tanpa ganggu badge service) */
+        .mini-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            color: #334155;
+            margin-left: 8px;
+            white-space: nowrap;
         }
 
         .mini-num {
@@ -574,7 +610,7 @@
             }
 
             .mini-item {
-                grid-template-columns: 90px 1fr 140px 80px;
+                grid-template-columns: 90px 1fr 140px 100px;
             }
 
             .top-right {
@@ -669,8 +705,13 @@
                             <div id="tellerLastCounter" class="last-meta">Loket: -</div>
                         </div>
 
-                        <button class="call-btn teller" onclick="callNext('TELLER')">Panggil Nomor Teller
-                            Berikutnya</button>
+                        <!-- ✅ tombol pemanggilan ulang ditambahkan (tanpa ubah logika yang lain) -->
+                        <div class="btn-row">
+                            <button class="call-btn teller" onclick="callNext('TELLER')">Panggil Nomor Teller
+                                Berikutnya</button>
+                            <button class="call-btn secondary" onclick="recallLast('TELLER')">Panggil Ulang Nomor
+                                Terakhir</button>
+                        </div>
                         <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
                     </div>
 
@@ -701,7 +742,12 @@
                             <div id="csLastCounter" class="last-meta">Loket: -</div>
                         </div>
 
-                        <button class="call-btn cs" onclick="callNext('CS')">Panggil Nomor CS Berikutnya</button>
+                        <!-- ✅ tombol pemanggilan ulang ditambahkan (tanpa ubah logika yang lain) -->
+                        <div class="btn-row">
+                            <button class="call-btn cs" onclick="callNext('CS')">Panggil Nomor CS Berikutnya</button>
+                            <button class="call-btn secondary" onclick="recallLast('CS')">Panggil Ulang Nomor
+                                Terakhir</button>
+                        </div>
                         <div class="hint">Tips: pilih loket dulu, lalu panggil.</div>
                     </div>
                 </div>
@@ -730,7 +776,7 @@
         // ==========================================================
         // ✅ SET SERVER IP DI SINI (ubah kalau pindah jaringan)
         // ==========================================================
-        const SERVER_IP = "192.168.100.118";
+        const SERVER_IP = "192.168.1.19";
         const SERVER_PORT = "3000";
         const API_BASE = `http://${SERVER_IP}:${SERVER_PORT}`;
 
@@ -892,9 +938,10 @@
             miniLogList.innerHTML = realtimeLogs.map((x) => {
                 const badgeCls = x.serviceType === "CS" ? "mini-badge cs" : "mini-badge";
                 const label = x.serviceType === "CS" ? "CS" : "TELLER";
+                const ulangTag = x.action === "RECALL" ? `<span class="mini-tag">ULANG</span>` : "";
                 return `
           <div class="mini-item">
-            <div><span class="${badgeCls}">${label}</span></div>
+            <div><span class="${badgeCls}">${label}</span>${ulangTag}</div>
             <div class="mini-num">${formatTicketCode(x.ticket || "-")}</div>
             <div class="mini-loket">${x.counterName || "-"}</div>
             <div class="mini-jam">${x.time || "-"}</div>
@@ -903,11 +950,16 @@
             }).join("");
         }
 
-        function pushRealtimeLog({ serviceType, ticket, counterName }) {
+        function pushRealtimeLog({ serviceType, ticket, counterName, action }) {
             const now = new Date();
-            // ✅ simpan juga sudah diformat biar konsisten tampil
             const shownTicket = formatTicketCode(ticket);
-            realtimeLogs.unshift({ serviceType, ticket: shownTicket, counterName, time: formatJam(now) });
+            realtimeLogs.unshift({
+                serviceType,
+                ticket: shownTicket,
+                counterName,
+                time: formatJam(now),
+                action: action || "CALL"
+            });
             if (realtimeLogs.length > 50) realtimeLogs = realtimeLogs.slice(0, 50);
             saveRealtimeLogToStorage();
             renderRealtimeLog();
@@ -967,6 +1019,7 @@
                         serviceType: serviceType === "CS" ? "CS" : "TELLER",
                         ticket: afterTicket,
                         counterName: afterCounter || counterName,
+                        action: "CALL"
                     });
                 } else if (afterTicketRaw === "-" || !afterTicketRaw) {
                     alert("Tidak ada antrian untuk dipanggil.");
@@ -993,15 +1046,15 @@
                             serviceType: serviceType === "CS" ? "CS" : "TELLER",
                             ticket: formatTicketCode(calledTicketRaw),
                             counterName,
+                            action: "CALL"
                         });
                     } else {
                         const boxTicket = (serviceType === "TELLER")
                             ? (tellerLastEl?.textContent || "-")
                             : (csLastEl?.textContent || "-");
 
-                        // boxTicket sudah formatted, tapi dibandingkan raw: aman karena fallback case aja
                         if (boxTicket && boxTicket !== "-" && boxTicket !== formatTicketCode(beforeTicket)) {
-                            pushRealtimeLog({ serviceType: serviceType === "CS" ? "CS" : "TELLER", ticket: boxTicket, counterName });
+                            pushRealtimeLog({ serviceType: serviceType === "CS" ? "CS" : "TELLER", ticket: boxTicket, counterName, action: "CALL" });
                         } else {
                             alert("Tidak ada antrian untuk dipanggil.");
                         }
@@ -1014,6 +1067,83 @@
             }
         }
         window.callNext = callNext;
+
+        // ==========================
+        // ✅ PEMANGGILAN ULANG (RECALL)
+        // - Tidak mengubah logika call-next
+        // - Hanya menembak endpoint khusus "call-repeat"
+        // - Jika server tidak support endpoint ini, fallback IPC (server-local)
+        // ==========================
+        async function recallLast(serviceType) {
+            // ambil nomor terakhir dari box (sudah terformat)
+            const shownTicket = (serviceType === "TELLER")
+                ? (tellerLastEl?.textContent || "-")
+                : (csLastEl?.textContent || "-");
+
+            const counterName = getCounterName(serviceType);
+
+            if (!shownTicket || shownTicket === "-") {
+                alert("Belum ada nomor yang dipanggil untuk diulang.");
+                return;
+            }
+
+            // untuk request ke server, kirim juga versi raw tanpa dash kalau perlu
+            const rawTicket = String(shownTicket).replace(/\s+/g, "").replace("-", "");
+
+            try {
+                // ✅ endpoint recall (kalau di server kamu sudah ada)
+                // payload aman: jika server cuma pakai sebagian field, tetap OK
+                await fetchJson("/api/call-repeat", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        serviceType,
+                        counterName,
+                        ticketCode: rawTicket,     // contoh: A010
+                        ticket: rawTicket,         // alias aman
+                    }),
+                });
+
+                // update UI box dari state (kalau server update)
+                await loadNowFromState();
+
+                // catat di log sebagai "ULANG"
+                pushRealtimeLog({
+                    serviceType: serviceType === "CS" ? "CS" : "TELLER",
+                    ticket: shownTicket,
+                    counterName,
+                    action: "RECALL"
+                });
+
+                return;
+            } catch (e) {
+                // client mode: jangan fallback IPC
+                if (!IS_SERVER_LOCAL) {
+                    console.error("Recall gagal via server (client mode):", e);
+                    alert("Gagal pemanggilan ulang. Pastikan endpoint recall tersedia di server pusat.");
+                    return;
+                }
+
+                // fallback IPC (server-local)
+                try {
+                    if (!ipcRenderer) throw new Error("IPC tidak tersedia.");
+                    await ipcRenderer.invoke("panel:recallLast", { serviceType, counterName, ticketCode: rawTicket });
+
+                    await loadNowFromState();
+
+                    pushRealtimeLog({
+                        serviceType: serviceType === "CS" ? "CS" : "TELLER",
+                        ticket: shownTicket,
+                        counterName,
+                        action: "RECALL"
+                    });
+                    return;
+                } catch (e2) {
+                    console.error("Recall gagal:", e, e2);
+                    alert("Gagal pemanggilan ulang. Pastikan server mendukung /api/call-repeat atau IPC recall.");
+                }
+            }
+        }
+        window.recallLast = recallLast;
 
         // ==========================
         // RESET HARI INI

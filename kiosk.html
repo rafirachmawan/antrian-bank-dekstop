@@ -952,8 +952,8 @@
         }
 
         /* =========================================================
-           ✅ BEDAKAN UI: SERVER MODE vs KIOSK MODE (UI saja)
-        ========================================================= */
+       ✅ BEDAKAN UI: SERVER MODE vs KIOSK MODE (UI saja)
+    ========================================================= */
         body.server-ui .page-body {
             grid-template-columns: 1fr !important;
         }
@@ -1424,14 +1424,16 @@
                 } catch (e) { }
             }
 
-            // fallback terakhir (kalau base64 gagal)
             __cachedLogoDataUrl = "assets/logo-bri.png";
             return __cachedLogoDataUrl;
         }
 
         function buildReceiptHtml({ branch, layanan, ticket, waktu, logoDataUrl }) {
             const logoSrc = logoDataUrl || "assets/logo-bri.png";
+
+            // ✅ tulisan BRI dibesarkan + tambah UNIT BUNGURASIH (sesuai request)
             const title1 = "BRI";
+            const titleUnit = "UNIT BUNGURASIH";
             const title2 = "SATU BANK UNTUK SEMUA";
 
             const shownTicket = normalizeTicketCode(ticket) || ticket;
@@ -1443,7 +1445,7 @@
   <meta charset="UTF-8" />
   <title>Struk Antrian</title>
   <style>
-    /* ✅ ukuran thermal 80mm, margin 0 (printer tetap punya margin fisik) */
+    /* ✅ kunci ukuran thermal 80mm + hilangkan margin browser */
     @page { size: 80mm auto; margin: 0; }
 
     html, body { margin: 0; padding: 0; }
@@ -1454,23 +1456,25 @@
       background:#fff;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
-    /* ✅ SHIFT untuk ngatasi hasil print kurang kiri/atas.
-       kamu bisa tuning mm ini kalau beda printer:
-       - makin negatif: makin ke kiri/atas
-       - makin positif: makin ke kanan/bawah */
+    /* ✅ SHIFT pakai position (lebih konsisten daripada transform saat print driver)
+       tuning kalau masih geser:
+       negatif = ke kiri/atas, positif = ke kanan/bawah */
     :root{
-      --shift-x: -2.6mm;  /* << geser kiri sedikit */
-      --shift-y: -1.8mm;  /* << geser atas sedikit */
+      --shift-x: -2.2mm;
+      --shift-y: -1.6mm;
     }
 
     .page {
       width: 80mm;
-      transform: translate(var(--shift-x), var(--shift-y));
+      position: relative;
+      left: var(--shift-x);
+      top: var(--shift-y);
     }
 
-    /* ✅ Lebihin lebar konten biar benar2 “tengah”, tapi tetap aman */
     .wrap {
       width: 74mm;
       margin: 0 auto;
@@ -1479,22 +1483,36 @@
 
     .center { text-align: center; }
 
-    /* ✅ logo lebih pasti tampil + ukuran pas seperti contoh struk kamu */
-    .logo-only {
-      display:block;
-      margin: 0 auto 2mm;
-      width: 14mm;
-      height: 14mm;
-      object-fit: contain;
-    }
+    /* ✅ Logo dimatikan (karena auto print kadang kosong / ga kebawa) */
+    .logo-only { display:none !important; }
 
-    .t1 { font-size: 12.5px; font-weight: 800; letter-spacing: .02em; margin: 0; }
-    .t2 { font-size: 11px; font-weight: 800; letter-spacing: .02em; margin: 1.5mm 0 0; }
+    /* ✅ BRI dibesarkan + UNIT */
+    .t1 {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: .02em;
+      margin: 0;
+      line-height: 1.05;
+    }
+    .tUnit{
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      margin: 1mm 0 0;
+      line-height: 1.15;
+    }
+    .t2 {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      margin: 1.2mm 0 0;
+      line-height: 1.15;
+    }
 
     .line { border-top: 1px dashed #000; margin: 3.5mm 0; }
 
     .meta { font-size: 10.5px; line-height: 1.35; }
-    .ticketLabel { font-size: 10.5px; font-weight: 800; margin-top: 3mm; }
+    .ticketLabel { font-size: 10.5px; font-weight: 900; margin-top: 3mm; }
 
     .ticket {
       font-family: "Courier New", monospace;
@@ -1508,8 +1526,11 @@
 
     .small { font-size: 9.6px; line-height: 1.35; }
 
-    /* ✅ kalau printer kamu “nge-zoom”, ini bantu stabil */
-    * { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    /* ✅ cegah browser nge-scale aneh */
+    @media print {
+      html, body { width: 80mm; }
+      * { box-sizing: border-box; }
+    }
   </style>
 </head>
 <body>
@@ -1518,6 +1539,7 @@
       <div class="center">
         <img class="logo-only" src="${logoSrc}" alt="Logo BRI" />
         <div class="t1">${title1}</div>
+        <div class="tUnit">${titleUnit}</div>
         <div class="t2">${title2}</div>
       </div>
 
@@ -1588,9 +1610,7 @@
             const layanan = serviceType === "TELLER" ? "TELLER" : "CUSTOMER SERVICE";
             const waktu = formatNow();
 
-            // ✅ ambil logo dataURL supaya pasti muncul di srcdoc
             const logoDataUrl = await loadLogoAsDataUrl();
-
             const receiptHtml = buildReceiptHtml({ branch, layanan, ticket, waktu, logoDataUrl });
 
             if (preview === true) {
@@ -1606,7 +1626,11 @@
                         ticket,
                         waktu,
                         deviceName: getPrinterName(),
+
+                        // ✅ kirim HTML struk yang sama persis dengan preview
+                        receiptHtml,
                     });
+
 
                     if (!res || res.ok !== true) {
                         console.error("Silent print gagal:", res);
