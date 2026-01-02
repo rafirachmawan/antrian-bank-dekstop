@@ -292,7 +292,6 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             margin-bottom: 6px;
-            /* ✅ sedikit rapat */
             flex: 0 0 auto;
         }
 
@@ -390,7 +389,6 @@
             overflow: hidden;
             max-height: var(--queues-max-h);
             margin-bottom: 6px;
-            /* ✅ kasih ruang lebih buat promo */
         }
 
         .queue-section {
@@ -401,7 +399,6 @@
             position: relative;
         }
 
-        /* ✅ title turun dikit biar "ketindih" */
         .queue-title {
             margin: 0;
             padding: 0;
@@ -437,7 +434,6 @@
             overflow: hidden !important;
             align-content: start !important;
 
-            /* ✅ LIST naik mepet ke title (jadi title kayak ketindih) */
             margin-top: var(--queue-list-lift) !important;
             z-index: 1;
         }
@@ -522,7 +518,6 @@
             min-height: 0;
         }
 
-        /* ✅ promo naik + lebih besar */
         .promo-strip {
             flex: 1 1 auto;
             min-height: var(--promo-strip-min-h);
@@ -716,15 +711,12 @@
     <script>
         /* =========================================================
            ✅ AUDIO UNLOCK (WAJIB BIAR PEMANGGILAN BUNYI)
-           - Tidak mengubah logika antrian / urutan audio
-           - Hanya membuka izin autoplay audio di Electron/Chromium
            ========================================================= */
         let __AUDIO_UNLOCKED__ = false;
 
         async function unlockAudioOnce() {
             if (__AUDIO_UNLOCKED__) return true;
 
-            // Cara 1: silent muted audio (paling stabil di Electron)
             try {
                 const a = new Audio();
                 a.muted = true;
@@ -735,7 +727,6 @@
                 __AUDIO_UNLOCKED__ = true;
                 return true;
             } catch (e) {
-                // Cara 2: WebAudio fallback
                 try {
                     const AC = window.AudioContext || window.webkitAudioContext;
                     if (!AC) return false;
@@ -756,7 +747,6 @@
             }
         }
 
-        // unlock otomatis saat load + fallback saat ada interaksi
         window.addEventListener("load", () => { unlockAudioOnce(); });
         window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
         window.addEventListener("keydown", unlockAudioOnce, { once: true });
@@ -792,6 +782,11 @@
 
         let lastTellerTicket = null;
         let lastCsTicket = null;
+
+        // ✅ RECALL FIX: simpan last called_at juga
+        let lastTellerCalledAt = null;
+        let lastCsCalledAt = null;
+
         let initialized = false;
 
         function pad2(n) { return String(n).padStart(2, "0"); }
@@ -821,6 +816,13 @@
             return s;
         }
 
+        // ✅ RECALL FIX: normalisasi called_at biar konsisten dibandingkan
+        function normalizeCalledAt(x) {
+            if (x == null) return null;
+            const s = String(x).trim();
+            return s ? s : null;
+        }
+
         let __duckAnimId = null;
         function __clamp01(v) {
             v = Number(v);
@@ -831,10 +833,8 @@
         function duckPromoVideo(isDuck) {
             if (!promoVideoEl) return;
 
-            // ✅ kalau sedang putar Indonesia Raya, jangan dimute oleh pemanggilan
             if (window.__SPECIAL_VIDEO_PLAYING__) return;
 
-            // simpan kondisi awal sekali saja
             if (promoVideoEl.__baseVol == null) {
                 promoVideoEl.__baseVol = typeof promoVideoEl.volume === "number" ? promoVideoEl.volume : 1;
             }
@@ -842,20 +842,16 @@
                 promoVideoEl.__baseMuted = !!promoVideoEl.muted;
             }
 
-            // target: saat panggilan => MUTE TOTAL
             const targetMuted = !!isDuck;
             const targetVol = isDuck ? 0 : __clamp01(promoVideoEl.__baseVol);
 
-            // hentikan anim sebelumnya
             if (__duckAnimId) {
                 cancelAnimationFrame(__duckAnimId);
                 __duckAnimId = null;
             }
 
-            // mute/unmute langsung biar benar-benar diam
             promoVideoEl.muted = targetMuted;
 
-            // fade volume (biar transisinya halus saat balik)
             const startVol = __clamp01(promoVideoEl.volume);
             const duration = isDuck ? 150 : 350;
             const startT = performance.now();
@@ -870,7 +866,6 @@
                     promoVideoEl.volume = targetVol;
                     __duckAnimId = null;
 
-                    // saat balik normal, restore muted awal (kalau dulunya mute)
                     if (!isDuck) {
                         promoVideoEl.muted = !!promoVideoEl.__baseMuted;
                     }
@@ -911,7 +906,6 @@
             try {
                 const a = ensureBellAudio();
 
-                // ✅ pastikan src selalu fresh (hindari cache/readyState nyangkut)
                 a.src = `${AUDIO_BASE}/BELL.wav?v=${Date.now()}`;
                 a.preload = "auto";
 
@@ -925,18 +919,15 @@
                     } catch { }
                 };
 
-                // ✅ kalau belum siap, tunggu canplay dulu
                 if (a.readyState >= 2) {
                     tryPlay();
                 } else {
                     a.load();
                     a.addEventListener("canplaythrough", tryPlay, { once: true });
-                    // fallback kalau event nggak kepanggil
                     setTimeout(tryPlay, 200);
                 }
             } catch { }
         }
-
 
         function playOne(url) {
             return new Promise((resolve) => {
@@ -1185,7 +1176,7 @@
             if (!ticketCode) return;
 
             announceQueue = announceQueue.then(async () => {
-                await unlockAudioOnce(); // ✅ TAMBAHAN INI SAJA (BIAR BUNYI)
+                await unlockAudioOnce();
 
                 duckPromoVideo(true);
                 if (statusTextEl) statusTextEl.textContent = "Memanggil antrian...";
@@ -1246,6 +1237,10 @@
             const csTicket = csNow?.ticket_code || csNow?.ticketCode || null;
             const csCounter = csNow?.counter_name || csNow?.counterName || null;
 
+            // ✅ RECALL FIX: ambil called_at juga
+            const tellerCalledAt = normalizeCalledAt(tellerNow?.called_at || tellerNow?.calledAt || null);
+            const csCalledAt = normalizeCalledAt(csNow?.called_at || csNow?.calledAt || null);
+
             tellerNowEl.textContent = tellerTicket ? normalizeTicketCode(tellerTicket) : "-";
             tellerCounterEl.textContent = "Loket: " + (tellerCounter || "-");
 
@@ -1255,12 +1250,27 @@
             renderQueueList(tellerQueueEl, state.tellerQueue || state.teller_queue || []);
             renderQueueList(csQueueEl, state.csQueue || state.cs_queue || []);
 
+            // ✅ RECALL FIX: bunyi kalau ticket berubah ATAU called_at berubah
             if (initialized) {
-                if (tellerTicket && tellerTicket !== lastTellerTicket) announce("TELLER", tellerTicket, tellerCounter || "");
-                if (csTicket && csTicket !== lastCsTicket) announce("CS", csTicket, csCounter || "");
+                const tellerChanged =
+                    (tellerTicket && tellerTicket !== lastTellerTicket) ||
+                    (tellerTicket && tellerCalledAt && tellerCalledAt !== lastTellerCalledAt);
+
+                const csChanged =
+                    (csTicket && csTicket !== lastCsTicket) ||
+                    (csTicket && csCalledAt && csCalledAt !== lastCsCalledAt);
+
+                if (tellerChanged) announce("TELLER", tellerTicket, tellerCounter || "");
+                if (csChanged) announce("CS", csTicket, csCounter || "");
             }
+
             lastTellerTicket = tellerTicket;
             lastCsTicket = csTicket;
+
+            // ✅ RECALL FIX: simpan called_at terakhir
+            lastTellerCalledAt = tellerCalledAt;
+            lastCsCalledAt = csCalledAt;
+
             initialized = true;
         }
 
@@ -1285,13 +1295,8 @@
         let lastVideoKey = "";
         let lastPromoImagesKey = "";
 
-        /* =========================================================
-           ✅ INDONESIA RAYA SCHEDULE (JAM 10:00)
-           - Video diganti sekali per hari jam 10:00
-           - Saat Indonesia Raya berjalan, applyPromoAndVideo tidak override video
-           ========================================================= */
         window.__SPECIAL_VIDEO_PLAYING__ = false;
-        let __SPECIAL_VIDEO_LAST_DATE__ = ""; // YYYY-MM-DD
+        let __SPECIAL_VIDEO_LAST_DATE__ = "";
         let __SPECIAL_PREV_SRC__ = "";
         let __SPECIAL_PREV_LOOP__ = true;
         let __SPECIAL_PREV_MUTED__ = false;
@@ -1308,7 +1313,6 @@
             if (!promoVideoEl) return;
             if (window.__SPECIAL_VIDEO_PLAYING__) return;
 
-            // simpan kondisi video normal
             __SPECIAL_PREV_SRC__ = promoVideoEl.currentSrc || promoVideoEl.src || "";
             __SPECIAL_PREV_LOOP__ = !!promoVideoEl.loop;
             __SPECIAL_PREV_MUTED__ = !!promoVideoEl.muted;
@@ -1316,7 +1320,6 @@
 
             window.__SPECIAL_VIDEO_PLAYING__ = true;
 
-            // Indonesia Raya: putar sekali, suara ON
             promoVideoEl.loop = false;
             promoVideoEl.muted = false;
             promoVideoEl.volume = 1;
@@ -1329,12 +1332,10 @@
 
                 window.__SPECIAL_VIDEO_PLAYING__ = false;
 
-                // restore setting video normal
                 promoVideoEl.loop = __SPECIAL_PREV_LOOP__;
                 promoVideoEl.muted = __SPECIAL_PREV_MUTED__;
                 promoVideoEl.volume = __SPECIAL_PREV_VOL__;
 
-                // balik ke video normal (kalau ada)
                 if (__SPECIAL_PREV_SRC__) {
                     try {
                         promoVideoEl.src = __SPECIAL_PREV_SRC__ + (String(__SPECIAL_PREV_SRC__).includes("?") ? "&" : "?") + "v=" + Date.now();
@@ -1343,7 +1344,6 @@
                     } catch { }
                 }
 
-                // paksa applyPromoAndVideo boleh set lagi normal
                 lastVideoKey = "";
             };
 
@@ -1363,17 +1363,14 @@
             const now = new Date();
             const today = __ymd(now);
 
-            // jam 10:00 (rentang 10:00:00 - 10:00:59)
             if (now.getHours() !== 10 || now.getMinutes() !== 0) return;
 
-            // sekali per hari
             if (__SPECIAL_VIDEO_LAST_DATE__ === today) return;
             __SPECIAL_VIDEO_LAST_DATE__ = today;
 
             __startIndonesiaRaya();
         }
 
-        // cek tiap 1 detik biar pas jam 10
         setInterval(__checkIndonesiaRayaAt10, 1000);
 
         function forcePlayVideoSafely() {
@@ -1498,7 +1495,6 @@
             const labelEl = document.getElementById("video-file-label");
             if (labelEl) labelEl.textContent = videoPath ? `File: ${videoPath}` : "Tidak ada video terpilih.";
 
-            // ✅ kalau sedang putar Indonesia Raya, jangan override video dari config
             if (window.__SPECIAL_VIDEO_PLAYING__) {
                 const imgs = getPromoImagesFromConfig(cfg);
                 const key = JSON.stringify(imgs);

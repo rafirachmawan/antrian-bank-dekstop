@@ -118,8 +118,11 @@ function pad3(n) {
   return String(n).padStart(3, "0");
 }
 function normalizeService(serviceType) {
-  if (serviceType === "TELLER") return "TELLER";
-  if (serviceType === "CS") return "CS";
+  const s = String(serviceType || "")
+    .toUpperCase()
+    .trim();
+  if (s === "TELLER") return "TELLER";
+  if (s === "CS") return "CS";
   throw new Error("serviceType invalid");
 }
 function safeParseJsonArray(x) {
@@ -172,17 +175,11 @@ async function takeTicket(serviceType) {
 
   let nextNum = 1;
   if (row && row.ticket_code) {
-    // ✅ lebih aman: ambil angka di belakang apapun prefix-nya
     const last = extractNumber(row.ticket_code);
     if (!isNaN(last)) nextNum = last + 1;
   }
 
-  // ✅ FORMAT BARU:
-  // Teller: A001, A002...
-  // CS:     B001, B002...
   const code = `${prefixFor(serviceType)}${pad3(nextNum)}`;
-  // kalau kamu tetap pengin ada strip, pakai ini:
-  // const code = `${prefixFor(serviceType)}-${pad3(nextNum)}`;
 
   await run(
     `
@@ -229,11 +226,57 @@ async function callNext(serviceType, counterName) {
   return { ticketCode: row.ticket_code, counterName, serviceType };
 }
 
+/**
+ * ✅ RECALL / PANGGIL ULANG TERAKHIR (TRIGGER EVENT)
+ * - Ambil ticket terakhir yg berstatus CALLED hari ini untuk serviceType tsb
+ * - Tidak mengubah antrian (status tetap CALLED)
+ * - Trik penting: UPDATE called_at -> sekarang, supaya Display bisa deteksi "event baru"
+ *   walaupun nomor tiketnya sama (ini yang bikin suara recall keluar).
+ */
+async function recallLast(serviceType, counterName = null) {
+  serviceType = normalizeService(serviceType);
+
+  const row = await get(
+    `
+    SELECT id, ticket_code, counter_name
+    FROM tickets
+    WHERE service_type = ?
+      AND status = 'CALLED'
+      AND date(created_at) = ${todayKeySQL()}
+    ORDER BY called_at DESC, id DESC
+    LIMIT 1
+    `,
+    [serviceType]
+  );
+
+  if (!row) return null;
+
+  const usedCounter =
+    (counterName && String(counterName).trim()) || row.counter_name || null;
+
+  // ✅ trigger event baru: sentuh called_at
+  await run(
+    `
+    UPDATE tickets
+    SET counter_name = ?,
+        called_at = datetime('now','localtime')
+    WHERE id = ?
+    `,
+    [usedCounter, row.id]
+  );
+
+  return {
+    ticketCode: row.ticket_code,
+    counterName: usedCounter,
+    serviceType,
+  };
+}
+
 // Ambil state untuk display (sedang dilayani + daftar waiting)
 async function getState() {
   const tellerNow = await get(
     `
-    SELECT ticket_code, counter_name
+    SELECT ticket_code, counter_name, called_at
     FROM tickets
     WHERE service_type='TELLER'
       AND status='CALLED'
@@ -245,7 +288,7 @@ async function getState() {
 
   const csNow = await get(
     `
-    SELECT ticket_code, counter_name
+    SELECT ticket_code, counter_name, called_at
     FROM tickets
     WHERE service_type='CS'
       AND status='CALLED'
@@ -284,10 +327,15 @@ async function getState() {
       ? {
           ticket_code: tellerNow.ticket_code,
           counter_name: tellerNow.counter_name,
+          called_at: tellerNow.called_at, // ✅ penting untuk recall trigger
         }
       : null,
     csNow: csNow
-      ? { ticket_code: csNow.ticket_code, counter_name: csNow.counter_name }
+      ? {
+          ticket_code: csNow.ticket_code,
+          counter_name: csNow.counter_name,
+          called_at: csNow.called_at, // ✅ penting untuk recall trigger
+        }
       : null,
     tellerQueue: (tellerQueueRows || []).map((r) => r.ticket_code),
     csQueue: (csQueueRows || []).map((r) => r.ticket_code),
@@ -379,10 +427,13 @@ async function setDisplayConfig({ promo_text, video_path, promo_images }) {
 }
 
 // ============= EXPORT =============
+// ✅ Aliasing nama export untuk kompatibilitas (TIDAK mengubah logika)
 module.exports = {
+  // nama utama (tetap)
   initDb,
   takeTicket,
   callNext,
+  recallLast,
   getState,
   getTodaySummary,
   getTodayCalls,
@@ -392,4 +443,7 @@ module.exports = {
   // helper (dipakai server)
   getDbPath,
   getUserDataPathSafe,
+
+  // ✅ alias jika ada kode lain pakai nama berbeda
+  initDB: initDb,
 };

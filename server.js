@@ -10,6 +10,7 @@ const { spawn } = require("child_process");
 const {
   takeTicket,
   callNext,
+  recallLast, // ✅ dipakai untuk pemanggilan ulang
   getState,
   getTodaySummary,
   getTodayCalls,
@@ -35,9 +36,6 @@ function extOf(original) {
 
 // =========================================================
 // ✅ SIMPLE TTS VIA PYTHON (cewek Indonesia)
-// - Display.html tetap panggil: /api/tts?text=...
-// - Server generate mp3 via: python tts.py "text" "output.mp3"
-// - Response: audio/mpeg (BUKAN JSON)
 // =========================================================
 function runPythonTts({ pythonCmd, scriptPath, text, outFile }) {
   return new Promise((resolve, reject) => {
@@ -63,8 +61,6 @@ function runPythonTts({ pythonCmd, scriptPath, text, outFile }) {
 
 // ==============================
 // ✅ AUTO RESET HARIAN (SERVER-SIDE)
-// - Simpan meta terakhir reset di file JSON kecil (tidak ganggu db.js)
-// - Saat tanggal ganti: clearTodayTickets() otomatis
 // ==============================
 function pad2(n) {
   return String(n).padStart(2, "0");
@@ -90,10 +86,7 @@ function writeJsonSafe(p, obj) {
 }
 
 // ==============================
-// ✅ BUNDLE AUDIO -> COPY KE userData (sekali saja)
-// - Kamu taruh audio di: projectRoot/assets/audio/*.wav
-// - Saat server start: auto copy ke: <userData>/media/audio/
-// - PC lain install: audio ikut karena dari assets
+// ✅ BUNDLE AUDIO -> COPY KE userData
 // ==============================
 function copyAudioIfMissing(srcDir, destDir) {
   try {
@@ -119,16 +112,11 @@ function copyAudioIfMissing(srcDir, destDir) {
   } catch {}
 }
 
-/**
- * createServer({ port, host, userDataPath })
- * ✅ userDataPath dipakai supaya folder media selalu konsisten dengan Electron (app.getPath('userData'))
- */
 function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "20mb" }));
 
-  // ✅ media folders di PC SERVER (konsisten)
   const baseDir =
     (userDataPath && String(userDataPath)) ||
     (getUserDataPathSafe ? getUserDataPathSafe() : process.cwd());
@@ -139,15 +127,12 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
   safeMkdir(videoDir);
   safeMkdir(imagesDir);
 
-  // ✅ AUDIO (bundled -> userData)
   const audioDir = path.join(mediaRoot, "audio");
   safeMkdir(audioDir);
 
-  // sumber audio bundling (taruh file wav kamu di sini)
   const bundledAudioDir = path.join(__dirname, "assets", "audio");
   copyAudioIfMissing(bundledAudioDir, audioDir);
 
-  // serve audio agar bisa dipakai display/admin/kiosk
   app.use(
     "/media/audio",
     express.static(audioDir, {
@@ -155,14 +140,10 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     })
   );
 
-  // ✅ folder cache untuk hasil mp3 tts (biar rapi)
   const ttsDir = path.join(mediaRoot, "tts-cache");
   safeMkdir(ttsDir);
 
-  // ✅ file meta reset harian (disimpan di baseDir biar konsisten)
   const dailyResetMetaPath = path.join(baseDir, "daily-reset-meta.json");
-
-  // ✅ lock biar tidak dobel reset kalau request barengan
   let resetInFlight = null;
 
   async function ensureDailyReset() {
@@ -203,7 +184,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
         cb(null, `${base}__${Date.now()}${ext}`);
       },
     }),
-    limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+    limits: { fileSize: 500 * 1024 * 1024 },
   });
 
   // =========================
@@ -217,12 +198,9 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     });
   });
 
-  /* =========================================================
-     ✅ TTS ENDPOINT (buat display.html)
-     - GET /api/tts?text=...&voice=...&format=mp3
-     - alias: /tts
-     - Output: AUDIO (audio/mpeg)
-  ========================================================= */
+  // =========================
+  // ✅ TTS
+  // =========================
   app.get(["/api/tts", "/tts"], async (req, res) => {
     try {
       const text = String(req.query.text || "").trim();
@@ -230,11 +208,9 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
         return res.status(400).json({ ok: false, error: "Missing text" });
 
       const format = String(req.query.format || "mp3").toLowerCase();
-      if (format !== "mp3") {
+      if (format !== "mp3")
         return res.status(400).json({ ok: false, error: "Only mp3 supported" });
-      }
 
-      // ✅ path ke tts.py (root project)
       const scriptPath = path.join(__dirname, "tts.py");
       if (!fs.existsSync(scriptPath)) {
         return res.status(500).json({
@@ -243,21 +219,13 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
         });
       }
 
-      // ✅ pilih command python (windows biasanya python)
       const pythonCmd = process.env.PYTHON_CMD || "python";
-
-      // ✅ file output unik per request (biar gak tabrakan)
       const outFile = path.join(
         ttsDir,
         `tts_${Date.now()}_${Math.random().toString(16).slice(2)}.mp3`
       );
 
-      await runPythonTts({
-        pythonCmd,
-        scriptPath,
-        text,
-        outFile,
-      });
+      await runPythonTts({ pythonCmd, scriptPath, text, outFile });
 
       if (!fs.existsSync(outFile)) {
         return res
@@ -266,8 +234,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
       }
 
       const audioBuf = fs.readFileSync(outFile);
-
-      // bersihin file cache (biar gak numpuk)
       try {
         fs.unlinkSync(outFile);
       } catch {}
@@ -330,6 +296,65 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     }
   });
 
+  // ===================== ✅ RECALL / PANGGIL ULANG =====================
+  async function handleRecall(req, res) {
+    try {
+      await ensureDailyReset();
+
+      // support POST body & GET query
+      const serviceType = String(
+        (req.body?.serviceType ?? req.query?.serviceType) || ""
+      )
+        .toUpperCase()
+        .trim();
+
+      const counterName = String(
+        (req.body?.counterName ?? req.query?.counterName) || ""
+      ).trim();
+
+      if (!serviceType)
+        return res
+          .status(400)
+          .json({ ok: false, error: "serviceType_required" });
+
+      const called = await recallLast(serviceType, counterName || null);
+      if (!called) return res.json({ ok: false, error: "no_last_call" });
+
+      return res.json({ ok: true, called });
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ ok: false, error: String(e?.message || e) });
+    }
+  }
+
+  // ✅ endpoint recall (yang sudah ada)
+  app.post("/api/recall", handleRecall);
+  app.post("/api/recall-last", handleRecall);
+  app.post("/api/tickets/recall", handleRecall);
+  app.post("/api/tickets/recall-last", handleRecall);
+  app.post("/api/admin/recall", handleRecall);
+  app.post("/api/admin/recall-last", handleRecall);
+
+  app.get("/api/recall", handleRecall);
+  app.get("/api/recall-last", handleRecall);
+  app.get("/api/tickets/recall", handleRecall);
+  app.get("/api/tickets/recall-last", handleRecall);
+  app.get("/api/admin/recall", handleRecall);
+  app.get("/api/admin/recall-last", handleRecall);
+
+  // ✅✅✅ ALIAS untuk admin.html kamu (yang nembak /api/call-repeat)
+  app.post("/api/call-repeat", handleRecall);
+  app.post("/api/call-repeat-last", handleRecall);
+  app.post("/api/tickets/call-repeat", handleRecall);
+  app.post("/api/tickets/call-repeat-last", handleRecall);
+
+  app.get("/api/call-repeat", handleRecall);
+  app.get("/api/call-repeat-last", handleRecall);
+  app.get("/api/tickets/call-repeat", handleRecall);
+  app.get("/api/tickets/call-repeat-last", handleRecall);
+
+  // ===================== STATE =====================
   app.get("/api/state", async (_req, res) => {
     try {
       await ensureDailyReset();
@@ -454,7 +479,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     }
   });
 
-  // ✅ Upload VIDEO ke server (Admin pakai ini) + simpan ke DB
   app.post(
     "/api/display/upload-video",
     upload.single("file"),
@@ -462,7 +486,7 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
       try {
         if (!req.file)
           return res.status(400).json({ ok: false, error: "No file" });
-        const abs = req.file.path; // path absolute di server
+        const abs = req.file.path;
         const cfg = await setDisplayConfig({ video_path: abs });
         res.json({ ok: true, config: cfg });
       } catch (e) {
@@ -471,7 +495,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     }
   );
 
-  // ✅ Upload IMAGES ke server (multiple) + ✅ simpan ke DB (merge, tidak hilang)
   app.post(
     "/api/display/upload-images",
     upload.array("files", 20),
@@ -513,7 +536,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     }
   );
 
-  // ✅ Serve images slider
   app.get("/media/promo-images/:name", (req, res) => {
     try {
       const file = String(req.params.name || "");
@@ -530,10 +552,6 @@ function createServer({ port = 3000, host = "0.0.0.0", userDataPath } = {}) {
     }
   });
 
-  /**
-   * ✅ STREAM VIDEO promo dari path yang disimpan di DB server
-   * Display PC lain pakai: http://IP-SERVER:3000/media/promo
-   */
   app.get("/media/promo", async (req, res) => {
     try {
       const cfg = await getDisplayConfig();

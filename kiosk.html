@@ -746,7 +746,7 @@
             }
         }
 
-        /* ================== SERVER SETTINGS (kiri bawah) ================== */
+        /* ================== SERVER SETTINGS ================== */
         .server-overlay {
             position: fixed;
             inset: 0;
@@ -953,6 +953,8 @@
 
         /* =========================================================
        ✅ BEDAKAN UI: SERVER MODE vs KIOSK MODE (UI saja)
+       - SERVER: hapus area Informasi & Promo (video/info) -> ganti jadi panel pengaturan (yang sama persis)
+       - LOGIKA JS tetap (ID elemen tetap sama)
     ========================================================= */
         body.server-ui .page-body {
             grid-template-columns: 1fr !important;
@@ -962,16 +964,41 @@
             display: none !important;
         }
 
+        /* Hide seluruh konten promo di server mode */
+        body.server-ui .video-card,
+        body.server-ui .video-frame,
+        body.server-ui .video-info,
+        body.server-ui #toggleVideoSoundBtn,
+        body.server-ui #videoMeta {
+            display: none !important;
+        }
+
+        /* Tampilkan serverPanel sebagai konten utama (bukan overlay) */
+        body.server-ui #serverOverlay {
+            display: none !important;
+        }
+
+        body.server-ui #serverFab {
+            display: none !important;
+        }
+
+        /* paksa panel terlihat walau JS ngatur show/hide */
+        body.server-ui #serverPanel {
+            position: static !important;
+            left: auto !important;
+            bottom: auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block !important;
+            opacity: 1 !important;
+            transform: none !important;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10) !important;
+            border: 1px solid rgba(15, 23, 42, 0.10) !important;
+        }
+
+        /* Supaya judulnya pas: ganti teks "Informasi & Promo" menjadi tidak terlihat (karena konten promo disembunyikan) */
         body.server-ui .video-panel {
             padding: 10px !important;
-        }
-
-        body.server-ui .video-card {
-            height: 100%;
-        }
-
-        body.server-ui .video-frame {
-            padding: 10px;
         }
     </style>
 </head>
@@ -1024,6 +1051,7 @@
         </div>
 
         <div class="panel video-panel">
+            <!-- ✅ KIOSK MODE: masih tampil promo seperti biasa -->
             <div class="video-card">
                 <div class="video-card-head">
                     <div class="video-card-title">
@@ -1068,6 +1096,39 @@
                 </div>
             </div>
 
+            <!-- ✅ SERVER MODE: panel pengaturan jadi isi utama (bukan overlay) -->
+            <div id="serverPanel" class="server-panel">
+                <div class="server-panel-head">
+                    <div class="server-panel-title">Pengaturan Display & Kiosk</div>
+                    <button class="server-panel-close" id="serverPanelClose">✕</button>
+                </div>
+                <div class="server-panel-body">
+                    <div class="server-field">
+                        <label>Running Text</label>
+                        <textarea id="setPromoText" placeholder="Isi teks berjalan..."></textarea>
+                        <div class="server-help">Ini akan sinkron ke Display & Kiosk client (yang ambil dari
+                            /api/display/config).</div>
+                    </div>
+
+                    <div class="server-row">
+                        <button class="server-btn-primary" id="btnSavePromo">Simpan Teks</button>
+                        <button class="server-btn-ghost" id="btnReloadCfg">Refresh</button>
+                    </div>
+
+                    <div class="server-row">
+                        <button class="server-btn-ghost" id="btnPickVideo">Pilih Video Promo</button>
+                        <button class="server-btn-ghost" id="btnClearVideo">Hapus Video</button>
+                    </div>
+
+                    <div class="server-row">
+                        <button class="server-btn-ghost" id="btnPickImages">Tambah Gambar Slider</button>
+                        <button class="server-btn-ghost" id="btnClearImages">Kosongkan Slider</button>
+                    </div>
+
+                    <div class="server-help" id="serverInfo"></div>
+                </div>
+            </div>
+
             <div class="bottom-strip">
                 <span id="kioskRunningText">SELAMAT DATANG • SILAKAN AMBIL NOMOR ANTRIAN ANDA • TERIMA KASIH</span>
             </div>
@@ -1076,38 +1137,6 @@
 
     <div id="serverOverlay" class="server-overlay"></div>
     <div id="serverFab" class="server-fab" title="Pengaturan Server">⚙️</div>
-
-    <div id="serverPanel" class="server-panel">
-        <div class="server-panel-head">
-            <div class="server-panel-title">Pengaturan Display & Kiosk</div>
-            <button class="server-panel-close" id="serverPanelClose">✕</button>
-        </div>
-        <div class="server-panel-body">
-            <div class="server-field">
-                <label>Running Text</label>
-                <textarea id="setPromoText" placeholder="Isi teks berjalan..."></textarea>
-                <div class="server-help">Ini akan sinkron ke Display & Kiosk client (yang ambil dari
-                    /api/display/config).</div>
-            </div>
-
-            <div class="server-row">
-                <button class="server-btn-primary" id="btnSavePromo">Simpan Teks</button>
-                <button class="server-btn-ghost" id="btnReloadCfg">Refresh</button>
-            </div>
-
-            <div class="server-row">
-                <button class="server-btn-ghost" id="btnPickVideo">Pilih Video Promo</button>
-                <button class="server-btn-ghost" id="btnClearVideo">Hapus Video</button>
-            </div>
-
-            <div class="server-row">
-                <button class="server-btn-ghost" id="btnPickImages">Tambah Gambar Slider</button>
-                <button class="server-btn-ghost" id="btnClearImages">Kosongkan Slider</button>
-            </div>
-
-            <div class="server-help" id="serverInfo"></div>
-        </div>
-    </div>
 
     <div id="receiptModal" class="receipt-modal" onclick="closeReceiptModalOnBackdrop(event)">
         <div class="receipt-modal-card" onclick="event.stopPropagation()">
@@ -1460,9 +1489,6 @@
       text-size-adjust: 100%;
     }
 
-    /* ✅ SHIFT pakai position (lebih konsisten daripada transform saat print driver)
-       tuning kalau masih geser:
-       negatif = ke kiri/atas, positif = ke kanan/bawah */
     :root{
       --shift-x: -2.2mm;
       --shift-y: -1.6mm;
@@ -1483,10 +1509,8 @@
 
     .center { text-align: center; }
 
-    /* ✅ Logo dimatikan (karena auto print kadang kosong / ga kebawa) */
     .logo-only { display:none !important; }
 
-    /* ✅ BRI dibesarkan + UNIT */
     .t1 {
       font-size: 26px;
       font-weight: 900;
@@ -1526,7 +1550,6 @@
 
     .small { font-size: 9.6px; line-height: 1.35; }
 
-    /* ✅ cegah browser nge-scale aneh */
     @media print {
       html, body { width: 80mm; }
       * { box-sizing: border-box; }
@@ -1626,11 +1649,8 @@
                         ticket,
                         waktu,
                         deviceName: getPrinterName(),
-
-                        // ✅ kirim HTML struk yang sama persis dengan preview
                         receiptHtml,
                     });
-
 
                     if (!res || res.ok !== true) {
                         console.error("Silent print gagal:", res);
@@ -1784,6 +1804,10 @@
                 document.getElementById("btnClearImages")?.addEventListener("click", clearImages);
 
                 loadCfgToForm();
+
+                // ✅ otomatis buka panel (tidak mengubah logika utama; hanya UI),
+                // tapi kalau CSS server-ui sudah memaksa tampil, ini aman.
+                try { openPanel(); } catch { }
             }
 
             tryInitOnce();
